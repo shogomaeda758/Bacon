@@ -66,3 +66,32 @@
   - 過去の類似プロジェクト事例
   - 開発・運用フェーズにおけるスケジュール例
   - ヒアリング内容に基づいたプロトタイプ提案の準備計画
+<div class="mermaid">
+graph TD
+  A[A01:管理者ログイン] -->B(A09:管理者メニュー)
+  B --> C(C02:商品管理)
+  C --> D(A03:商品登録)
+  C --> E(A04:商品編集)
+  B --> F(A05:注文管理)
+  F --> G(A06:注文詳細)
+  B --> H(A08:会員管理)
+ B --> I(A07:管理者一覧)
+
+ dummy[ ] --エラー発生 --> O(C17:共通エラー画面)
+
+
+    style dummy fill:#fff,stroke:#fff,stroke-width:1px
+      style O fill:#d3d3d3,stroke:#808080
+      style A fill:#cfd8dc,stroke:#455a64
+  style B fill:#b0bec5,stroke:#37474f
+
+  style C fill:#e0f2f1,stroke:#00796b
+  style D fill:#e0f2f1,stroke:#00796b
+  style E fill:#e0f2f1,stroke:#00796b
+
+  style F fill:#f3e5f5,stroke:#8e24aa
+  style G fill:#f3e5f5,stroke:#8e24aa
+  style H fill:#e8f5e9,stroke:#2e7d32
+  style I fill:#fff3e0,stroke:#ef6c00
+
+</div>
