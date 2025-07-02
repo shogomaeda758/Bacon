@@ -171,5 +171,3 @@ sequenceDiagram
 ```
 
 ---
-
->>>>>>> bf3aeb7607a776f0910d4e190ca4e378f0e4d08e
