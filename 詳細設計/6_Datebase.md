@@ -12,78 +12,78 @@
 
 #### CUSTOMER（顧客情報）
 
-| 論理名           | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | デフォルト値      | 備考             |
+| 論理名           | 物理名        | 型        | サイズ | PK | NULL | UQ | FK | CHK | デフォルト値      | 備考             |
 |------------------|---------------|-----------|--------|----|----|----|----|-----|-------------------|------------------|
-| 顧客ID           | customer_id   | INT       | -      | ○  | ○  |    |    |     | 自動採番          | 主キー           |
-| ログイン用メールアドレス | email         | VARCHAR   | 255    |    | ○  | ○  |    |     |                   |                  |
-| パスワード       | password      | VARCHAR   | 255    |    | ○  |    |    |     |                   | ハッシュ前提     |
+| 顧客ID           | customer_id   | INT       | -      | ○  | NN  |    |    |     | 自動採番          | 主キー           |
+| ログイン用メールアドレス | email         | VARCHAR   | 255    |   | NN  | ○  |    |     |                   |                  |
+| パスワード       | password      | VARCHAR   | 255    |    | NN |    |    |     |                   | ハッシュ前提     |
 | 姓               | last_name     | VARCHAR   | 50     |    | ○  |    |    |     |                   |                  |
 | 名               | first_name    | VARCHAR   | 50     |    | ○  |    |    |     |                   |                  |
 | 電話番号         | phone_number  | VARCHAR   | 20     |    | ○  |    |    |     |                   |                  |
 | 配達先住所       | address       | TEXT      | -      |    | ○  |    |    |     |                   |                  |
-| 登録日時         | created_at    | TIMESTAMP | -      |    | ○  |    |    |     | CURRENT_TIMESTAMP | 自動設定         |
-| 更新日時         | updated_at    | TIMESTAMP | -      |    | ○  |    |    |     | CURRENT_TIMESTAMP | 自動更新（トリガ等） |
+| 登録日時         | created_at    | TIMESTAMP | -      |    | NN  |    |    |     | CURRENT_TIMESTAMP | 自動設定         |
+| 更新日時         | updated_at    | TIMESTAMP | -      |    | NN  |    |    |     | CURRENT_TIMESTAMP | 自動更新（トリガ等） |
 
 ---
 
 #### PRODUCT（商品情報）
 
-| 論理名           | 物理名         | 型        | サイズ | PK | NN | UQ | FK | CHK                    | デフォルト値      | 備考                   |
+| 論理名           | 物理名         | 型        | サイズ | PK | NULL | UQ | FK | CHK                    | デフォルト値      | 備考                   |
 |------------------|----------------|-----------|--------|----|----|----|----|-------------------------|-------------------|------------------------|
-| 商品ID           | product_id     | INT       | -      | ○  | ○  |    |    |                         | 自動採番          |                        |
+| 商品ID           | product_id     | INT       | -      | ○  | NN |    |    |                         | 自動採番          |                        |
 | 商品名           | product_name   | VARCHAR   | 255    |    | ○  |    |    |                         |                   |                        |
 | 商品説明         | description    | TEXT      | -      |    |    |    |    |                         |                   |                        |
-| 価格             | price          | DECIMAL   | 10     |    | ○  |    |    | price > 0               |                   |                        |
+| 価格             | price          | DECIMAL   | 10     |    | NN |    |    | price > 0               |                   |                        |
 | 画像URL          | image_url      | VARCHAR   | 500    |    |    |    |    |                         |                   |                        |
 | 素材             | material       | VARCHAR   | 100    |    |    |    |    |                         |                   |                        |
 | サイズ           | size           | VARCHAR   | 100    |    |    |    |    |                         |                   |                        |
-| カテゴリID       | category_id    | INT       | -      |    | ○  |    | ○  |                         |                   | → CATEGORY(category_id) |
-| 在庫数           | stock_quantity | INT       | -      |    | ○  |    |    | stock_quantity >= 0     | 0                 |                        |
-| 登録日時         | created_at     | TIMESTAMP | -      |    | ○  |    |    |                         | CURRENT_TIMESTAMP |                        |
-| 更新日時         | updated_at     | TIMESTAMP | -      |    | ○  |    |    |                         | CURRENT_TIMESTAMP |                        |
+| カテゴリID       | category_id    | INT       | -      |    | NN |    | ○  |                         |                   | → CATEGORY(category_id) |
+| 在庫数           | stock_quantity | INT       | -      |    | NN |    |    | stock_quantity >= 0     | 0                 |                        |
+| 登録日時         | created_at     | TIMESTAMP | -      |    | NN |    |    |                         | CURRENT_TIMESTAMP |                        |
+| 更新日時         | updated_at     | TIMESTAMP | -      |    | NN |    |    |                         | CURRENT_TIMESTAMP |                        |
 
 ---
 
 #### CATEGORY（カテゴリ情報）
 
-| 論理名           | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | デフォルト値      | 備考             |
+| 論理名           | 物理名        | 型        | サイズ | PK | NULL | UQ | FK | CHK | デフォルト値      | 備考             |
 |------------------|---------------|-----------|--------|----|----|----|----|-----|-------------------|------------------|
-| カテゴリID       | category_id   | INT       | -      | ○  | ○  |    |    |     | 自動採番          | 主キー           |
-| カテゴリ名       | category_name | VARCHAR   | 100    |    | ○  | ○  |    |     |                   | 一意制約あり     |
-| 登録日時         | created_at    | TIMESTAMP | -      |    | ○  |    |    |     | CURRENT_TIMESTAMP |                  |
-| 更新日時         | updated_at    | TIMESTAMP | -      |    | ○  |    |    |     | CURRENT_TIMESTAMP |                  |
+| カテゴリID       | category_id   | INT       | -      | ○  | NN |    |    |     | 自動採番          | 主キー           |
+| カテゴリ名       | category_name | VARCHAR   | 100    |    | NN | ○  |    |     |                   | 一意制約あり     |
+| 登録日時         | created_at    | TIMESTAMP | -      |    | NN |    |    |     | CURRENT_TIMESTAMP |                  |
+| 更新日時         | updated_at    | TIMESTAMP | -      |    | NN |    |    |     | CURRENT_TIMESTAMP |                  |
 
 ---
 
 #### ORDER（注文情報）
 
-| 論理名              | 物理名           | 型        | サイズ | PK | NN | UQ | FK | CHK                         | デフォルト値      | 備考                      |
+| 論理名              | 物理名           | 型        | サイズ | PK | NULL | UQ | FK | CHK                         | デフォルト値      | 備考                      |
 |---------------------|------------------|-----------|--------|----|----|----|----|------------------------------|-------------------|---------------------------|
-| 注文ID              | order_id         | INT       | -      | ○  | ○  |    |    |                              | 自動採番          | 主キー                    |
-| 顧客ID              | customer_id      | INT       | -      |    | ○  |    | ○  |                              |                   | → CUSTOMER(customer_id)   |
+| 注文ID              | order_id         | INT       | -      | ○  | NN |    |    |                              | 自動採番          | 主キー                    |
+| 顧客ID              | customer_id      | INT       | -      |    | NN |    | ○  |                              |                   | → CUSTOMER(customer_id)   |
 | 注文者メールアドレス | order_email      | VARCHAR   | 255    |    | ○  |    |    |                              |                   | 顧客情報のコピー          |
 | 注文者氏名          | order_name       | VARCHAR   | 100    |    | ○  |    |    |                              |                   |                            |
 | 注文者電話番号      | order_phone_number | VARCHAR | 20     |    | ○  |    |    |                              |                   |                            |
 | 注文者住所          | order_address    | TEXT      | -      |    | ○  |    |    |                              |                   |                            |
-| 合計金額            | total_price      | DECIMAL   | 10     |    | ○  |    |    | total_price > 0              |                   |                            |
+| 合計金額            | total_price      | DECIMAL   | 10     |    | NN |    |    | total_price > 0              |                   |                            |
 | 配送料              | shipping_fee     | DECIMAL   | 10     |    | ○  |    |    |                              |                   |                            |
-| 支払方法            | payment_method   | VARCHAR   | 50     |    | ○  |    |    | payment_method IN ('credit', 'bank', 'cash') | | |
-| 注文日時            | order_date       | TIMESTAMP | -      |    | ○  |    |    |                              | CURRENT_TIMESTAMP |                            |
-| データ登録日時      | created_at       | TIMESTAMP | -      |    | ○  |    |    |                              | CURRENT_TIMESTAMP |                            |
+| 支払方法            | payment_method   | VARCHAR   | 50     |    | NN |    |    | payment_method IN ('credit', 'bank', 'cash') | | |
+| 注文日時            | order_date       | TIMESTAMP | -      |    | NN |    |    |                              | CURRENT_TIMESTAMP |                            |
+| データ登録日時      | created_at       | TIMESTAMP | -      |    | NN |    |    |                              | CURRENT_TIMESTAMP |                            |
 
 ---
 
 #### ORDER_DETAIL（注文明細情報）
 
-| 論理名      | 物理名          | 型        | サイズ | PK | NN | UQ | FK | CHK                 | デフォルト値      | 備考                        |
+| 論理名      | 物理名          | 型        | サイズ | PK | NULL | UQ | FK | CHK                 | デフォルト値      | 備考                        |
 |-------------|-----------------|-----------|--------|----|----|----|----|----------------------|-------------------|-----------------------------|
-| 注文明細ID  | order_detail_id | INT       | -      | ○  | ○  |    |    |                      | 自動採番          | 主キー                      |
-| 注文ID      | order_id        | INT       | -      |    | ○  |    | ○  |                      |                   | → ORDER(order_id)          |
-| 商品ID      | product_id      | INT       | -      |    | ○  |    | ○  |                      |                   | → PRODUCT(product_id)      |
-| 数量        | quantity        | INT       | -      |    | ○  |    |    | quantity > 0         |                   |                            |
-| 購入時価格  | unit_price      | DECIMAL   | 10     |    | ○  |    |    | unit_price > 0       |                   |                            |
-| 登録日時    | created_at      | TIMESTAMP | -      |    | ○  |    |    |                      | CURRENT_TIMESTAMP |                            |
-| 更新日時    | updated_at      | TIMESTAMP | -      |    | ○  |    |    |                      | CURRENT_TIMESTAMP |                            |
+| 注文明細ID  | order_detail_id | INT       | -      | ○  | NN |    |    |                      | 自動採番          | 主キー                      |
+| 注文ID      | order_id        | INT       | -      |    | NN |    | ○  |                      |                   | → ORDER(order_id)          |
+| 商品ID      | product_id      | INT       | -      |    | NN |    | ○  |                      |                   | → PRODUCT(product_id)      |
+| 数量        | quantity        | INT       | -      |    | NN |    |    | quantity > 0         |                   |                            |
+| 購入時価格  | unit_price      | DECIMAL   | 10     |    | NN |    |    | unit_price > 0       |                   |                            |
+| 登録日時    | created_at      | TIMESTAMP | -      |    | NN |    |    |                      | CURRENT_TIMESTAMP |                            |
+| 更新日時    | updated_at      | TIMESTAMP | -      |    | NN |    |    |                      | CURRENT_TIMESTAMP |                            |
 
 ---
 
