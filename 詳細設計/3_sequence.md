@@ -404,14 +404,25 @@ sequenceDiagram
 ### 3.2.6. 自動入力シーケンス図
 
 <div class="mermaid">
- sequenceDiagram
+sequenceDiagram
     participant User as ユーザー (Browser)
     participant FE as フロントエンド (JS)
-    participant Session as セッション管理
+    participant CustomerController
+    participant CustomerService
+    participant CustomerRepository
+    participant Session as セッション (HttpSession)
 
     User->>FE: 注文フォームを開く
-    FE->>Session: 顧客情報の取得 (ログイン中)
-    Session-->>FE: Customer情報 (name, address, phone)
+    FE->>CustomerController: GET /api/customers/me
+    CustomerController->>Session: セッションからcustomerIdを取得
+    Session-->>CustomerController: customerId
+
+    CustomerController->>CustomerService: getCustomerById(customerId)
+    CustomerService->>CustomerRepository: findById(customerId)
+    CustomerRepository-->>CustomerService: Customerエンティティ
+    CustomerService-->>CustomerController: CustomerResponse DTO
+    CustomerController-->>FE: JSON(CustomerResponse)
+
     FE-->>User: 注文フォームに自動入力表示
 </div>
 
@@ -422,8 +433,12 @@ sequenceDiagram
     participant OrderService
     participant MailService
     participant User as ユーザー (メール受信者)
+    participant Admin as 管理者 (メール受信者)
 
     OrderService->>MailService: sendOrderConfirmationEmail(order)
-    MailService->>User: 注文確定メール送信 (order summary)
-    MailService-->>OrderService: メール送信完了
+
+    MailService->>User: 注文確定メール送信 (注文内容)
+    MailService->>Admin: 注文通知メール送信 (注文内容)
+
+    MailService-->>OrderService: メール送信完了（ユーザー・管理者）
 </div>
