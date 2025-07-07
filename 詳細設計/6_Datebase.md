@@ -8,7 +8,7 @@
 
 | 倫理名     　  | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
 |---------------|---------------|----------|--------|----|----|----|----|-----|--------|--------------|---------------------------|
-|　顧客番号　    | customer_id   | INT      | -    | ○    | ○   |   |     |  |      |　(自動採番) | 主キー  |
+|　顧客ID  　    | customer_id   | INT      | -    | ○    | ○   |   |     |  |      |　(自動採番) | 主キー  |
 |　メールアドレス | email         | VARCHAR | 255  |      | ○  | ○  |     |  |      |            |
 |　パスワード　   | password      | VARCHAR | 255  |       | ○  |    |     |   |      |            |     |
 |　姓　          | last_name     | VARCHAR | 50   |       | ○  |    |     |   |      |            |      |
@@ -28,7 +28,7 @@
 | 商品ID　　　　　| product_id     | INT       |     | ○   | ○ | | | | ○ | (自動採番)    |   |
 | 商品名　　　　　| product_name   | VARCHAR   | 255  |     | ○ | | | | ○ |               |   |
 | 商品説明　　　　| description    | TEXT      |     |     |   | | | |   |              |   |
-| 価格　　　　　　| price          | DECIMAL   |     |     | ○ | | |○|   |              | price > 0 |
+| 価格　　　　　　| price          | DECIMAL   |  10 |     | ○ | | |○|   |              | price > 0 |
 | 画像URL　　　　 | image_url      | VARCHAR   | 500 |     |   | | | |   |              |   |
 | 素材　         | material       | VARCHAR   | 100  |     |   | | | |   |              |   |
 | サイズ　　　　　| size           | VARCHAR   | 100  |     |   | | | |   |              |   |
@@ -41,44 +41,45 @@
 
 - CATEGORY（カテゴリ情報）
 
-| 項目名        | データ型  | 桁数 | 主キー | NOT NULL | 備考               |
-|---------------|-----------|------|--------|----------|--------------------|
-| category_id   | INT       | -    | ○      | ○        | カテゴリID（自動採番） |
-| category_name | VARCHAR   | 100  |        | ○        | カテゴリ名         |
-| created_at    | DATETIME  | -    |        | ○        | 登録日時           |
-| updated_at    | DATETIME  | -    |        | ○        | 更新日時           |
+| 倫理名     　   | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
+|--------------- |---------------|----------|--------|----|----|----|----|-----|----|--------------|---------------------------|
+|カテゴリID　　　 | category_id   | INT      |        |　○　|　○　|　　|　　|　　　|　　|（自動採番）  |　|
+|カテゴリ名　　　 | category_name | VARCHAR  |100     |　 　|　○　|　　|　　|　　　|　　|　           |　|
+|登録日時　　　　 | created_at    | TIMESTANP|        |     | ○  |    |    |     |    |             |  |
+|更新日時　　　　 | updated_at    | TIMESTANP|        |     | ○  |    |    |     |    |             |  |
 
 ---
 
 - ORDER（注文情報）
 
-| 項目名             | データ型  | 桁数 | 主キー | NOT NULL | 備考                         |
-|--------------------|-----------|------|--------|----------|------------------------------|
-| order_id           | INT       | -    | ○      | ○        | 注文ID（自動採番）           |
-| customer_id        | INT       | -    |        | ○        | 顧客ID（非会員は0）          |
-| order_email        | VARCHAR   | 255  |        | ○        | 注文者メールアドレス         |
-| order_name         | VARCHAR   | 100  |        | ○        | 注文者氏名                   |
-| order_phone_number | VARCHAR   | 20   |        | ○        | 注文者電話番号               |
-| order_address      | TEXT      | -    |        | ○        | 注文者住所                   |
-| total_price        | DECIMAL   | 10,2 |        | ○        | 合計金額                     |
-| shipping_fee       | DECIMAL   | 10,2 |        | ○        | 配送料                       |
-| payment_method     | VARCHAR   | 50   |        | ○        | 支払い方法                   |
-| order_date         | DATETIME  | -    |        | ○        | 注文日時                     |
-| created_at         | DATETIME  | -    |        | ○        | データ登録日時               |
+| 倫理名     　       | 物理名    | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
+|---------------------|-----------|----------|--------|----|----|----|----|-----|--------|--------------|---------------------------|
+|注文ID     　       |order_id   　| INT     | 　  　| ○ | ○  | 　 |　　 | 　　 | 　　　|(自動採番)| |
+|顧客ID           　 |customer_id　| INT     |    　 |   | ○  |　  |     |     |       |(自動採番)| |         
+|注文者メールアドレス　|order_email　| VARCHAR　| 255  |　  | ○  |   |　　　|     |       |         | |
+|注文者氏名　　　　　　|order_name 　| VARCHAR  | 100  |   | ○  | 　 |　　　|     |       |         | |
+|注文者電話番号　　　　|order_phone_number | VARCHAR   | 20   |　| ○ | | | | | | |
+|注文者住所　　　　　　|order_address| TEXT    | 　　　|  | ○ | | | | | | | |
+|合計金額　　　　　　　|total_price　| DECIMAL |10　 |  | ○ | | | | ○ | | | total_price > 0 |
+|配送料　　　　　　　　|shipping_fee | DECIMAL |10　　|  | ○ | | | | | | |
+|支払方法　　　　　　　|payment_method| VARCHAR| 50   |  | ○ | | |  | | | | 
+|注文日時　　　　　　　|order_date  | TIMESTANP |　　  |　| ○ | | | | | | |
+|データ登録日時　　　　|created_at  | TIMESTANP |     |  | ○ | | | | | | |
 
 ---
 
 - ORDER_DETAIL（注文明細情報）
 
-| 項目名          | データ型  | 桁数 | 主キー | NOT NULL | 備考                        |
-|-----------------|-----------|------|--------|----------|-----------------------------|
-| order_detail_id | INT       | -    | ○      | ○        | 注文明細ID（自動採番）      |
-| order_id        | INT       | -    |        | ○        | 注文ID（外部キー）          |
-| product_id      | INT       | -    |        | ○        | 商品ID（外部キー）          |
-| quantity        | INT       | -    |        | ○        | 数量                        |
-| unit_price      | DECIMAL   | 10,2 |        | ○        | 購入時単価                  |
-| created_at      | DATETIME  | -    |        | ○        | 登録日時                    |
-| updated_at      | DATETIME  | -    |        | ○        | 更新日時                    |
+
+| 倫理名      | 物理名　　　　    | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
+|------------|-----------------|-----------|------|----|----|----|----|-----|--------|--------------|---------------------------|
+|注文明細ID   | order_detail_id |INT　　　  | 　　 |   ○ | ○  | 　   |　| | |(自動採番)| |
+|注文ID       | order_id       | INT       |      |     | ○  | | ○ | | |(自動採番)| | 
+|商品ID       | product_id     | INT       |      |     | ○  | | ○ | | |(自動採番)| |
+|数量　　　　　| quantity       | INT       |      |     | ○  |　|　| | |          | |
+|購入時価格　　| unit_price     | DECIMAL   | 10   |     | ○  |  |  | | |
+|登録日時　　　| created_at     | TIMESTANP |      |     | ○  |  |  | | |
+|更新日時　　　| updated_at     | TIMESTANP |      |     | ○  |  |  | | |
 
 
 ### 6.2 ER図
