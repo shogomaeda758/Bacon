@@ -5,40 +5,48 @@
 ### 4.1. 主要パッケージ構成
 com.example.ecsite
 ├── controller
-│   ├── ProductController
-│   ├── CartController
-│   ├── OrderController
-│   ├── MemberController
+│   ├── ProductController         // 商品一覧・詳細取得
+│   ├── CartController            // カート操作（セッション）
+│   ├── OrderController           // 注文処理（非会員含む）
+│   └── CustomerController        // 会員登録・ログイン・プロフィール更新
 │
 ├── service
 │   ├── ProductService
 │   ├── CartService
 │   ├── OrderService
-│   ├── MemberService
+│   └── CustomerService
 │
 ├── repository
 │   ├── ProductRepository
 │   ├── OrderRepository
-│   ├── MemberRepository
+│   ├── OrderDetailRepository
+│   └── CustomerRepository
 │
 ├── entity
-│   ├── Product
-│   ├── Order
-│   ├── OrderDetail
-│   ├── Member
-│   ├── Address
+│   ├── Product                  // 商品情報
+│   ├── Order                    // 注文情報
+│   ├── OrderDetail              // 注文明細
+│   └── Customer                 // 会員情報
 │
 ├── dto
-│   ├── ProductListItemDto
-│   ├── ProductDetailDto
-│   ├── CartDto
-│   ├── CartItemDto
-│   ├── OrderRequestDto
-│   ├── OrderResponseDto
-│   ├── MemberDto
-│   ├── AddressDto
+│   ├── ProductListItemDto       // 商品一覧表示用
+│   ├── ProductDetailDto         // 商品詳細表示用
+│   ├── CartDto                  // カート情報（セッション用）
+│   ├── CartItemDto              // カート内アイテム
+│   ├── CartItemInfo             // カート追加リクエスト
+│   ├── CartItemQuantityDto      // カート数量変更リクエスト
+│   ├── OrderRequestDto          // 注文リクエスト
+│   ├── CustomerInfo             // 注文時の顧客情報（非会員）
+│   ├── OrderResponseDto         // 注文完了レスポンス
+│   ├── CustomerRegisterRequest  // 会員登録リクエスト
+│   ├── LoginRequest             // ログインリクエスト
+│   ├── CustomerUpdateRequest    // 会員情報更新リクエスト
+│   ├── CustomerResponse         // 会員情報レスポンス
+│   ├── OrderSummary             // 注文履歴一覧用
+│   └── OrderItemSummary         // 注文履歴内商品の概要
 │
-└── exception
+└── exception                    // エラーハンドリング関連
+
 
 ## 4.2 クラス図
 ### 4.2.1. 商品関連クラス図
@@ -406,25 +414,42 @@ classDiagram
 
 ## 4.3. 主要クラス説明
 
-Product : 商品情報エンティティ（id, name, price, stock, description）
+**Product**  
+商品情報エンティティ（`productId`, `name`, `description`, `price`, `stock`, `imageUrl`, `isRecommended`, `createdAt`, `updatedAt`）
 
+**Order**  
+注文情報エンティティ（`orderId`, `orderNumber`, `orderDate`, `totalAmount`, `customerName`, `shippingAddress`, `shippingPhoneNumber`, `status`, `memberId`, `paymentMethod`, `paymentStatus`, `orderDetails`, `createdAt`, `updatedAt`）
 
-Order : 注文情報エンティティ（id, orderDate, memberId, totalPrice）
+**OrderDetail**  
+注文明細エンティティ（`orderDetailId`, `order`, `product`, `productName`, `price`, `quantity`）
 
+**Customer**  
+会員情報エンティティ（`customerId`, `name`, `email`, `password`, `address`, `phoneNumber`, `createdAt`, `updatedAt`）
 
-OrderDetail : 注文明細エンティティ（id, orderId, productId, quantity, price）
+**CartDto**  
+セッション保持用カート情報（`Map<String, CartItemDto> items`, `totalQuantity`, `totalPrice`）
 
+**CartItemDto**  
+カート内商品の情報（`id`, `productId`, `name`, `price`, `imageUrl`, `quantity`, `subtotal`）
 
-Member : 会員情報エンティティ（id, name, email, password）
+**OrderRequestDto**  
+注文リクエストDTO（`customerInfo`（非会員用）, `memberId`（会員注文用））
 
+**CustomerInfo**  
+非会員向け注文時の顧客情報DTO（`name`, `email`, `address`, `phoneNumber`）
 
-Address : 住所情報エンティティ（id, postalCode, prefecture, city, detail）
+**OrderResponseDto**  
+注文完了レスポンスDTO（`orderId`, `orderNumber`, `orderDate`, `totalAmount`, `status`）
 
+**CustomerRegisterRequest / LoginRequest / CustomerUpdateRequest**  
+会員登録・ログイン・プロフィール更新用リクエストDTO（`name`, `email`, `password`, `address`, `phoneNumber` など）
 
-CartDto : セッション保持用カート情報（Map<productId, CartItemDto>、totalPrice）
+**CustomerResponse**  
+会員情報レスポンスDTO（`customerId`, `name`, `email`, `address`, `phoneNumber`）
 
+**OrderSummary**  
+注文履歴一覧表示用DTO（`orderId`, `orderDate`, `totalAmount`, `items`）
 
-OrderRequestDto : 注文情報リクエスト（顧客情報、カート内容）
+**OrderItemSummary**  
+注文履歴の商品情報DTO（`productName`, `quantity`, `price`）
 
-
-OrderResponseDto : 注文完了レスポンス（注文ID、注文日時）
