@@ -217,32 +217,32 @@ classDiagram
         +JpaRepository~Product, Integer~
     }
 
+
     class Order {
         <<Entity>>
         +Integer orderId
-        +String orderNumber
+        +Customer customer
+        +String orderEmail
+        +String orderName
+        +String orderPhoneNumber
+        +String orderAddress
+        +BigDecimal totalPrice
+        +BigDecimal shippingFee
+        +String paymentMethod
         +LocalDateTime orderDate
-        +Integer totalAmount
-        +String customerName // 非会員用
-        +String shippingAddress
-        +String shippingPhoneNumber
-        +String status
-        +Integer memberId "Nullable" // 会員ログイン時のみ
-        +String paymentMethod "Nullable"
-        +String paymentStatus "Nullable"
-        +List~OrderDetail~ orderDetails
-        +LocalDateTime createdAt "Nullable"
-        +LocalDateTime updatedAt "Nullable"
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
     }
 
     class OrderDetail {
         <<Entity>>
         +Integer orderDetailId
         +Order order
-        +Product product // 商品リレーション（更新時など）
-        +String productName // 履歴用途
-        +Integer price // 注文時点価格
+        +Product product
         +Integer quantity
+        +BigDecimal unitPrice
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
     }
 
     class Product {
@@ -323,11 +323,12 @@ classDiagram
     class Customer {
         <<Entity>>
         +Integer customerId
-        +String name
         +String email
         +String password
-        +String address
+        +String lastName
+        +String firstName
         +String phoneNumber
+        +String address
         +LocalDateTime createdAt
         +LocalDateTime updatedAt
     }
@@ -368,19 +369,17 @@ classDiagram
     class Order {
         <<Entity>>
         +Integer orderId
-        +String orderNumber
+        +Customer customer
+        +String orderEmail
+        +String orderName
+        +String orderPhoneNumber
+        +String orderAddress
+        +BigDecimal totalPrice
+        +BigDecimal shippingFee
+        +String paymentMethod
         +LocalDateTime orderDate
-        +Integer totalAmount
-        +String customerName // 非会員用
-        +String shippingAddress
-        +String shippingPhoneNumber
-        +String status
-        +Integer memberId "Nullable" // 会員ログイン時のみ
-        +String paymentMethod "Nullable"
-        +String paymentStatus "Nullable"
-        +List~OrderDetail~ orderDetails
-        +LocalDateTime createdAt "Nullable"
-        +LocalDateTime updatedAt "Nullable"
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
     }
 
     class OrderSummary {
