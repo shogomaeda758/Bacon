@@ -4,37 +4,38 @@
 ### 6.1 テーブル定義書
 本システムで使用する主要テーブルの物理設計を以下に示す。
 
-- CUSTOMER（顧客情報）
+**CUSTOMER（顧客情報）**
 
-| 項目名        | データ型  | 桁数 | 主キー | NOT NULL | ユニーク | 備考                      |
-|---------------|-----------|------|--------|----------|----------|---------------------------|
-| customer_id   | INT       | -    | ○      | ○        |          | 顧客ID（自動採番）        |
-| email         | VARCHAR   | 255  |        | ○        | ○        | ログイン用メールアドレス  |
-| password      | VARCHAR   | 255  |        | ○        |          | ハッシュ化済みパスワード  |
-| last_name     | VARCHAR   | 50   |        | ○        |          | 姓                        |
-| first_name    | VARCHAR   | 50   |        | ○        |          | 名                        |
-| phone_number  | VARCHAR   | 20   |        | ○        |          | 電話番号                  |
-| address       | TEXT      | -    |        | ○        |          | 配送先住所                |
-| created_at    | DATETIME  | -    |        | ○        |          | 登録日時                  |
-| updated_at    | DATETIME  | -    |        | ○        |          | 更新日時                  |
+| 倫理名     　  | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
+|---------------|---------------|----------|--------|----|----|----|----|-----|--------|--------------|---------------------------|
+|　顧客番号　    | customer_id   | INT      | -    | ○    | ○   |   |     |  |      |　(自動採番) | 主キー  |
+|　メールアドレス | email         | VARCHAR | 255  |      | ○  | ○  |     |  |      |            |
+|　パスワード　   | password      | VARCHAR | 255  |       | ○  |    |     |   |      |            |     |
+|　姓　          | last_name     | VARCHAR | 50   |       | ○  |    |     |   |      |            |      |
+|　名　          | first_name    | VARCHAR | 50   |       | ○  |    |     |   |      |            |         |
+|　電話番号　    | phone_number  | VARCHAR  | 20   |       | ○  |    |     |  |       |            |          |
+|　配達先住所　  | address       | TEXT     | -    |       | ○  |    |     |   |      |            |          |
+| 登録日時　     | created_at    | TIMESTANP | -    |       | ○  |    |     |  |       |           |          |
+|　更新日時　    | updated_at    | TIMESTANP | -    |       | ○  |    |     |  |       |            |         |
 
 ---
 
-- PRODUCT（商品情報）
+**PRODUCT（商品情報）**
 
-| 項目名         | データ型  | 桁数 | 主キー | NOT NULL | 備考                    |
-|----------------|-----------|------|--------|----------|-------------------------|
-| product_id     | INT       | -    | ○      | ○        | 商品ID（自動採番）      |
-| product_name   | VARCHAR   | 255  |        | ○        | 商品名                  |
-| description    | TEXT      | -    |        |          | 商品説明                |
-| price          | DECIMAL   | 10,2 |        | ○        | 単価                    |
-| image_url      | VARCHAR   | 500  |        |          | 画像URL                 |
-| material       | VARCHAR   | 100  |        |          | 素材                    |
-| size           | VARCHAR   | 100  |        |          | サイズ                  |
-| category_id    | INT       | -    |        | ○        | カテゴリID（外部キー）  |
-| stock_quantity | INT       | -    |        | ○        | 在庫数                  |
-| created_at     | DATETIME  | -    |        | ○        | 登録日時                |
-| updated_at     | DATETIME  | -    |        | ○        | 更新日時                |
+
+| 倫理名     　   | 物理名        | 型        | サイズ | PK | NN | UQ | FK | CHK | Index　|　デフォルト値　| 備考                      |
+|--------------- |---------------|----------|--------|----|----|----|----|-----|----|--------------|---------------------------|
+| 商品ID　　　　　| product_id     | INT       |     | ○   | ○ | | | | ○ | (自動採番)    |   |
+| 商品名　　　　　| product_name   | VARCHAR   | 255  |     | ○ | | | | ○ |               |   |
+| 商品説明　　　　| description    | TEXT      |     |     |   | | | |   |              |   |
+| 価格　　　　　　| price          | DECIMAL   |     |     | ○ | | |○|   |              | price > 0 |
+| 画像URL　　　　 | image_url      | VARCHAR   | 500 |     |   | | | |   |              |   |
+| 素材　         | material       | VARCHAR   | 100  |     |   | | | |   |              |   |
+| サイズ　　　　　| size           | VARCHAR   | 100  |     |   | | | |   |              |   |
+| カテゴリID　　　| category_id    | INT       |      |     | ○ | | | | ○ |             |   |
+| 在庫数　　　　　| stock_quantity | INT       |      |     | ○ | |○|○|   | 0       |  stock_quantity >= 0 |
+| 登録日時　　　　| created_at     | TIMESTANP |      |     | ○ ||||| (現在時刻)   |  |
+| 更新日時　　　　| updated_at     | TIMESTANP |      |     | ○ ||||| (現在時刻)   |  |
 
 ---
 
