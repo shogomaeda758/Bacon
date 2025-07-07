@@ -152,4 +152,41 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
+```
+
+### 6.3 インデックス一覧
+
+| テーブル名   | インデックス名       | 対象カラム   | 用途・補足                     |
+|--------------|----------------------|--------------|-------------------------------|
+| CUSTOMER     | idx_customer_email   | email        | ログイン認証用ユニーク検索     |
+| PRODUCT      | idx_product_category | category_id  | 商品一覧のカテゴリ絞り込み     |
+| ORDER        | idx_order_customer   | customer_id  | 顧客別注文履歴の高速検索       |
+| ORDER_DETAIL | idx_detail_order     | order_id     | 注文明細の注文単位検索         |
+| ORDER_DETAIL | idx_detail_product   | product_id   | 商品別の注文明細検索           |
+
+※ 主キーにはデフォルトでユニークインデックスが作成される。
+
+---
+
+### 6.4 トランザクション設計方針
+
+#### 基本方針
+
+- 関連データ操作（特に注文処理・会員登録）においては、**トランザクション処理で整合性を担保**
+- 複数テーブルにまたがる処理は原子性（Atomicity）を確保し、**失敗時にはロールバック**
+- **排他制御（SELECT FOR UPDATEなど）**を用いて同時更新を防止
+
+#### トランザクション対象処理例
+
+| 処理名       | 対象テーブル              | ロールバック条件             |
+|--------------|---------------------------|------------------------------|
+| 注文確定処理 | ORDER, ORDER_DETAIL       | いずれかのINSERT失敗         |
+| 会員登録処理 | CUSTOMER                  | INSERT失敗                   |
+| 会員情報更新 | CUSTOMER                  | UPDATE失敗                   |
+| 在庫更新     | PRODUCT                   | UPDATE失敗                   |
+
+#### 排他制御
+
+- 商品在庫の更新には `SELECT FOR UPDATE` を使用
+- トランザクションの粒度は「画面単位」とし、ロックは必要最小限に限定
 
