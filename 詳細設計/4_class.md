@@ -191,9 +191,112 @@ classDiagram
 
 </div>
 
-### 4.2.3. 注文関連クラス図 (非会員注文)
+### 4.2.3. 注文関連クラス図 
 <div class='mermaid'>
 classDiagram
+    %% ユーザー関連
+    class User {
+        +cart: Cart
+        +addToCart()
+        +viewProduct()
+    }
+
+    class Guest {
+        +register()
+    }
+
+    class Member {
+        -email: String
+        -password: String
+        +login()
+        +viewMyPage()
+        +editProfile()
+    }
+
+    class LoggedInMember {
+        +placeOrder()
+        +viewOrderHistory()
+        +logout()
+    }
+
+    %% 商品関連
+    class Product {
+        <<Entity>>
+        +Integer productId
+        +String name
+        +String description
+        +Integer price
+        +Integer stock
+        +String imageUrl
+    }
+
+    %% カート関連
+    class Cart {
+        -items: List~CartItem~
+        +addItem()
+        +removeItem()
+        +clearCart()
+    }
+
+    class CartItem {
+        -product: Product
+        -quantity: int
+    }
+
+    %% 注文関連
+    class Order {
+        <<Entity>>
+        +Integer orderId
+        +Customer customer
+        +String orderEmail
+        +String orderName
+        +String orderPhoneNumber
+        +String orderAddress
+        +BigDecimal totalPrice
+        +BigDecimal shippingFee
+        +String paymentMethod
+        +LocalDateTime orderDate
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+        +calculateTotal()
+    }
+
+    class OrderDetail {
+        <<Entity>>
+        +Integer orderDetailId
+        +Order order
+        +Product product
+        +Integer quantity
+        +BigDecimal unitPrice
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+    }
+
+    %% DTO類
+    class OrderRequest {
+        <<DTO>>
+        +CustomerInfo customerInfo  // 非会員用
+        +Integer memberId "Nullable"
+    }
+
+    class CustomerInfo {
+        <<DTO>>
+        +String name
+        +String email
+        +String address
+        +String phoneNumber
+    }
+
+    class OrderResponse {
+        <<DTO>>
+        +Integer orderId
+        +String orderNumber
+        +LocalDateTime orderDate
+        +Integer totalAmount
+        +String status
+    }
+
+    %% コントローラー・サービス・リポジトリ
     class OrderController {
         +OrderService orderService
         +CartService cartService
@@ -224,68 +327,19 @@ classDiagram
         +JpaRepository~Product, Integer~
     }
 
-
-    class Order {
-        <<Entity>>
-        +Integer orderId
-        +Customer customer
-        +String orderEmail
-        +String orderName
-        +String orderPhoneNumber
-        +String orderAddress
-        +BigDecimal totalPrice
-        +BigDecimal shippingFee
-        +String paymentMethod
-        +LocalDateTime orderDate
-        +LocalDateTime createdAt
-        +LocalDateTime updatedAt
-    }
-
-    class OrderDetail {
-        <<Entity>>
-        +Integer orderDetailId
-        +Order order
-        +Product product
-        +Integer quantity
-        +BigDecimal unitPrice
-        +LocalDateTime createdAt
-        +LocalDateTime updatedAt
-    }
-
-    class Product {
-        <<Entity>>
-        +Integer productId
-        +String name
-        +String description
-        +Integer price
-        +Integer stock
-        +String imageUrl
-    }
-
-    class OrderRequest {
-        <<DTO>>
-        +CustomerInfo customerInfo // 非会員のみ使用
-        +Integer memberId "Nullable"
-    }
-
-    class CustomerInfo {
-        <<DTO>>
-        +String name
-        +String email
-        +String address
-        +String phoneNumber
-    }
-
-    class OrderResponse {
-        <<DTO>>
-        +Integer orderId
-        +String orderNumber
-        +LocalDateTime orderDate
-        +Integer totalAmount
-        +String status
-    }
+    %% 継承関係
+    User <|-- Guest
+    User <|-- Member
+    Member <|-- LoggedInMember
 
     %% 関連
+    User --> Cart : owns
+    LoggedInMember --> Order : places
+    Order --> OrderDetail : contains (Cascade PERSIST/MERGE)
+    OrderDetail --> Product : refers to
+    Cart --> CartItem : contains
+    CartItem --> Product : refers to
+
     OrderController --> OrderService : uses
     OrderController --> CartService : uses
     OrderService --> OrderRepository : uses
@@ -295,7 +349,6 @@ classDiagram
 
     OrderRepository "1" -- "*" Order : manages
     OrderDetailRepository "1" -- "*" OrderDetail : manages
-    Order "1" -- "*" OrderDetail : contains (Cascade PERSIST/MERGE)
     OrderDetail "n" -- "1" Order : belongs to
     OrderDetail "n" -- "1" Product : refers to
 
