@@ -46,12 +46,23 @@ sequenceDiagram
     PC->>PS: findAllProducts()
     PS->>PR: findAll()
     PR->>DB: SELECT * FROM PRODUCT
-    DB-->>PR: Product[]
-    PR-->>PS: Product[]
-    PS-->>PC: ProductListItem[]
-    PC-->>B: ResponseEntity<List<ProductListItem>>
-    B-->>U: 商品一覧画面表示
+    
+    alt 正常処理
+        DB-->>PR: Product[]
+        PR-->>PS: Product[]
+        PS-->>PC: ProductListItem[]
+        PC-->>B: ResponseEntity<List<ProductListItem>>
+        B-->>U: 商品一覧画面表示
+    else DBエラー
+        DB-->>PR: SQLException
+        PR-->>PS: DataAccessException
+        PS-->>PC: ServiceException
+        PC-->>B: ResponseEntity<ErrorResponse>(500)
+        B-->>U: システムエラー画面表示
+    end
 ```
+
+
 
 ### 3.2.2. カテゴリ別一覧表示フロー
 
@@ -69,11 +80,18 @@ sequenceDiagram
     PC->>PS: findProductsByCategory(categoryId)
     PS->>PR: findByCategoryId(categoryId)
     PR->>DB: SELECT * FROM PRODUCT WHERE category_id = ?
-    DB-->>PR: Product[]
-    PR-->>PS: Product[]
-    PS-->>PC: ProductListItem[]
-    PC-->>B: ResponseEntity<List<ProductListItem>>
-    B-->>U: カテゴリ別商品一覧表示
+    
+    alt 正常処理
+        DB-->>PR: Product[]
+        PR-->>PS: Product[]
+        PS-->>PC: ProductListItem[]
+        PC-->>B: ResponseEntity<List<ProductListItem>>
+        B-->>U: カテゴリ別商品一覧表示
+    else 不正カテゴリID
+        PS-->>PC: IllegalArgumentException
+        PC-->>B: ResponseEntity<ErrorResponse>(400)
+        B-->>U: 不正な要求エラー表示
+    end
 ```
 
 ### 3.2.3. 商品検索フロー
@@ -93,14 +111,21 @@ sequenceDiagram
     PC->>PS: searchProducts(keyword)
     PS->>PR: findByNameContaining(keyword)
     PR->>DB: SELECT * FROM PRODUCT WHERE product_name LIKE '%keyword%'
-    DB-->>PR: Product[]
-    PR-->>PS: Product[]
-    PS-->>PC: ProductListItem[]
-    PC-->>B: ResponseEntity<List<ProductListItem>>
-    B-->>U: 検索結果表示
+    
+    alt 正常処理
+        DB-->>PR: Product[]
+        PR-->>PS: Product[]
+        PS-->>PC: ProductListItem[]
+        PC-->>B: ResponseEntity<List<ProductListItem>>
+        B-->>U: 検索結果表示
+    else 空の検索ワード
+        PS-->>PC: ValidationException
+        PC-->>B: ResponseEntity<ErrorResponse>(400)
+        B-->>U: 検索ワード必須エラー表示
+    end
 ```
 
-### 3.2.4. 商品詳細表示フロー**
+### 3.2.4. 商品詳細表示フロー
 
 ```mermaid
 sequenceDiagram
@@ -141,15 +166,31 @@ sequenceDiagram
     CC->>CS: addItemToCart(productId, quantity, session)
     CS->>PR: findById(productId)
     PR->>DB: SELECT * FROM PRODUCT WHERE product_id = ?
-    DB-->>PR: Product
-    PR-->>CS: Product
-    CS->>S: セッションからカート取得
-    S-->>CS: Cart or null
-    CS->>CS: カートに商品追加・計算
-    CS->>S: 更新されたカートを保存
-    CS-->>CC: Cart
-    CC-->>B: ResponseEntity<Cart>
-    B-->>U: カート更新成功メッセージ
+    
+    alt 商品存在
+        DB-->>PR: Product
+        PR-->>CS: Product
+        CS->>CS: 在庫確認
+        alt 在庫十分
+            CS->>S: セッションからカート取得
+            S-->>CS: Cart or null
+            CS->>CS: カートに商品追加・計算
+            CS->>S: 更新されたカートを保存
+            CS-->>CC: Cart
+            CC-->>B: ResponseEntity<Cart>
+            B-->>U: カート更新成功メッセージ
+        else 在庫不足
+            CS-->>CC: InsufficientStockException
+            CC-->>B: ResponseEntity<ErrorResponse>(400)
+            B-->>U: 在庫不足エラー表示
+        end
+    else 商品不存在
+        DB-->>PR: null
+        PR-->>CS: null
+        CS-->>CC: ProductNotFoundException
+        CC-->>B: ResponseEntity<ErrorResponse>(404)
+        B-->>U: 商品が見つからないエラー表示
+    end
 ```
 
 ### 3.2.6. カート内容確認・編集フロー
@@ -167,10 +208,18 @@ sequenceDiagram
     B->>CC: GET /api/cart
     CC->>CS: getCartFromSession(session)
     CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS-->>CC: Cart
-    CC-->>B: ResponseEntity<Cart>
-    B-->>U: カート内容表示
+    
+    alt セッション有効
+        S-->>CS: Cart
+        CS-->>CC: Cart
+        CC-->>B: ResponseEntity<Cart>
+        B-->>U: カート内容表示
+    else セッション無効
+        S-->>CS: null
+        CS-->>CC: SessionExpiredException
+        CC-->>B: ResponseEntity<ErrorResponse>(401)
+        B-->>U: セッション切れエラー・ログイン画面表示
+    end
 
     Note over U,S: 数量変更
     U->>B: 数量変更
@@ -178,24 +227,19 @@ sequenceDiagram
     Note over B,CC: {quantity: 3}
     CC->>CS: updateItemQuantity(itemId, quantity, session)
     CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS->>CS: 数量更新・再計算
-    CS->>S: 更新されたカートを保存
-    CS-->>CC: Cart
-    CC-->>B: ResponseEntity<Cart>
-    B-->>U: カート内容更新表示
-
-    Note over U,S: アイテム削除
-    U->>B: 削除ボタン押下
-    B->>CC: DELETE /api/cart/items/{itemId}
-    CC->>CS: removeItemFromCart(itemId, session)
-    CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS->>CS: アイテム削除・再計算
-    CS->>S: 更新されたカートを保存
-    CS-->>CC: Cart
-    CC-->>B: ResponseEntity<Cart>
-    B-->>U: カート内容更新表示
+    
+    alt 正常処理
+        S-->>CS: Cart
+        CS->>CS: 数量更新・再計算
+        CS->>S: 更新されたカートを保存
+        CS-->>CC: Cart
+        CC-->>B: ResponseEntity<Cart>
+        B-->>U: カート内容更新表示
+    else 不正数量
+        CS-->>CC: IllegalArgumentException
+        CC-->>B: ResponseEntity<ErrorResponse>(400)
+        B-->>U: 不正な数量エラー表示
+    end
 ```
 
 ### 3.2.7. 注文情報入力フロー
@@ -205,21 +249,42 @@ sequenceDiagram
     participant B as ブラウザ
     participant OC as OrderController
     participant CS as CartService
+    participant CuS as CustomerService
     participant S as HttpSession
 
     U->>B: 「注文手続きに進む」ボタン押下
     B->>OC: GET /api/order/input
     OC->>CS: getCartFromSession(session)
     CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS-->>OC: Cart
-    OC-->>B: ResponseEntity<Cart>
-    B-->>U: 注文情報入力画面表示
 
-    U->>B: 注文者情報入力
+    alt カート存在
+        S-->>CS: Cart
+        CS-->>OC: Cart
+
+        OC->>S: セッションから customerId 取得
+        S-->>OC: customerId
+
+        OC->>CuS: getCustomerById(customerId)
+        CuS-->>OC: CustomerResponse (氏名・住所等)
+
+        alt カート空でない
+            OC-->>B: ResponseEntity<Cart + CustomerResponse>
+            B-->>U: 注文情報入力画面表示（自動入力）
+        else カート空
+            OC-->>B: ResponseEntity<ErrorResponse>(400)
+            B-->>U: カートが空エラー表示
+        end
+    else セッション無効
+        S-->>CS: null
+        CS-->>OC: SessionExpiredException
+        OC-->>B: ResponseEntity<ErrorResponse>(401)
+        B-->>U: セッション切れエラー表示
+    end
+
+    U->>B: 注文者情報入力（自動入力された内容を確認・修正）
     Note over U,B: 氏名、住所、電話番号、支払い方法等
     B->>OC: POST /api/order/preview
-    Note over B,OC: {customerInfo: {...}}
+    Note over B,OC: OrderRequest（customerInfo含む）
     OC->>CS: getCartFromSession(session)
     CS->>S: セッションからカート取得
     S-->>CS: Cart
@@ -227,6 +292,7 @@ sequenceDiagram
     OC->>OC: 送料計算
     OC-->>B: ResponseEntity<OrderPreview>
     B-->>U: 注文内容確認画面表示
+
 ```
 
 ### 3.2.8. 注文確認・確定フロー
