@@ -15,12 +15,12 @@
 | 論理名           | 物理名        | 型        | サイズ | PK | NULL | UQ | FK | CHK | デフォルト値      | 備考             |
 |------------------|---------------|-----------|--------|----|----|----|----|-----|-------------------|------------------|
 | 顧客ID           | customer_id   | INT       | -      | ○  | NN  |    |    |     | 自動採番          | 主キー           |
-| ログイン用メールアドレス | email         | VARCHAR   | 255    |   | NN  | ○  |    |     |                   |                  |
+| ログイン用メールアドレス | email         | VARCHAR   | 255    |   | NN  | NN  |    |     |                   |                  |
 | パスワード       | password      | VARCHAR   | 255    |    | NN |    |    |     |                   | ハッシュ前提     |
-| 姓               | last_name     | VARCHAR   | 50     |    | ○  |    |    |     |                   |                  |
-| 名               | first_name    | VARCHAR   | 50     |    | ○  |    |    |     |                   |                  |
-| 電話番号         | phone_number  | VARCHAR   | 20     |    | ○  |    |    |     |                   |                  |
-| 配達先住所       | address       | TEXT      | -      |    | ○  |    |    |     |                   |                  |
+| 姓               | last_name     | VARCHAR   | 50     |    | NN  |    |    |     |                   |                  |
+| 名               | first_name    | VARCHAR   | 50     |    | NN  |    |    |     |                   |                  |
+| 電話番号         | phone_number  | VARCHAR   | 20     |    | NN  |    |    |     |                   |                  |
+| 配達先住所       | address       | TEXT      | -      |    | NN  |    |    |     |                   |                  |
 | 登録日時         | created_at    | TIMESTAMP | -      |    | NN  |    |    |     | CURRENT_TIMESTAMP | 自動設定         |
 | 更新日時         | updated_at    | TIMESTAMP | -      |    | NN  |    |    |     | CURRENT_TIMESTAMP | 自動更新（トリガ等） |
 
@@ -31,13 +31,13 @@
 | 論理名           | 物理名         | 型        | サイズ | PK | NULL | UQ | FK | CHK                    | デフォルト値      | 備考                   |
 |------------------|----------------|-----------|--------|----|----|----|----|-------------------------|-------------------|------------------------|
 | 商品ID           | product_id     | INT       | -      | ○  | NN |    |    |                         | 自動採番          |                        |
-| 商品名           | product_name   | VARCHAR   | 255    |    | ○  |    |    |                         |                   |                        |
+| 商品名           | product_name   | VARCHAR   | 255    |    | NN  |    |    |                         |                   |                        |
 | 商品説明         | description    | TEXT      | -      |    |    |    |    |                         |                   |                        |
 | 価格             | price          | DECIMAL   | 10     |    | NN |    |    | price > 0               |                   |                        |
 | 画像URL          | image_url      | VARCHAR   | 500    |    |    |    |    |                         |                   |                        |
 | 素材             | material       | VARCHAR   | 100    |    |    |    |    |                         |                   |                        |
 | サイズ           | size           | VARCHAR   | 100    |    |    |    |    |                         |                   |                        |
-| カテゴリID       | category_id    | INT       | -      |    | NN |    | ○  |                         |                   | → CATEGORY(category_id) |
+| カテゴリID       | category_id    | INT       | -      |    | NN |    | NN  |                         |                   | → CATEGORY(category_id) |
 | 在庫数           | stock_quantity | INT       | -      |    | NN |    |    | stock_quantity >= 0     | 0                 |                        |
 | 登録日時         | created_at     | TIMESTAMP | -      |    | NN |    |    |                         | CURRENT_TIMESTAMP |                        |
 | 更新日時         | updated_at     | TIMESTAMP | -      |    | NN |    |    |                         | CURRENT_TIMESTAMP |                        |
@@ -60,13 +60,13 @@
 | 論理名              | 物理名           | 型        | サイズ | PK | NULL | UQ | FK | CHK                         | デフォルト値      | 備考                      |
 |---------------------|------------------|-----------|--------|----|----|----|----|------------------------------|-------------------|---------------------------|
 | 注文ID              | order_id         | INT       | -      | ○  | NN |    |    |                              | 自動採番          | 主キー                    |
-| 顧客ID              | customer_id      | INT       | -      |    | NN |    | ○  |                              |                   | → CUSTOMER(customer_id)   |
-| 注文者メールアドレス | order_email      | VARCHAR   | 255    |    | ○  |    |    |                              |                   | 顧客情報のコピー          |
-| 注文者氏名          | order_name       | VARCHAR   | 100    |    | ○  |    |    |                              |                   |                            |
-| 注文者電話番号      | order_phone_number | VARCHAR | 20     |    | ○  |    |    |                              |                   |                            |
-| 注文者住所          | order_address    | TEXT      | -      |    | ○  |    |    |                              |                   |                            |
+| 顧客ID              | customer_id      | INT       | -      |    | NN |    | NN  |                              |                   | → CUSTOMER(customer_id)   |
+| 注文者メールアドレス | order_email      | VARCHAR   | 255    |    | NN  |    |    |                              |                   | 顧客情報のコピー          |
+| 注文者氏名          | order_name       | VARCHAR   | 100    |    | NN  |    |    |                              |                   |                            |
+| 注文者電話番号      | order_phone_number | VARCHAR | 20     |    | NN  |    |    |                              |                   |                            |
+| 注文者住所          | order_address    | TEXT      | -      |    | NN  |    |    |                              |                   |                            |
 | 合計金額            | total_price      | DECIMAL   | 10     |    | NN |    |    | total_price > 0              |                   |                            |
-| 配送料              | shipping_fee     | DECIMAL   | 10     |    | ○  |    |    |                              |                   |                            |
+| 配送料              | shipping_fee     | DECIMAL   | 10     |    | NN  |    |    |                              |                   |                            |
 | 支払方法            | payment_method   | VARCHAR   | 50     |    | NN |    |    | payment_method IN ('credit', 'bank', 'cash') | | |
 | 注文日時            | order_date       | TIMESTAMP | -      |    | NN |    |    |                              | CURRENT_TIMESTAMP |                            |
 | データ登録日時      | created_at       | TIMESTAMP | -      |    | NN |    |    |                              | CURRENT_TIMESTAMP |                            |
@@ -176,7 +176,7 @@ erDiagram
 - 複数テーブルにまたがる処理は原子性（Atomicity）を確保し、**失敗時にはロールバック**
 - **排他制御（SELECT FOR UPDATEなど）**　を用いて同時更新を防止
 
-#### トランザクション対象処理例
+#### トランザクション対象処理
 
 | 処理名       | 対象テーブル              | ロールバック条件             |
 |--------------|---------------------------|------------------------------|
@@ -185,8 +185,18 @@ erDiagram
 | 会員情報更新 | CUSTOMER                  | UPDATE失敗                   |
 | 在庫更新     | PRODUCT                   | UPDATE失敗                   |
 
+
+#### ロールバック時の処理内容
+
+| 処理名      | 対象コントローラー | 時点・操作             | メッセージ                                                |
+| -------- | --------- | ----------------- | ---------------------------------------------------- |
+| 注文処理失敗   | ORDER     | 注文確定ボタン押下後、DB登録時  | 注文処理に失敗しました。ネットワーク環境や商品在庫をご確認のうえ、再度お試しください。          |
+| 会員情報登録失敗 | CUSTOMER  | 会員登録フォーム送信後       | 会員登録に失敗しました。入力内容をご確認のうえ、再度お試しください。                   |
+| 会員情報更新失敗 | CUSTOMER  | 会員情報更新ボタン押下後      | 会員情報の更新に失敗しました。再度お試しください。操作が繰り返し失敗する場合はサポートへご連絡ください。 |
+| 在庫更新失敗   | PRODUCT   | 注文確定処理中、在庫UPDATE時 | 在庫の更新に失敗しました。在庫状況が変動した可能性があります。カート内容を確認してください。       |
+
+
 #### 排他制御
 
-- 商品在庫の更新には `SELECT FOR UPDATE` を使用
 - トランザクションの粒度は「画面単位」とし、ロックは必要最小限に限定
 
