@@ -199,6 +199,7 @@ classDiagram
         +cart: Cart
         +addToCart()
         +viewProduct()
+        +placeOrder()
     }
 
     class Guest {
@@ -214,8 +215,6 @@ classDiagram
     }
 
     class LoggedInMember {
-        +placeOrder()
-        +viewOrderHistory()
         +logout()
     }
 
@@ -247,7 +246,7 @@ classDiagram
     class Order {
         <<Entity>>
         +Integer orderId
-        +Customer customer
+        +Member member "Nullable"
         +String orderEmail
         +String orderName
         +String orderPhoneNumber
@@ -258,6 +257,8 @@ classDiagram
         +LocalDateTime orderDate
         +LocalDateTime createdAt
         +LocalDateTime updatedAt
+        +String status
+        +Boolean isGuest
         +calculateTotal()
     }
 
@@ -275,8 +276,9 @@ classDiagram
     %% DTO類
     class OrderRequest {
         <<DTO>>
-        +CustomerInfo customerInfo  // 非会員用
+        +CustomerInfo customerInfo
         +Integer memberId "Nullable"
+        +Boolean isGuest
     }
 
     class CustomerInfo {
@@ -293,14 +295,26 @@ classDiagram
         +String orderNumber
         +LocalDateTime orderDate
         +Integer totalAmount
+        +BigDecimal shippingFee
         +String status
+    }
+
+    class OrderPreview {
+        <<DTO>>
+        +List~OrderItemPreview~ items
+        +BigDecimal subtotal
+        +BigDecimal shippingFee
+        +BigDecimal totalAmount
+        +String paymentMethod
+        +CustomerInfo customerInfo
     }
 
     %% コントローラー・サービス・リポジトリ
     class OrderController {
         +OrderService orderService
         +CartService cartService
-        +placeOrder(OrderRequest, HttpSession) ResponseEntity~OrderResponse~
+        +placeOrder(OrderRequest, HttpSession): ResponseEntity~OrderResponse~
+        +getOrderHistory(memberId: Integer): ResponseEntity~List~OrderResponse~~
     }
 
     class OrderService {
@@ -308,23 +322,45 @@ classDiagram
         +OrderDetailRepository orderDetailRepository
         +ProductRepository productRepository
         +CartService cartService
-        +placeOrder(Cart, OrderRequest) OrderResponse
+        +placeOrder(Cart, OrderRequest): OrderResponse
+        +getOrderHistoryByMember(memberId: Integer): List~OrderResponse~
+        +calculateShippingFee(address, totalAmount): BigDecimal
     }
 
     class OrderRepository {
         <<Interface>>
         +JpaRepository~Order, Integer~
+        +findByMember(member: Member): List~Order~
     }
 
     class OrderDetailRepository {
         <<Interface>>
         +JpaRepository~OrderDetail, Integer~
-        +saveAll(details) List~OrderDetail~
+        +saveAll(details): List~OrderDetail~
+        +findByOrderId(orderId: Integer): List~OrderDetail~
     }
 
     class ProductRepository {
         <<Interface>>
         +JpaRepository~Product, Integer~
+    }
+
+    class CustomerController {
+        +register(request): ResponseEntity~CustomerResponse~
+        +login(request): ResponseEntity~CustomerResponse~
+        +logout(): ResponseEntity~Success~
+    }
+
+    class CustomerService {
+        +registerCustomer(request): CustomerResponse
+        +authenticate(loginRequest): CustomerResponse
+        +getOrderHistory(customerId): List~OrderResponse~
+    }
+
+    class CustomerRepository {
+        <<Interface>>
+        +JpaRepository~Member, Integer~
+        +findByEmail(email): Optional~Member~
     }
 
     %% 継承関係
@@ -334,8 +370,8 @@ classDiagram
 
     %% 関連
     User --> Cart : owns
-    LoggedInMember --> Order : places
-    Order --> OrderDetail : contains (Cascade PERSIST/MERGE)
+    Member --> Order : places
+    Order --> OrderDetail : contains
     OrderDetail --> Product : refers to
     Cart --> CartItem : contains
     CartItem --> Product : refers to
@@ -354,7 +390,9 @@ classDiagram
 
     OrderController ..> OrderRequest : receives
     OrderController ..> OrderResponse : returns
+    OrderController ..> OrderPreview : returns
     OrderService ..> OrderResponse : creates
+
 </div>
 
 ### 4.2.4. 会員登録関連クラス図
