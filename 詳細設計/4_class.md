@@ -88,7 +88,15 @@ classDiagram
         +Boolean isRecommended "Nullable"
         +LocalDateTime createdAt "Nullable"
         +LocalDateTime updatedAt "Nullable"
+        +Category category
+    }
+
+    class Category {
+        <<Entity>>
         +Integer categoryId
+        +String categoryName
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
     }
 
     class ProductListItem {
@@ -113,11 +121,13 @@ classDiagram
     ProductController --> ProductService : uses
     ProductService --> ProductRepository : uses
     ProductRepository "1" -- "*" Product : manages
+    Product --> Category : belongs to
 
     ProductService ..> ProductListItem : creates
     ProductService ..> ProductDetail : creates
     ProductController ..> ProductListItem : returns
     ProductController ..> ProductDetail : returns
+
 </div>
 
 ### 4.2.2. カート関連クラス図 (セッション管理)
@@ -384,17 +394,7 @@ classDiagram
 
   
 
-    class CustomerService {
-        +registerCustomer(request): CustomerResponse
-        +authenticate(loginRequest): CustomerResponse
-        +getOrderHistory(customerId): List~OrderSummaryResponse~
-    }
-
-    class CustomerRepository {
-        <<Interface>>
-        +JpaRepository~Member, Integer~
-        +findByEmail(email): Optional~Member~
-    }
+    
 
     %% 継承関係
     User <|-- Guest
@@ -443,7 +443,6 @@ classDiagram
         +registerCustomer(CustomerRegisterRequest) CustomerResponse
         +authenticate(LoginRequest) CustomerResponse
         +updateCustomerInfo(CustomerUpdateRequest) CustomerResponse
-        +getOrderHistory(customerId) List~OrderSummary~
     }
 
     class CustomerRepository {
@@ -498,43 +497,17 @@ classDiagram
         +String phoneNumber
     }
 
-    class Order {
-        <<Entity>>
-        +Integer orderId
-        +Customer customer
-        +String orderEmail
-        +String orderName
-        +String orderPhoneNumber
-        +String orderAddress
-        +BigDecimal totalPrice
-        +BigDecimal shippingFee
-        +String paymentMethod
-        +LocalDateTime orderDate
-        +LocalDateTime createdAt
-        +LocalDateTime updatedAt
-    }
-
-    class OrderSummary {
-        <<DTO>>
-        +Integer orderId
-        +LocalDateTime orderDate
-        +Integer totalAmount
-        +List~OrderItemSummary~ items
-    }
-
-
     %% 関連
     CustomerController --> CustomerService : uses
     CustomerService --> CustomerRepository : uses
     CustomerRepository --> Customer : manages
-    Customer "1" -- "*" Order : places
 
     CustomerController ..> CustomerRegisterRequest : receives
     CustomerController ..> LoginRequest : receives
     CustomerController ..> CustomerUpdateRequest : receives
     CustomerController ..> CustomerResponse : returns
     CustomerService ..> CustomerResponse : creates
-    CustomerService ..> OrderSummary : returns
+
 </div>
 
 ## 4.3. 主要クラス説明
