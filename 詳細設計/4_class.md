@@ -382,11 +382,7 @@ classDiagram
         +JpaRepository~Product, Integer~
     }
 
-    class CustomerController {
-        +register(request): ResponseEntity~CustomerResponse~
-        +login(request): ResponseEntity~CustomerResponse~
-        +logout(): ResponseEntity~Success~
-    }
+  
 
     class CustomerService {
         +registerCustomer(request): CustomerResponse
@@ -526,12 +522,6 @@ classDiagram
         +List~OrderItemSummary~ items
     }
 
-    class OrderItemSummary {
-        <<DTO>>
-        +String productName
-        +Integer quantity
-        +Integer price
-    }
 
     %% 関連
     CustomerController --> CustomerService : uses
