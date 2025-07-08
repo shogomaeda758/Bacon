@@ -579,41 +579,59 @@ classDiagram
 ## 4.3. 主要クラス説明
 
 **Product**  
-商品情報エンティティ（`productId`, `name`, `description`, `price`, `stock`, `imageUrl`, `isRecommended`, `createdAt`, `updatedAt`）
+商品情報エンティティ（`productId`, `name`, `description`, `price`, `stock`, `imageUrl`, `isRecommended`, `createdAt`, `updatedAt`, `category`）
 
 **Order**  
-注文情報エンティティ（`orderId`, `orderNumber`, `orderDate`, `totalAmount`, `customerName`, `shippingAddress`, `shippingPhoneNumber`, `status`, `memberId`, `paymentMethod`, `paymentStatus`, `orderDetails`, `createdAt`, `updatedAt`）
+注文情報エンティティ（`orderId`, `member`, `orderEmail`, `orderName`, `orderPhoneNumber`, `orderAddress`, `totalPrice`, `shippingFee`, `paymentMethod`, `orderDate`, `status`, `isGuest`, `createdAt`, `updatedAt`）
 
 **OrderDetail**  
-注文明細エンティティ（`orderDetailId`, `order`, `product`, `productName`, `price`, `quantity`）
+注文明細エンティティ（`orderDetailId`, `order`, `product`, `quantity`, `unitPrice`, `createdAt`, `updatedAt`）
 
 **Customer**  
-会員情報エンティティ（`customerId`, `name`, `email`, `password`, `address`, `phoneNumber`, `createdAt`, `updatedAt`）
+会員情報エンティティ（`customerId`, `email`, `password`, `lastName`, `firstName`, `phoneNumber`, `address`, `createdAt`, `updatedAt`）
 
-**CartDto**  
-セッション保持用カート情報（`Map<String, CartItemDto> items`, `totalQuantity`, `totalPrice`）
+**Cart**  
+セッション保持用カートオブジェクト（`Map<String, CartItem> items`, `totalQuantity`, `totalPrice`）
 
-**CartItemDto**  
+**CartItem**  
 カート内商品の情報（`id`, `productId`, `name`, `price`, `imageUrl`, `quantity`, `subtotal`）
 
-**OrderRequestDto**  
-注文リクエストDTO（`customerInfo`（非会員用）, `memberId`（会員注文用））
+**OrderRequest**  
+注文リクエストDTO（`customerInfo`, `memberId`, `isGuest`）
 
 **CustomerInfo**  
 非会員向け注文時の顧客情報DTO（`name`, `email`, `address`, `phoneNumber`）
 
-**OrderResponseDto**  
-注文完了レスポンスDTO（`orderId`, `orderNumber`, `orderDate`, `totalAmount`, `status`）
+**OrderResponse**  
+注文完了レスポンスDTO（`orderId`, `orderNumber`, `orderDate`, `totalAmount`, `shippingFee`, `status`）
 
 **CustomerRegisterRequest / LoginRequest / CustomerUpdateRequest**  
-会員登録・ログイン・プロフィール更新用リクエストDTO（`name`, `email`, `password`, `address`, `phoneNumber` など）
+会員登録・ログイン・プロフィール更新用リクエストDTO（`lastName`, `firstName`, `email`, `password`, `address`, `phoneNumber`）
 
-**CustomerResponse**  
-会員情報レスポンスDTO（`customerId`, `name`, `email`, `address`, `phoneNumber`）
+**CustomerRegisterResponse / LoginResponse / CustomerUpdateResponse**  
+会員登録・ログイン・更新時のレスポンスDTO（`customerId`, `lastName`, `firstName`, `email`, `address`, `phoneNumber`, `authToken`, `updatedAt`）
 
-**OrderSummary**  
-注文履歴一覧表示用DTO（`orderId`, `orderDate`, `totalAmount`, `items`）
+**OrderSummaryResponse**  
+注文履歴一覧表示用DTO（`orderId`, `orderDate`, `totalPrice`, `status`）
 
-**OrderItemSummary**  
-注文履歴の商品情報DTO（`productName`, `quantity`, `price`）
+**OrderItemDetailResponse**  
+注文詳細の商品の情報DTO（`productName`, `quantity`, `unitPrice`, `subtotal`）
+
+**OrderPreview**  
+注文確定前のプレビュー表示用DTO（`items`, `subtotal`, `shippingFee`, `totalAmount`, `paymentMethod`, `customerInfo`）
+
+**OrderItemPreview**  
+注文プレビュー時の商品明細DTO（`product`, `quantity`, `unitPrice`）
+
+**ProductListItem**  
+商品一覧用DTO（`productId`, `name`, `price`, `imageUrl`）
+
+**ProductDetail**  
+商品詳細用DTO（`productId`, `name`, `price`, `description`, `stock`, `imageUrl`）
+
+**CartResponse**  
+カート表示用DTO（`items`, `totalQuantity`, `totalPrice`）
+
+**CartItemResponse**  
+カート内商品情報のDTO版（`id`, `productId`, `name`, `price`, `imageUrl`, `quantity`, `subtotal`）
 
