@@ -309,12 +309,48 @@ classDiagram
         +CustomerInfo customerInfo
     }
 
+    class OrderItemPreview {
+        <<DTO>>
+        +Product product
+        +Integer quantity
+        +BigDecimal unitPrice
+    }
+
+    class OrderSummaryResponse {
+        <<DTO>>
+        +Integer orderId
+        +LocalDateTime orderDate
+        +BigDecimal totalPrice
+        +String status
+    }
+
+    class OrderDetailResponse {
+        <<DTO>>
+        +Integer orderId
+        +CustomerInfo customerInfo
+        +LocalDateTime orderDate
+        +BigDecimal shippingFee
+        +BigDecimal totalPrice
+        +String paymentMethod
+        +String status
+        +List~OrderItemDetailResponse~ items
+    }
+
+    class OrderItemDetailResponse {
+        <<DTO>>
+        +String productName
+        +Integer quantity
+        +BigDecimal unitPrice
+        +BigDecimal subtotal
+    }
+
     %% コントローラー・サービス・リポジトリ
     class OrderController {
         +OrderService orderService
         +CartService cartService
         +placeOrder(OrderRequest, HttpSession): ResponseEntity~OrderResponse~
-        +getOrderHistory(memberId: Integer): ResponseEntity~List~OrderResponse~~
+        +getOrderHistory(memberId: Integer): ResponseEntity~List~OrderSummaryResponse~~
+        +getOrderDetail(orderId: Integer): ResponseEntity~OrderDetailResponse~
     }
 
     class OrderService {
@@ -323,7 +359,8 @@ classDiagram
         +ProductRepository productRepository
         +CartService cartService
         +placeOrder(Cart, OrderRequest): OrderResponse
-        +getOrderHistoryByMember(memberId: Integer): List~OrderResponse~
+        +getOrderHistoryByMember(memberId: Integer): List~OrderSummaryResponse~
+        +getOrderDetail(orderId: Integer): OrderDetailResponse
         +calculateShippingFee(address, totalAmount): BigDecimal
     }
 
@@ -354,7 +391,7 @@ classDiagram
     class CustomerService {
         +registerCustomer(request): CustomerResponse
         +authenticate(loginRequest): CustomerResponse
-        +getOrderHistory(customerId): List~OrderResponse~
+        +getOrderHistory(customerId): List~OrderSummaryResponse~
     }
 
     class CustomerRepository {
@@ -391,8 +428,9 @@ classDiagram
     OrderController ..> OrderRequest : receives
     OrderController ..> OrderResponse : returns
     OrderController ..> OrderPreview : returns
-    OrderService ..> OrderResponse : creates
-
+    OrderController ..> OrderSummaryResponse : returns
+    OrderController ..> OrderDetailResponse : returns
+    OrderDetailResponse --> OrderItemDetailResponse : contains
 </div>
 
 ### 4.2.4. 会員登録関連クラス図
