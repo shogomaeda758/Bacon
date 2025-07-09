@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプル雑貨オンライン</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <span class="fs-4">シンプル雑貨オンライン</span>
+            </a>
+            <div class="text-end">
+                <button id="cart-btn" class="btn btn-outline-dark position-relative">
+                    <i class="bi bi-cart"></i> カート
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                        0
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <div id="main-content">
+            <!-- ここにコンテンツが動的に表示される -->
+            <div id="products-container" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+                <!-- 商品リストがここに表示される -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品詳細モーダル -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="productModalBody">
+                    <!-- 商品詳細情報 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- カートモーダル -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ショッピングカート</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="cartModalBody">
+                    <!-- カート内容 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">買い物を続ける</button>
+                    <button type="button" class="btn btn-primary" id="checkout-btn">注文手続きへ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注文フォームモーダル -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">お客様情報入力</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="order-form" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">お名前</label>
+                            <input type="text" class="form-control" id="name" required>
+                            <div class="invalid-feedback">お名前を入力してください</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">メールアドレス</label>
+                            <input type="email" class="form-control" id="email" required>
+                            <div class="invalid-feedback">有効なメールアドレスを入力してください</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">住所</label>
+                            <input type="text" class="form-control" id="address" required>
+                            <div class="invalid-feedback">住所を入力してください</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">電話番号</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                            <div class="invalid-feedback">電話番号を入力してください</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" id="confirm-order-btn">注文を確定する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注文完了モーダル -->
+    <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ご注文ありがとうございます</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderCompleteBody">
+                    <!-- 注文完了メッセージ -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">トップに戻る</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
