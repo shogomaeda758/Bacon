@@ -17,7 +17,7 @@ public class CartService {
     
     private final ProductRepository productRepository;
     
-    
+    @Autowired
     public CartService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
