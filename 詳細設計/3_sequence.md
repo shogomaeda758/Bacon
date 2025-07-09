@@ -36,6 +36,36 @@
 sequenceDiagram
     participant U as ユーザー
     participant B as ブラウザ
+    participant CuC as CustomerController
+    participant S as HttpSession
+
+    # 添削・修正済みシークエンス図 - パッケージ構造対応版
+
+## 🔍 主な問題点と修正
+
+### 1. **DTOの不整合**
+- パッケージ構造に `OrderPreview` が存在しない → `OrderResponseDto` で代用
+- `OrderInput` が存在しない → 削除またはDTOで代用
+
+### 2. **例外処理の問題**
+- `ResourceNotFoundException` は商品・顧客が見つからない場合のみ
+- セッション関連は `IllegalStateException` が適切
+
+### 3. **Controller略語の不統一**
+- `CartC` → `CC` に統一（CustomerControllerと重複回避）
+
+### 4. **不足しているDTO**
+- `OrderSummaryDto` → `OrderSummary` (パッケージ構造通り)
+- `OrderItemSummaryDto` → `OrderItemSummary` (パッケージ構造通り)
+
+---
+
+## 3.2.1. 商品一覧表示フロー
+
+```mermaid
+sequenceDiagram
+    participant U as ユーザー
+    participant B as ブラウザ
     participant PC as ProductController
     participant PS as ProductService
     participant PR as ProductRepository
@@ -50,13 +80,13 @@ sequenceDiagram
     alt 正常処理
         DB-->>PR: Product[]
         PR-->>PS: Product[]
-        PS-->>PC: ProductListItem[]
-        PC-->>B: ResponseEntity<List<ProductListItem>>
+        PS-->>PC: ProductListItemDto[]
+        PC-->>B: ResponseEntity<List<ProductListItemDto>>
         B-->>U: 商品一覧画面表示
     else DBエラー
         DB-->>PR: SQLException
         PR-->>PS: DataAccessException
-        PS-->>PC: ServiceException
+        PS-->>PC: ResourceNotFoundException
         PC-->>B: ResponseEntity<ErrorResponse>(500)
         B-->>U: システムエラー画面表示
     end
@@ -84,11 +114,11 @@ sequenceDiagram
     alt 正常処理
         DB-->>PR: Product[]
         PR-->>PS: Product[]
-        PS-->>PC: ProductListItem[]
-        PC-->>B: ResponseEntity<List<ProductListItem>>
+        PS-->>PC: ProductListItemDto[]
+        PC-->>B: ResponseEntity<List<ProductListItemDto>>
         B-->>U: カテゴリ別商品一覧表示
     else 不正カテゴリID
-        PS-->>PC: IllegalArgumentException
+        PS-->>PC: ValidationException
         PC-->>B: ResponseEntity<ErrorResponse>(400)
         B-->>U: 不正な要求エラー表示
     end
@@ -115,8 +145,8 @@ sequenceDiagram
     alt 正常処理
         DB-->>PR: Product[]
         PR-->>PS: Product[]
-        PS-->>PC: ProductListItem[]
-        PC-->>B: ResponseEntity<List<ProductListItem>>
+        PS-->>PC: ProductListItemDto[]
+        PC-->>B: ResponseEntity<List<ProductListItemDto>>
         B-->>U: 検索結果表示
     else 空の検索ワード
         PS-->>PC: ValidationException
@@ -141,11 +171,20 @@ sequenceDiagram
     PC->>PS: findProductById(productId)
     PS->>PR: findById(productId)
     PR->>DB: SELECT * FROM PRODUCT WHERE product_id = ?
-    DB-->>PR: Product
-    PR-->>PS: Product
-    PS-->>PC: ProductDetail
-    PC-->>B: ResponseEntity<ProductDetail>
-    B-->>U: 商品詳細画面表示
+    
+    alt 正常処理
+        DB-->>PR: Product
+        PR-->>PS: Product
+        PS-->>PC: ProductDetailDto
+        PC-->>B: ResponseEntity<ProductDetailDto>
+        B-->>U: 商品詳細画面表示
+    else 商品不存在
+        DB-->>PR: null
+        PR-->>PS: null
+        PS-->>PC: ResourceNotFoundException
+        PC-->>B: ResponseEntity<ErrorResponse>(404)
+        B-->>U: 商品が見つからないエラー表示
+    end
 ```
 
 ### 3.2.5. カート追加フロー
@@ -162,8 +201,8 @@ sequenceDiagram
 
     U->>B: 「カートに追加」ボタン押下
     B->>CC: POST /api/cart/add
-    Note over B,CC: {productId: 1, quantity: 2}
-    CC->>CS: addItemToCart(productId, quantity, session)
+    Note over B,CC: CartItemInfo{productId: 1, quantity: 2}
+    CC->>CS: addItemToCart(cartItemInfo, session)
     CS->>PR: findById(productId)
     PR->>DB: SELECT * FROM PRODUCT WHERE product_id = ?
     
@@ -173,21 +212,21 @@ sequenceDiagram
         CS->>CS: 在庫確認
         alt 在庫十分
             CS->>S: セッションからカート取得
-            S-->>CS: Cart or null
+            S-->>CS: CartDto or null
             CS->>CS: カートに商品追加・計算
             CS->>S: 更新されたカートを保存
-            CS-->>CC: Cart
-            CC-->>B: ResponseEntity<Cart>
+            CS-->>CC: CartDto
+            CC-->>B: ResponseEntity<CartDto>
             B-->>U: カート更新成功メッセージ
         else 在庫不足
-            CS-->>CC: InsufficientStockException
+            CS-->>CC: ValidationException
             CC-->>B: ResponseEntity<ErrorResponse>(400)
             B-->>U: 在庫不足エラー表示
         end
     else 商品不存在
         DB-->>PR: null
         PR-->>CS: null
-        CS-->>CC: ProductNotFoundException
+        CS-->>CC: ResourceNotFoundException
         CC-->>B: ResponseEntity<ErrorResponse>(404)
         B-->>U: 商品が見つからないエラー表示
     end
@@ -210,13 +249,13 @@ sequenceDiagram
     CS->>S: セッションからカート取得
     
     alt セッション有効
-        S-->>CS: Cart
-        CS-->>CC: Cart
-        CC-->>B: ResponseEntity<Cart>
+        S-->>CS: CartDto
+        CS-->>CC: CartDto
+        CC-->>B: ResponseEntity<CartDto>
         B-->>U: カート内容表示
     else セッション無効
         S-->>CS: null
-        CS-->>CC: SessionExpiredException
+        CS-->>CC: IllegalStateException
         CC-->>B: ResponseEntity<ErrorResponse>(401)
         B-->>U: セッション切れエラー・ログイン画面表示
     end
@@ -224,19 +263,19 @@ sequenceDiagram
     Note over U,S: 数量変更
     U->>B: 数量変更
     B->>CC: PUT /api/cart/items/{itemId}
-    Note over B,CC: {quantity: 3}
+    Note over B,CC: CartItemQuantityDto{quantity: 3}
     CC->>CS: updateItemQuantity(itemId, quantity, session)
     CS->>S: セッションからカート取得
     
     alt 正常処理
-        S-->>CS: Cart
+        S-->>CS: CartDto
         CS->>CS: 数量更新・再計算
         CS->>S: 更新されたカートを保存
-        CS-->>CC: Cart
-        CC-->>B: ResponseEntity<Cart>
+        CS-->>CC: CartDto
+        CC-->>B: ResponseEntity<CartDto>
         B-->>U: カート内容更新表示
     else 不正数量
-        CS-->>CC: IllegalArgumentException
+        CS-->>CC: ValidationException
         CC-->>B: ResponseEntity<ErrorResponse>(400)
         B-->>U: 不正な数量エラー表示
     end
@@ -258,25 +297,35 @@ sequenceDiagram
     CS->>S: セッションからカート取得
 
     alt カート存在
-        S-->>CS: Cart
-        CS-->>OC: Cart
+        S-->>CS: CartDto
+        CS-->>OC: CartDto
 
         OC->>S: セッションから customerId 取得
         S-->>OC: customerId
 
-        OC->>CuS: getCustomerById(customerId)
-        CuS-->>OC: CustomerResponse (氏名・住所等)
-
-        alt カート空でない
-            OC-->>B: ResponseEntity<Cart + CustomerResponse>
-            B-->>U: 注文情報入力画面表示（自動入力）
-        else カート空
-            OC-->>B: ResponseEntity<ErrorResponse>(400)
-            B-->>U: カートが空エラー表示
+        alt 会員ログイン中
+            OC->>CuS: getCustomerById(customerId)
+            CuS-->>OC: CustomerResponseDto (氏名・住所等)
+            
+            alt カート空でない
+                OC-->>B: ResponseEntity<CartDto + CustomerResponseDto>
+                B-->>U: 注文情報入力画面表示（自動入力）
+            else カート空
+                OC-->>B: ResponseEntity<ErrorResponse>(400)
+                B-->>U: カートが空エラー表示
+            end
+        else 非会員
+            alt カート空でない
+                OC-->>B: ResponseEntity<CartDto>
+                B-->>U: 注文情報入力画面表示（空白フォーム）
+            else カート空
+                OC-->>B: ResponseEntity<ErrorResponse>(400)
+                B-->>U: カートが空エラー表示
+            end
         end
     else セッション無効
         S-->>CS: null
-        CS-->>OC: SessionExpiredException
+        CS-->>OC: IllegalStateException
         OC-->>B: ResponseEntity<ErrorResponse>(401)
         B-->>U: セッション切れエラー表示
     end
@@ -284,15 +333,14 @@ sequenceDiagram
     U->>B: 注文者情報入力（自動入力された内容を確認・修正）
     Note over U,B: 氏名、住所、電話番号、支払い方法等
     B->>OC: POST /api/order/preview
-    Note over B,OC: OrderRequest（customerInfo含む）
+    Note over B,OC: OrderRequestDto（CustomerInfo含む）
     OC->>CS: getCartFromSession(session)
     CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS-->>OC: Cart
+    S-->>CS: CartDto
+    CS-->>OC: CartDto
     OC->>OC: 送料計算
-    OC-->>B: ResponseEntity<OrderPreview>
+    OC-->>B: ResponseEntity<OrderResponseDto>
     B-->>U: 注文内容確認画面表示
-
 ```
 
 ### 3.2.8. 注文確認・確定フロー
@@ -312,12 +360,12 @@ sequenceDiagram
 
     U->>B: 「注文確定」ボタン押下
     B->>OC: POST /api/order/confirm
-    Note over B,OC: {customerInfo: {...}}
+    Note over B,OC: OrderRequestDto{customerInfo: {...}}
     OC->>CS: getCartFromSession(session)
     CS->>S: セッションからカート取得
-    S-->>CS: Cart
-    CS-->>OC: Cart
-    OC->>OS: placeOrder(cart, orderRequest)
+    S-->>CS: CartDto
+    CS-->>OC: CartDto
+    OC->>OS: placeOrder(cartDto, orderRequestDto)
     
     OS->>DB: BEGIN TRANSACTION
     OS->>OR: save(order)
@@ -339,8 +387,8 @@ sequenceDiagram
     OS->>DB: COMMIT
     OS->>CS: clearCart(session)
     CS->>S: セッションからカート削除
-    OS-->>OC: OrderResponse
-    OC-->>B: ResponseEntity<OrderResponse>
+    OS-->>OC: OrderResponseDto
+    OC-->>B: ResponseEntity<OrderResponseDto>
     B-->>U: 注文完了画面表示
 ```
 ### 3.2.9. 非会員購入フロー**
@@ -357,34 +405,35 @@ sequenceDiagram
     Note over U,S: 商品閲覧〜カート追加
     U->>B: 商品一覧閲覧
     B->>PC: GET /api/products/all
-    PC-->>B: ProductList
+    PC-->>B: List<ProductListItemDto>
     B-->>U: 商品一覧表示
     
     U->>B: 商品選択
     B->>PC: GET /api/products/{productId}
-    PC-->>B: ProductDetail
+    PC-->>B: ProductDetailDto
     B-->>U: 商品詳細表示
     
     U->>B: カートに追加
     B->>CC: POST /api/cart/add
     CC->>S: セッションでカート管理
-    CC-->>B: Cart
+    CC-->>B: CartDto
     B-->>U: カート追加完了
     
     Note over U,S: 注文手続き
     U->>B: 注文手続きへ
     B->>OC: GET /api/order/input
-    OC-->>B: OrderInput
+    OC-->>B: CartDto
     B-->>U: 注文情報入力画面
     
     U->>B: 顧客情報入力（非会員）
     B->>OC: POST /api/order/preview
-    OC-->>B: OrderPreview
+    Note over B,OC: OrderRequestDto{customerInfo: CustomerInfo{...}}
+    OC-->>B: OrderResponseDto
     B-->>U: 注文確認画面
     
     U->>B: 注文確定
     B->>OC: POST /api/order/confirm
-    OC-->>B: OrderResponse
+    OC-->>B: OrderResponseDto
     B-->>U: 注文完了画面
 ```
 
@@ -394,45 +443,47 @@ sequenceDiagram
 sequenceDiagram
     participant U as ユーザー
     participant B as ブラウザ
-    participant CC as CustomerController
+    participant CuC as CustomerController
     participant PC as ProductController
-    participant CaC as CartController
+    participant CC as CartController
     participant OC as OrderController
     participant S as HttpSession
 
     Note over U,S: ログイン
     U->>B: ログイン
-    B->>CC: POST /api/login
-    CC->>S: セッションに会員情報保存
-    CC-->>B: CustomerResponse
+    B->>CuC: POST /api/login
+    Note over B,CuC: LoginRequestDto{email, password}
+    CuC->>S: セッションに会員情報保存
+    CuC-->>B: CustomerResponseDto
     B-->>U: ログイン成功
     
     Note over U,S: 商品閲覧〜カート追加
     U->>B: 商品閲覧・選択
     B->>PC: GET /api/products/{productId}
-    PC-->>B: ProductDetail
+    PC-->>B: ProductDetailDto
     B-->>U: 商品詳細表示
     
     U->>B: カートに追加
-    B->>CaC: POST /api/cart/add
-    CaC-->>B: Cart
+    B->>CC: POST /api/cart/add
+    CC-->>B: CartDto
     B-->>U: カート追加完了
     
     Note over U,S: 注文手続き（会員情報自動入力）
     U->>B: 注文手続きへ
     B->>OC: GET /api/order/input
     OC->>S: セッションから会員情報取得
-    OC-->>B: OrderInput (会員情報自動入力)
+    OC-->>B: CartDto + CustomerResponseDto (会員情報自動入力)
     B-->>U: 注文情報入力画面（自動入力済み）
     
     U->>B: 配送先・支払い方法確認/修正
     B->>OC: POST /api/order/preview
-    OC-->>B: OrderPreview
+    Note over B,OC: OrderRequestDto{customerInfo: CustomerInfo{...}}
+    OC-->>B: OrderResponseDto
     B-->>U: 注文確認画面
     
     U->>B: 注文確定
     B->>OC: POST /api/order/confirm
-    OC-->>B: OrderResponse
+    OC-->>B: OrderResponseDto
     B-->>U: 注文完了画面
 ```
 ### 3.2.11. 注文完了・通知フロー
@@ -443,20 +494,16 @@ sequenceDiagram
     participant B as ブラウザ
     participant OC as OrderController
     participant OS as OrderService
-    participant ES as EmailService
-    participant MS as MailServer
 
-    Note over U,MS: 注文確定後の処理
-    OS->>ES: sendOrderConfirmationEmail(order)
-    ES->>MS: メール送信
-    MS-->>ES: 送信完了
-    ES-->>OS: 送信結果
+    Note over U,OS: 注文確定後の処理
+    OS->>OS: sendOrderConfirmationEmail(order)
+    Note over OS: メール送信処理（外部サービス連携）
     
     B-->>U: 注文完了画面表示
     Note over B,U: 注文番号、注文日時、合計金額等
     
-    Note over U,MS: メール通知
-    MS->>U: 注文確認メール送信
+    Note over U,OS: メール通知
+    OS->>U: 注文確認メール送信
 ```
 
 
@@ -466,7 +513,7 @@ sequenceDiagram
 sequenceDiagram
     participant U as ユーザー
     participant B as ブラウザ
-    participant CC as CustomerController
+    participant CuC as CustomerController
     participant CS as CustomerService
     participant CR as CustomerRepository
     participant DB as データベース
@@ -475,9 +522,9 @@ sequenceDiagram
     B-->>U: 会員登録画面表示
     
     U->>B: 会員情報入力・送信
-    B->>CC: POST /api/register
-    Note over B,CC: {name, email, password, address, phoneNumber}
-    CC->>CS: registerCustomer(request)
+    B->>CuC: POST /api/register
+    Note over B,CuC: CustomerRegisterRequestDto{name, email, password, address, phoneNumber}
+    CuC->>CS: registerCustomer(customerRegisterRequestDto)
     CS->>CR: findByEmail(email)
     CR->>DB: SELECT * FROM CUSTOMER WHERE email = ?
     DB-->>CR: Customer or null
@@ -489,12 +536,12 @@ sequenceDiagram
         CR->>DB: INSERT INTO CUSTOMER
         DB-->>CR: Customer (with customerId)
         CR-->>CS: Customer
-        CS-->>CC: CustomerResponse
-        CC-->>B: ResponseEntity<CustomerResponse>
+        CS-->>CuC: CustomerResponseDto
+        CuC-->>B: ResponseEntity<CustomerResponseDto>
         B-->>U: 登録完了画面表示
     else メールアドレス重複あり
-        CS-->>CC: エラー (メールアドレス重複)
-        CC-->>B: ResponseEntity<Error>
+        CS-->>CuC: ValidationException (メールアドレス重複)
+        CuC-->>B: ResponseEntity<ErrorResponse>(400)
         B-->>U: エラーメッセージ表示
     end
 ```
@@ -505,7 +552,7 @@ sequenceDiagram
 sequenceDiagram
     participant U as ユーザー
     participant B as ブラウザ
-    participant CC as CustomerController
+    participant CuC as CustomerController
     participant CS as CustomerService
     participant CR as CustomerRepository
     participant S as HttpSession
@@ -515,9 +562,9 @@ sequenceDiagram
     B-->>U: ログイン画面表示
     
     U->>B: メールアドレス・パスワード入力
-    B->>CC: POST /api/login
-    Note over B,CC: {email, password}
-    CC->>CS: authenticate(loginRequest)
+    B->>CuC: POST /api/login
+    Note over B,CuC: LoginRequestDto{email, password}
+    CuC->>CS: authenticate(loginRequestDto)
     CS->>CR: findByEmail(email)
     CR->>DB: SELECT * FROM CUSTOMER WHERE email = ?
     DB-->>CR: Customer or null
@@ -526,12 +573,12 @@ sequenceDiagram
     alt 会員存在 and パスワード一致
         CS->>CS: パスワード検証
         CS->>S: セッションに会員情報保存
-        CS-->>CC: CustomerResponse
-        CC-->>B: ResponseEntity<CustomerResponse>
+        CS-->>CuC: CustomerResponseDto
+        CuC-->>B: ResponseEntity<CustomerResponseDto>
         B-->>U: ログイン成功・マイページ表示
     else 認証失敗
-        CS-->>CC: エラー (認証失敗)
-        CC-->>B: ResponseEntity<Error>
+        CS-->>CuC: ValidationException (認証失敗)
+        CuC-->>B: ResponseEntity<ErrorResponse>(401)
         B-->>U: エラーメッセージ表示
     end
 ```
@@ -583,8 +630,8 @@ sequenceDiagram
         ODR-->>CS: OrderDetail[]
     end
     
-    CS-->>CC: OrderSummary[]
-    CC-->>B: ResponseEntity<List<OrderSummary>>
+    CS-->>CC: List<OrderSummaryDto>
+    CC-->>B: ResponseEntity<List<OrderSummaryDto>>
     B-->>U: 注文履歴一覧表示
 ```
 
@@ -593,9 +640,11 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+sequenceDiagram
     participant U as ユーザー
     participant B as ブラウザ
     participant OC as OrderController
+    participant OS as OrderService
 
     U->>B: 注文情報入力画面表示
     B-->>U: 支払い方法選択肢表示
@@ -603,8 +652,10 @@ sequenceDiagram
     
     U->>B: 支払い方法選択
     B->>OC: POST /api/order/preview
-    Note over B,OC: {paymentMethod: "cash"}
-    OC->>OC: 支払い方法検証
+    Note over B,OC: OrderRequestDto{paymentMethod: "cash"}
+    OC->>OS: validatePaymentMethod(paymentMethod)
+    OS->>OS: 支払い方法検証
+    OS-->>OC: 検証結果
     OC-->>B: ResponseEntity<OrderPreview>
     B-->>U: 選択した支払い方法反映
 ```
@@ -620,7 +671,7 @@ sequenceDiagram
 
     U->>B: 配送先住所入力
     B->>OC: POST /api/order/preview
-    Note over B,OC: {customerInfo: {address: "..."}}
+    Note over B,OC: OrderRequestDto{customerInfo: CustomerInfo{address: "..."}}
     OC->>OS: calculateShippingFee(address, totalAmount)
     OS->>OS: 配送料計算ロジック
     Note over OS: 地域別・金額別送料計算

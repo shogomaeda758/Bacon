@@ -4,7 +4,7 @@
 **商品関連 DTO**
 
 ```java
-// 商品一覧用
+// 商品一覧用 DTO
 public class ProductListItem {
     private Integer productId;
     private String name;
@@ -24,8 +24,8 @@ public class ProductListItem {
     public String getImageUrl() { return imageUrl; }
 }
 
-// 商品詳細用
-public class ProductDetail {
+// 商品詳細用 DTO
+public class ProductDetailResponse {
     private Integer productId;
     private String name;
     private Integer price;
@@ -33,7 +33,7 @@ public class ProductDetail {
     private Integer stock;
     private String imageUrl;
 
-    public ProductDetail(Integer productId, String name, Integer price, String description, Integer stock, String imageUrl) {
+    public ProductDetailResponse(Integer productId, String name, Integer price, String description, Integer stock, String imageUrl) {
         this.productId = productId;
         this.name = name;
         this.price = price;
@@ -49,12 +49,12 @@ public class ProductDetail {
     public Integer getStock() { return stock; }
     public String getImageUrl() { return imageUrl; }
 }
+
 ```
 **カート関連 DTO** 
 
 ```java
-
-// カート全体 (セッション格納/APIレスポンス用)
+// カート全体（セッション・レスポンス用）
 public class Cart {
     private Map<String, CartItem> items = new LinkedHashMap<>();
     private int totalQuantity;
@@ -104,7 +104,7 @@ public class Cart {
     }
 }
 
-// カート内商品 (セッション格納/APIレスポンス用)
+// カート内アイテム
 public class CartItem {
     private String id;
     private Integer productId;
@@ -141,8 +141,7 @@ public class CartItem {
         this.subtotal = price * quantity;
     }
 }
-
-// カート追加APIリクエスト用
+// カート商品追加リクエスト用
 public class CartItemInfo {
     @NotNull
     private Integer productId;
@@ -158,7 +157,7 @@ public class CartItemInfo {
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 }
 
-// カート数量更新APIリクエスト用
+// 数量更新用
 public class CartItemQuantityDto {
     @NotNull
     @Min(1)
@@ -167,22 +166,31 @@ public class CartItemQuantityDto {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 }
+
+
 ```
 **注文関連 DTO**
 
 ```java
-
-// 注文APIリクエスト用
+// 注文リクエストDTO
 public class OrderRequest {
     @Valid
-    @NotNull
     private CustomerInfo customerInfo;
+
+    private Integer memberId;
+    private Boolean isGuest;
 
     public CustomerInfo getCustomerInfo() { return customerInfo; }
     public void setCustomerInfo(CustomerInfo customerInfo) { this.customerInfo = customerInfo; }
+
+    public Integer getMemberId() { return memberId; }
+    public void setMemberId(Integer memberId) { this.memberId = memberId; }
+
+    public Boolean getIsGuest() { return isGuest; }
+    public void setIsGuest(Boolean isGuest) { this.isGuest = isGuest; }
 }
 
-// 注文APIリクエスト内の顧客情報用 (非会員用)
+// 顧客情報（非会員）
 public class CustomerInfo {
     @NotBlank
     private String name;
@@ -210,18 +218,146 @@ public class CustomerInfo {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 }
 
-// 注文APIレスポンス用
+// 注文完了レスポンスDTO
 public class OrderResponse {
     private Integer orderId;
+    private String orderNumber;
     private LocalDateTime orderDate;
+    private BigDecimal totalAmount;
+    private BigDecimal shippingFee;
+    private String status;
 
-    public OrderResponse(Integer orderId, LocalDateTime orderDate) {
+    public OrderResponse(Integer orderId, String orderNumber, LocalDateTime orderDate, BigDecimal totalAmount, BigDecimal shippingFee, String status) {
+        this.orderId = orderId;
+        this.orderNumber = orderNumber;
+        this.orderDate = orderDate;
+        this.totalAmount = totalAmount;
+        this.shippingFee = shippingFee;
+        this.status = status;
+    }
+
+    public Integer getOrderId() { return orderId; }
+    public String getOrderNumber() { return orderNumber; }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public BigDecimal getShippingFee() { return shippingFee; }
+    public String getStatus() { return status; }
+}
+
+// 注文履歴一覧表示用DTO
+public class OrderSummaryResponse {
+    private Integer orderId;
+    private LocalDateTime orderDate;
+    private BigDecimal totalPrice;
+    private String status;
+
+    public OrderSummaryResponse(Integer orderId, LocalDateTime orderDate, BigDecimal totalPrice, String status) {
         this.orderId = orderId;
         this.orderDate = orderDate;
+        this.totalPrice = totalPrice;
+        this.status = status;
     }
 
     public Integer getOrderId() { return orderId; }
     public LocalDateTime getOrderDate() { return orderDate; }
+
+// 注文明細の商品情報DTO
+public class OrderItemDetailResponse {
+    private String productName;
+    private Integer quantity;
+    private BigDecimal unitPrice;
+    private BigDecimal subtotal;
+
+    public OrderItemDetailResponse(String productName, Integer quantity, BigDecimal unitPrice, BigDecimal subtotal) {
+        this.productName = productName;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.subtotal = subtotal;
+    }
+
+    public String getProductName() { return productName; }
+    public Integer getQuantity() { return quantity; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public BigDecimal getSubtotal() { return subtotal; }
 }
+
+// 注文詳細画面全体のレスポンスDTO
+public class OrderDetailResponse {
+    private Integer orderId;
+    private CustomerInfo customerInfo;
+    private LocalDateTime orderDate;
+    private BigDecimal shippingFee;
+    private BigDecimal totalPrice;
+    private String paymentMethod;
+    private String status;
+    private List<OrderItemDetailResponse> items;
+
+    public OrderDetailResponse(Integer orderId, CustomerInfo customerInfo, LocalDateTime orderDate, BigDecimal shippingFee,
+                               BigDecimal totalPrice, String paymentMethod, String status, List<OrderItemDetailResponse> items) {
+        this.orderId = orderId;
+        this.customerInfo = customerInfo;
+        this.orderDate = orderDate;
+        this.shippingFee = shippingFee;
+        this.totalPrice = totalPrice;
+        this.paymentMethod = paymentMethod;
+        this.status = status;
+        this.items = items;
+    }
+
+    public Integer getOrderId() { return orderId; }
+    public CustomerInfo getCustomerInfo() { return customerInfo; }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public BigDecimal getShippingFee() { return shippingFee; }
+    public BigDecimal getTotalPrice() { return totalPrice; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public String getStatus() { return status; }
+    public List<OrderItemDetailResponse> getItems() { return items; }
+}
+
+// 注文プレビュー画面用DTO
+public class OrderPreview {
+    private List<OrderItemPreview> items;
+    private BigDecimal subtotal;
+    private BigDecimal shippingFee;
+    private BigDecimal totalAmount;
+    private String paymentMethod;
+    private CustomerInfo customerInfo;
+
+    public OrderPreview(List<OrderItemPreview> items, BigDecimal subtotal, BigDecimal shippingFee,
+                        BigDecimal totalAmount, String paymentMethod, CustomerInfo customerInfo) {
+        this.items = items;
+        this.subtotal = subtotal;
+        this.shippingFee = shippingFee;
+        this.totalAmount = totalAmount;
+        this.paymentMethod = paymentMethod;
+        this.customerInfo = customerInfo;
+    }
+
+    public List<OrderItemPreview> getItems() { return items; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public BigDecimal getShippingFee() { return shippingFee; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public CustomerInfo getCustomerInfo() { return customerInfo; }
+}
+
+// 注文プレビュー用の各商品情報DTO
+public class OrderItemPreview {
+    private ProductListItem product;
+    private Integer quantity;
+    private BigDecimal unitPrice;
+
+    public OrderItemPreview(ProductListItem product, Integer quantity, BigDecimal unitPrice) {
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
+
+    public ProductListItem getProduct() { return product; }
+    public Integer getQuantity() { return quantity; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+}
+
+```
 
 
