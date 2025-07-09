@@ -27,7 +27,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
 
-    @Autowired
+   
     public OrderService(
             OrderRepository orderRepository,
             OrderDetailRepository orderDetailRepository,
