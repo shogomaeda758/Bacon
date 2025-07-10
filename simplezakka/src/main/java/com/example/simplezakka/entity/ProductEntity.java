@@ -1,16 +1,20 @@
-package com.example.simplezakka.entity;
+// ===============================
+// Product Entity
+// ===============================
+package com.example.ecsite.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "products")
 @Data
 @NoArgsConstructor
-public class Product {
+public class ProductEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +26,8 @@ public class Product {
     @Column(length = 1000)
     private String description;
     
-    @Column(nullable = false)
-    private Integer price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
     
     @Column(nullable = false)
     private Integer stock;
@@ -31,6 +35,10 @@ public class Product {
     private String imageUrl;
     
     private Boolean isRecommended;
+    
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryEntity category;
     
     private LocalDateTime createdAt;
     

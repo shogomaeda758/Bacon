@@ -1,6 +1,6 @@
 package com.example.simplezakka.config;
 
-import com.example.simplezakka.entity.Product;
+import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -30,7 +30,7 @@ public class DataLoader implements CommandLineRunner {
             return; // すでにデータが存在する場合はスキップ
         }
 
-        List<Product> products = Arrays.asList(
+        List<ProductEntity> products = Arrays.asList(
             createProduct(
                 "シンプルデスクオーガナイザー", 
                 "机の上をすっきり整理できる木製オーガナイザー。ペン、メモ、スマートフォンなどを収納できます。", 
@@ -116,8 +116,8 @@ public class DataLoader implements CommandLineRunner {
         productRepository.saveAll(products);
     }
     
-    private Product createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended) {
-        Product product = new Product();
+    private ProductEntity createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended) {
+        ProductEntity product = new ProductEntity();
         product.setName(name);
         product.setDescription(description);
         product.setPrice(price);
