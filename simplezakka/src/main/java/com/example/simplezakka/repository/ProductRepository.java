@@ -1,9 +1,9 @@
 // =============================================================================
 // ProductRepository.java
 // =============================================================================
-package com.example.ecsite.repository;
+package com.example.simplezakka.repository;
 
-import com.example.ecsite.entity.Product;
+import com.example.simplezakka.entity.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
