@@ -1,5 +1,7 @@
 package com.example.simplezakka.dto.product;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDetail {
+    public ProductDetail(Integer productId2, String name2, BigDecimal price2, String description2, Integer stock2,
+            String imageUrl2) {
+        //TODO Auto-generated constructor stub
+    }
     private Integer productId;
     private String name;
     private Integer price;

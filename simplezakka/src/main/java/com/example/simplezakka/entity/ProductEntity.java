@@ -54,4 +54,9 @@ public class ProductEntity {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public void setPrice(Integer price2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
+    }
 }
