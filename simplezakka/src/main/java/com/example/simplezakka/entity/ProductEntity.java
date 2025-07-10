@@ -1,7 +1,7 @@
 // ===============================
 // Product Entity
 // ===============================
-package com.example.ecsite.entity;
+package com.example.simplezakka.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.example.simplezakka.entity.CategoryEntity; 
 
 @Entity
 @Table(name = "products")
@@ -38,7 +40,7 @@ public class ProductEntity {
     
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private CategoryEntity category;
     
     private LocalDateTime createdAt;
     
