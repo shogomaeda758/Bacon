@@ -7,7 +7,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "categories")
@@ -15,25 +17,27 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CategoryEntity {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer categoryId;
-    
+   
     @Column(nullable = false)
     private String categoryName;
-    
+   
     private LocalDateTime createdAt;
-    
+   
     private LocalDateTime updatedAt;
-    
+   
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-    
+   
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 }
+

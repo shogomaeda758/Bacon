@@ -1,9 +1,9 @@
 // =============================================================================
 // CategoryRepository.java
 // =============================================================================
-package com.example.ecsite.repository;
+package com.example.simplezakka.repository;
 
-import com.example.ecsite.entity.Category;
+import com.example.simplezakka.entity.CategoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,10 +14,10 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
     
     // カテゴリ名による検索
-    Optional<Category> findByCategoryName(String categoryName);
+    Optional<CategoryEntity> findByCategoryName(String categoryName);
     
     // 全カテゴリを作成日時順で取得
-    List<Category> findAllByOrderByCreatedAtAsc();
+    List<CategoryEntity> findAllByOrderByCreatedAtAsc();
     
     // カテゴリ名の重複チェック
     boolean existsByCategoryName(String categoryName);
