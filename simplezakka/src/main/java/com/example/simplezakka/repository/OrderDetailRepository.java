@@ -1,10 +1,10 @@
 // =============================================================================
 // OrderDetailRepository.java
 // =============================================================================
-package com.example.ecsite.repository;
+package com.example.simplezakka.repository;
 
-import com.example.ecsite.entity.OrderDetail;
-import com.example.ecsite.entity.Order;
+import com.example.simplezakka.entity.OrderDetailEntity;
+import com.example.simplezakka.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +16,7 @@ import java.util.List;
 public interface OrderDetailRepository extends JpaRepository<OrderDetailEntity, Integer> {
     
     // 注文IDによる注文明細取得
-    List<OrderDetailEntity> findByOrderOrderByOrderDetailIdAsc(Order order);
+    List<OrderDetailEntity> findByOrderOrderByOrderDetailIdAsc(OrderEntity order);
     
     // 注文IDによる注文明細取得（Order entityを使わない版）
     @Query("SELECT od FROM OrderDetail od WHERE od.order.orderId = :orderId ORDER BY od.orderDetailId ASC")

@@ -2,7 +2,7 @@ package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.Cart;
 import com.example.simplezakka.dto.cart.CartItem;
-import com.example.simplezakka.entity.Product;
+import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,10 @@ public class CartService {
     }
     
     public Cart addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-        Optional<Product> productOpt = productRepository.findById(productId);
+        Optional<ProductEntity> productOpt = productRepository.findById(productId);
         
         if (productOpt.isPresent()) {
-            Product product = productOpt.get();
+            ProductEntity product = productOpt.get();
             Cart cart = getCartFromSession(session);
             
             CartItem item = new CartItem();
