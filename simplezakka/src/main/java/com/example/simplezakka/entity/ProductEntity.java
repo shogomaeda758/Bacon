@@ -27,7 +27,7 @@ public class ProductEntity {
     private String description;
     
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    private Integer price;
     
     @Column(nullable = false)
     private Integer stock;
