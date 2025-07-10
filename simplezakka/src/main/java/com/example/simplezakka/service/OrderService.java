@@ -109,8 +109,7 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        // 送料の計算と設定 (小計のみを考慮)
-        // 送料の計算と設定 (小計のみを考慮)
+        // 送料の計算と設定 (小計のみを考慮) 
         BigDecimal subtotal = BigDecimal.valueOf(cart.getTotalPrice()); //カート内の商品の合計金額(/intをBigDecimalに変換  )
         BigDecimal shippingFee = calculateShippingFee(subtotal);
         order.setShippingFee(shippingFee);
