@@ -1,7 +1,7 @@
 // ===============================
 // Customer Entity
 // ===============================
-package com.example.ecsite.entity;
+package com.example.simplezakka.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "customers")
 @Data
 @NoArgsConstructor
-public class Customer {
+public class CustomerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +30,7 @@ public class Customer {
     @Column(nullable = false)
     private String lastName;
     
-    @Column(nullable = 'false')
+    @Column(nullable = false)
     private String firstName;
     
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class Customer {
     private String address;
     
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
+    private List<OrderEntity> orders = new ArrayList<>();
     
     private LocalDateTime createdAt;
     
@@ -58,7 +58,7 @@ public class Customer {
     }
     
     // Helper method to add order
-    public void addOrder(Order order) {
+    public void addOrder(OrderEntity order) {
         orders.add(order);
         order.setCustomer(this);
     }
