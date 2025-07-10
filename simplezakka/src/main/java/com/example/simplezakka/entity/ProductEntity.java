@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.example.simplezakka.entity.CategoryEntity; 
-
 @Entity
 @Table(name = "products")
 @Data
