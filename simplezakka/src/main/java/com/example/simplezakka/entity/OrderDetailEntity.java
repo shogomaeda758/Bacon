@@ -2,6 +2,7 @@
 // OrderDetail Entity
 // ===============================
 package com.example.simplezakka.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

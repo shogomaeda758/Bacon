@@ -5,9 +5,9 @@ import com.example.simplezakka.dto.cart.CartItem;
 import com.example.simplezakka.dto.order.CustomerInfo;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.entity.Order;
-import com.example.simplezakka.entity.OrderDetail;
-import com.example.simplezakka.entity.Product;
+import com.example.simplezakka.entity.OrderEntity;
+import com.example.simplezakka.entity.OrderDetailEntity;
+import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.OrderDetailRepository;
 import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
@@ -47,14 +47,14 @@ public class OrderService {
 
         // 在庫確認
         for (CartItem cartItem : cart.getItems().values()) {
-            Optional<Product> productOpt = productRepository.findById(cartItem.getProductId());
+            Optional<ProductEntity> productOpt = productRepository.findById(cartItem.getProductId());
             if (productOpt.isEmpty() || productOpt.get().getStock() < cartItem.getQuantity()) {
                 throw new RuntimeException("在庫不足または商品未存在: " + cartItem.getName());
             }
         }
 
         // 注文エンティティ作成
-        Order order = new Order();
+        OrderEntity order = new OrderEntity();
         CustomerInfo customerInfo = orderRequest.getCustomerInfo();
         order.setOrderDate(LocalDateTime.now());
         order.setTotalAmount(cart.getTotalPrice());
@@ -66,11 +66,11 @@ public class OrderService {
 
         // 注文明細作成と在庫減算
         for (CartItem cartItem : cart.getItems().values()) {
-            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow(
+            ProductEntity product = productRepository.findById(cartItem.getProductId()).orElseThrow(
                 () -> new IllegalStateException("在庫確認後に商品が見つかりません: " + cartItem.getName())
             );
 
-            OrderDetail orderDetail = new OrderDetail();
+            OrderDetailEntity orderDetail = new OrderDetail();
             orderDetail.setProduct(product);
             orderDetail.setProductName(product.getName());
             orderDetail.setPrice(product.getPrice());
@@ -94,7 +94,7 @@ public class OrderService {
         }
 
         // 注文保存
-        Order savedOrder = orderRepository.save(order);
+        OrderEntity savedOrder = orderRepository.save(order);
 
         // カートクリア
         cartService.clearCart(session);
