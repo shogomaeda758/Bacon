@@ -1,5 +1,5 @@
 // ===============================
-// Product Entity
+// Category Entity
 // ===============================
 package com.example.ecsite.entity;
 
@@ -7,38 +7,20 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "categories")
 @Data
 @NoArgsConstructor
-public class ProductEntity {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer productId;
+    private Integer categoryId;
     
     @Column(nullable = false)
-    private String name;
-    
-    @Column(length = 1000)
-    private String description;
-    
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
-    
-    @Column(nullable = false)
-    private Integer stock;
-    
-    private String imageUrl;
-    
-    private Boolean isRecommended;
-    
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private String categoryName;
     
     private LocalDateTime createdAt;
     
