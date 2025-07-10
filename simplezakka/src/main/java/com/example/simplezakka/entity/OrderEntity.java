@@ -1,7 +1,7 @@
 // ===============================
 // Order Entity
 // ===============================
-package com.example.simplezakka.entity;
+package com.example.ecsite.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
