@@ -15,7 +15,7 @@ public class DataLoader implements CommandLineRunner {
 
     private final ProductRepository productRepository;
 
-    @Autowired
+  
     public DataLoader(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }

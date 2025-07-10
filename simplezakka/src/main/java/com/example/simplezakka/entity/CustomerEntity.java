@@ -3,7 +3,6 @@
 // ===============================
 package com.example.simplezakka.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.List;
 @NoArgsConstructor
 public class CustomerEntity {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customerId;
@@ -33,7 +31,7 @@ public class CustomerEntity {
    
     @Column(nullable = false)
     private String lastName;
-   
+
     @Column(nullable = false)
     private String firstName;
    
@@ -45,7 +43,7 @@ public class CustomerEntity {
    
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderEntity> orders = new ArrayList<>();
-   
+
     private LocalDateTime createdAt;
    
     private LocalDateTime updatedAt;

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<CategoryEntity, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
     
     // カテゴリ名による検索
     Optional<CategoryEntity> findByCategoryName(String categoryName);
