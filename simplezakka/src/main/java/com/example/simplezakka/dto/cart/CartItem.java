@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -17,4 +18,8 @@ public class CartItem implements Serializable {
     private String imageUrl;
     private int quantity;
     private int subtotal;
+    public void setPrice(BigDecimal price2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
+    }
 }
