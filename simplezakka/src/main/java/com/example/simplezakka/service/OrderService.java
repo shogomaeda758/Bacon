@@ -59,7 +59,7 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setTotalAmount(cart.getTotalPrice());
         order.setCustomerName(customerInfo.getName());
-        order.setCustomerEmail(customerInfo.getEmail());
+        order.setOrderEmail(customerInfo.getEmail());
         order.setShippingAddress(customerInfo.getAddress());
         order.setShippingPhoneNumber(customerInfo.getPhoneNumber());
         order.setStatus("PENDING");
@@ -70,7 +70,7 @@ public class OrderService {
                 () -> new IllegalStateException("在庫確認後に商品が見つかりません: " + cartItem.getName())
             );
 
-            OrderDetailEntity orderDetail = new OrderDetail();
+            OrderDetailEntity orderDetail = new OrderDetailEntity();
             orderDetail.setProduct(product);
             orderDetail.setProductName(product.getName());
             orderDetail.setPrice(product.getPrice());

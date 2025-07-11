@@ -55,5 +55,5 @@ public class CartController {
     public ResponseEntity<Cart> removeItem(@PathVariable String itemId, HttpSession session) {
         Cart cart = cartService.removeItemFromCart(itemId, session);
         return ResponseEntity.ok(cart);
-    }
-}
+
+    }}
