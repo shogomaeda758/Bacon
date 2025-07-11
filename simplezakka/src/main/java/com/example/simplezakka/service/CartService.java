@@ -1,7 +1,7 @@
 package com.example.simplezakka.service;
 
-import com.example.simplezakka.dto.cart.Cart;
-import com.example.simplezakka.dto.cart.CartItem;
+import com.example.simplezakka.dto.cart.CartRespons;
+import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
@@ -22,47 +22,50 @@ public class CartService {
         this.productRepository = productRepository;
     }
     
-    public Cart getCartFromSession(HttpSession session) {
-        Cart cart = (Cart) session.getAttribute(CART_SESSION_KEY);
+    public CartRespons getCartFromSession(HttpSession session) {
+        CartRespons cart = (CartRespons) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
-            cart = new Cart();
+            cart = new CartRespons();
             session.setAttribute(CART_SESSION_KEY, cart);
         }
         return cart;
     }
     
-    public Cart addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-        Optional<ProductEntity> productOpt = productRepository.findById(productId);
-        
-        if (productOpt.isPresent()) {
-            ProductEntity product = productOpt.get();
-            Cart cart = getCartFromSession(session);
-            
-            CartItem item = new CartItem();
-            item.setProductId(product.getProductId());
-            item.setName(product.getName());
-            item.setPrice(product.getPrice());
-            item.setImageUrl(product.getImageUrl());
-            item.setQuantity(quantity);
-            
-            cart.addItem(item);
-            session.setAttribute(CART_SESSION_KEY, cart);
-            
+public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
+    Optional<ProductEntity> productOpt = productRepository.findById(productId);
+
+    if (productOpt.isPresent()) {
+        ProductEntity product = productOpt.get();
+        CartRespons cart = getCartFromSession(session);
+
+        String itemId = String.valueOf(productId); // カートのキー
+        int currentInCart = 0;
+
+        // 🔽 カートにすでに商品がある場合は数量を取得
+        if (cart.getItems().containsKey(itemId)) {
+            currentInCart = cart.getItems().get(itemId).getQuantity();
+        }
+
+        // 🔽 在庫チェック
+        if (currentInCart + quantity > product.getStock()) {
+            throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
+             "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
+        }
             return cart;
         }
         
         return null;
     }
     
-    public Cart updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
-        Cart cart = getCartFromSession(session);
+    public CartRespons updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
+        CartRespons cart = getCartFromSession(session);
         cart.updateQuantity(itemId, quantity);
         session.setAttribute(CART_SESSION_KEY, cart);
         return cart;
     }
     
-    public Cart removeItemFromCart(String itemId, HttpSession session) {
-        Cart cart = getCartFromSession(session);
+    public CartRespons removeItemFromCart(String itemId, HttpSession session) {
+        CartRespons cart = getCartFromSession(session);
         cart.removeItem(itemId);
         session.setAttribute(CART_SESSION_KEY, cart);
         return cart;
