@@ -10,13 +10,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 @Table(name = "categories")
 @Data
 @NoArgsConstructor
 public class CategoryEntity {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +33,3 @@ public class CategoryEntity {
         updatedAt = LocalDateTime.now();
     }
 }
-
