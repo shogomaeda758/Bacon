@@ -1,15 +1,14 @@
 package com.example.simplezakka.dto.order;
 
 import lombok.Data;
-import lombok.AllArgsConstructor; // ★追加
-import lombok.NoArgsConstructor; // ★追加：デフォルトコンストラクタも保持するため
+import lombok.NoArgsConstructor; 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @NoArgsConstructor // デフォルトコンストラクタが必要な場合
-@AllArgsConstructor // 全てのフィールドを引数にとるコンストラクタを生成
+ // 全てのフィールドを引数にとるコンストラクタを生成
 public class OrderResponse {
 
     /** 注文ID */
@@ -35,4 +34,28 @@ public class OrderResponse {
 
     /** 顧客情報（注文時の配送先・連絡先） */
     private CustomerInfo customerInfo; // ★このフィールドは含める
+
+    /** メッセージ（成功時やエラー時など） */
+    private String message; 
+
+    // 1. エラーメッセージなどを渡すためのコンストラクタ (String一つ)
+    public OrderResponse(String message) {
+        this.message = message;
+    }
+
+    // 2. 注文確定成功時に全ての注文詳細を返すためのコンストラクタ (placeOrderメソッドの戻り値用)
+    // message フィールドを最後に含めます
+    public OrderResponse(Integer orderId, LocalDateTime orderDate, BigDecimal totalAmount, BigDecimal shippingFee,
+                         String paymentMethod, String status, List<OrderItemDetailResponse> items,
+                         CustomerInfo customerInfo, String message) { // messageフィールドも引数に追加
+        this.orderId = orderId;
+        this.orderDate = orderDate;
+        this.totalAmount = totalAmount;
+        this.shippingFee = shippingFee;
+        this.paymentMethod = paymentMethod;
+        this.status = status;
+        this.items = items;
+        this.customerInfo = customerInfo;
+        this.message = message; // messageも初期化
+     }
 }

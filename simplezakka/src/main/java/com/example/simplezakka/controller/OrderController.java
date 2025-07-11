@@ -1,6 +1,5 @@
 package com.example.simplezakka.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,6 @@ public class OrderController {
     private final OrderService orderService;
     private final CartService cartService; // カート情報を取得するために必要
 
-    @Autowired
     public OrderController(OrderService orderService, CartService cartService) {
         this.orderService = orderService;
         this.cartService = cartService;
@@ -58,6 +56,7 @@ public class OrderController {
             // 必要に応じてログ出力も追加 (例: logger.error("注文確定中に予期せぬエラーが発生しました", e);)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderResponse("注文確定中に予期せぬエラーが発生しました。"));
         }
+    }
        @PostMapping("/order/preview") // API_10のエンドポイント
     public ResponseEntity<List<OrderSummaryResponse>> getOrderHistory(
             // リクエストDTOはAPI仕様に合わせて別途定義・調整してください

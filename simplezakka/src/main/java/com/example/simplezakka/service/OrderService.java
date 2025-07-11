@@ -21,15 +21,13 @@ import com.example.simplezakka.repository.OrderDetailRepository;
 import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList; // ArrayList をインポート
+import java.util.ArrayList; 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +39,6 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final CartService cartService;
 
-    @Autowired
     public OrderService(
             OrderRepository orderRepository,
             OrderDetailRepository orderDetailRepository,
@@ -103,7 +100,7 @@ public class OrderService {
 
         order.setTotalPrice(subtotal.add(shippingFee));
 
-        for (CartItem cartItem : cart.getItems().values()) {
+        for (CartItemResponse cartItem : cart.getItems().values()) {
             ProductEntity product = productRepository.findById(cartItem.getProductId()).orElseThrow(
                 () -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "在庫確認後に商品が見つかりません: " + cartItem.getName())
             );
@@ -149,7 +146,8 @@ public class OrderService {
             savedOrder.getPaymentMethod(),
             savedOrder.getStatus(),
             responseItems,
-            customerInfo
+            customerInfo,
+            "注文が正常に完了しました。"
         );
     }
 
