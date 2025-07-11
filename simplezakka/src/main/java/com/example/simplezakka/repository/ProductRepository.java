@@ -19,8 +19,8 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<ProductEntity, Integer> {
     
     // カテゴリID別商品検索
-    @Query("SELECT p FROM Product p WHERE p.category.categoryId = :categoryId")
-    List<ProductEntity> findByCategoryId(@Param("categoryId") Integer categoryId);
+    @Query("SELECT p FROM ProductEntity p WHERE p.category.categoryId = :categoryId")
+    List<ProductEntity> findByCategory(@Param("categoryId") Integer categoryId);
     
     // 商品名での部分一致検索
     List<ProductEntity> findByNameContaining(String keyword);
@@ -37,18 +37,18 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Integer>
     // 在庫減少処理（カスタムクエリ）
     @Modifying
     @Transactional
-    @Query("UPDATE Product p SET p.stock = p.stock - :quantity WHERE p.productId = :productId AND p.stock >= :quantity")
+    @Query("UPDATE ProductEntity p SET p.stock = p.stock - :quantity WHERE p.productId = :productId AND p.stock >= :quantity")
     int decreaseStock(@Param("productId") Integer productId, @Param("quantity") Integer quantity);
     
     // 在庫更新処理
     @Modifying
     @Transactional
-    @Query("UPDATE Product p SET p.stock = :newStock WHERE p.productId = :productId")
+    @Query("UPDATE ProductEntity p SET p.stock = :newStock WHERE p.productId = :productId")
     int updateStock(@Param("productId") Integer productId, @Param("newStock") Integer newStock);
     
     // 価格更新処理
     @Modifying
     @Transactional
-    @Query("UPDATE Product p SET p.price = :newPrice WHERE p.productId = :productId")
+    @Query("UPDATE ProductEntity p SET p.price = :newPrice WHERE p.productId = :productId")
     int updatePrice(@Param("productId") Integer productId, @Param("newPrice") BigDecimal newPrice);
 }

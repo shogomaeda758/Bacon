@@ -55,8 +55,7 @@ public class ProductEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public void setPrice(Integer price2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
+    public void setPrice(Integer price) {
+        this.price = BigDecimal.valueOf(price);
     }
 }
