@@ -21,7 +21,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
     List<OrderEntity> findByCustomerOrderByOrderDateDesc(CustomerEntity customer);
     
     // 会員IDによる注文履歴取得
-    @Query("SELECT o FROM Order o WHERE o.customer.customerId = :customerId ORDER BY o.orderDate DESC")
+    @Query("SELECT o FROM OrderRepository o WHERE o.customer.customerId = :customerId ORDER BY o.orderDate DESC")
     List<OrderEntity> findByCustomer_CustomerIdOrderByOrderDateDesc(@Param("customerId") Integer customerId);
     
     // 非会員注文の取得（メールアドレスベース）
@@ -37,6 +37,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
     Optional<OrderEntity> findByOrderId(Integer orderId);
     
     // 会員と非会員の注文数を取得
-    @Query("SELECT COUNT(o) FROM Order o WHERE o.isGuest = :isGuest")
+    @Query("SELECT COUNT(o) FROM OrderRepository o WHERE o.isGuest = :isGuest")
     long countByIsGuest(@Param("isGuest") Boolean isGuest);
 }
