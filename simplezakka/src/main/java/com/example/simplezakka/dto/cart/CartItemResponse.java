@@ -1,3 +1,5 @@
+/* カートに入っている商品のデータ*/
+
 package com.example.simplezakka.dto.cart;
 
 import lombok.AllArgsConstructor;
@@ -10,7 +12,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartItem implements Serializable {
+public class CartItemResponse implements Serializable {
     private String id;
     private Integer productId;
     private String name;

@@ -7,17 +7,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
-public class Cart implements Serializable {
-    private Map<String, CartItem> items = new LinkedHashMap<>();
+public class CartRespons implements Serializable {
+    private Map<String, CartItemResponse> items = new LinkedHashMap<>();//カート内の商品のリスト化
     private int totalQuantity;
     private int totalPrice;
     
-    public void addItem(CartItem item) {
+    public void addItem(CartItemResponse item) {
         String itemId = String.valueOf(item.getProductId());
         
         // 既存のアイテムがあれば数量を加算
         if (items.containsKey(itemId)) {
-            CartItem existingItem = items.get(itemId);
+            CartItemResponse existingItem = items.get(itemId);
             existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
             existingItem.setSubtotal(existingItem.getPrice() * existingItem.getQuantity());
         } else {
@@ -33,7 +33,7 @@ public class Cart implements Serializable {
     
     public void updateQuantity(String itemId, int quantity) {
         if (items.containsKey(itemId)) {
-            CartItem item = items.get(itemId);
+            CartItemResponse item = items.get(itemId);
             item.setQuantity(quantity);
             item.setSubtotal(item.getPrice() * quantity);
             calculateTotals();
@@ -49,7 +49,7 @@ public class Cart implements Serializable {
         totalQuantity = 0;
         totalPrice = 0;
         
-        for (CartItem item : items.values()) {
+        for (CartItemResponse item : items.values()) {
             totalQuantity += item.getQuantity();
             totalPrice += item.getSubtotal();
         }
