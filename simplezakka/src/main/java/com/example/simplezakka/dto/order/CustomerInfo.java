@@ -1,12 +1,16 @@
 package com.example.simplezakka.dto.order;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor 
 public class CustomerInfo {
 
     /** 顧客ID (会員の場合に設定、ゲストの場合は0) */
