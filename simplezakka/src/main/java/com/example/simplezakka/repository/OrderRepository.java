@@ -22,7 +22,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
     
     // 会員IDによる注文履歴取得
     @Query("SELECT o FROM Order o WHERE o.customer.customerId = :customerId ORDER BY o.orderDate DESC")
-    List<OrderEntity> findByCustomerIdOrderByOrderDateDesc(@Param("customerId") Integer customerId);
+    List<OrderEntity> findByCustomer_CustomerIdOrderByOrderDateDesc(@Param("customerId") Integer customerId);
     
     // 非会員注文の取得（メールアドレスベース）
     List<OrderEntity> findByOrderEmailAndIsGuestTrueOrderByOrderDateDesc(String orderEmail);
