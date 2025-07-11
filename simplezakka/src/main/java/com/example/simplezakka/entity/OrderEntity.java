@@ -53,8 +53,16 @@ public class OrderEntity {
     @Column(nullable = false)
     private String status;
     
-    @Column(nullable = false)
+    @Column(name="is_guest",nullable = false)
     private Boolean isGuest;
+    
+    public Boolean getIsGuest() {
+    return isGuest;
+    }
+
+    public void setIsGuest(Boolean isGuest) {
+        this.isGuest = isGuest;
+    }
     
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetailEntity> orderDetails = new ArrayList<>();
