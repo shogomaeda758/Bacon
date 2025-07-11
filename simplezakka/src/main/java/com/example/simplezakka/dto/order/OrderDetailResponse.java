@@ -16,9 +16,6 @@ public class OrderDetailResponse {
     /** 注文ID */
     private Integer orderId;
 
-    /** 顧客情報（注文時の配送先・連絡先） */
-    private CustomerInfo customerInfo;
-
     /** 注文日時 */
     private LocalDateTime orderDate;
 
@@ -34,6 +31,9 @@ public class OrderDetailResponse {
     /** 注文ステータス。例: "PENDING", "CONFIRMED" */
     private String status;
 
-    /** 注文された個々の商品アイテムのリスト */
+    /** 注文されsた個々の商品アイテムのリスト */
     private List<OrderItemDetailResponse> items;
+
+      /** 顧客情報（注文時の配送先・連絡先） */
+    private CustomerInfo customerInfo;
 }
