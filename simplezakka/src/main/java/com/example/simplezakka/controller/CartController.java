@@ -1,6 +1,6 @@
 package com.example.simplezakka.controller;
 
-import com.example.simplezakka.dto.cart.Cart;
+import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.cart.CartItemInfo;
 import com.example.simplezakka.dto.cart.CartItemQuantityDto;
 import com.example.simplezakka.service.CartService;
@@ -22,14 +22,14 @@ public class CartController {
     }
     
     @GetMapping
-    public ResponseEntity<Cart> getCart(HttpSession session) {
-        Cart cart = cartService.getCartFromSession(session);
+    public ResponseEntity<CartRespons> getCart(HttpSession session) {
+        CartRespons cart = cartService.getCartFromSession(session);
         return ResponseEntity.ok(cart);
     }
     
     @PostMapping
-    public ResponseEntity<Cart> addItem(@Valid @RequestBody CartItemInfo cartItemInfo, HttpSession session) {
-        Cart cart = cartService.addItemToCart(
+    public ResponseEntity<CartRespons> addItem(@Valid @RequestBody CartItemInfo cartItemInfo, HttpSession session) {
+        CartRespons cart = cartService.addItemToCart(
                 cartItemInfo.getProductId(),
                 cartItemInfo.getQuantity(),
                 session
@@ -43,17 +43,17 @@ public class CartController {
     }
     
     @PutMapping("/items/{itemId}")
-    public ResponseEntity<Cart> updateItem(
+    public ResponseEntity<CartRespons> updateItem(
             @PathVariable String itemId,
             @Valid @RequestBody CartItemQuantityDto quantityDto,
             HttpSession session) {
-        Cart cart = cartService.updateItemQuantity(itemId, quantityDto.getQuantity(), session);
+        CartRespons cart = cartService.updateItemQuantity(itemId, quantityDto.getQuantity(), session);
         return ResponseEntity.ok(cart);
     }
     
     @DeleteMapping("/items/{itemId}")
-    public ResponseEntity<Cart> removeItem(@PathVariable String itemId, HttpSession session) {
-        Cart cart = cartService.removeItemFromCart(itemId, session);
+    public ResponseEntity<CartRespons> removeItem(@PathVariable String itemId, HttpSession session) {
+        CartRespons cart = cartService.removeItemFromCart(itemId, session);
         return ResponseEntity.ok(cart);
 
     }}

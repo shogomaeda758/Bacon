@@ -1,7 +1,7 @@
 package com.example.simplezakka.service;
 
-import com.example.simplezakka.dto.cart.Cart;
-import com.example.simplezakka.dto.cart.CartItem;
+import com.example.simplezakka.dto.cart.CartRespons;
+import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.order.CustomerInfo;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
@@ -56,7 +56,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse placeOrder(Cart cart, OrderRequest orderRequest, HttpSession session) {
+    public OrderResponse placeOrder(CartRespons cart, OrderRequest orderRequest, HttpSession session) {
         if (cart == null || cart.getItems().isEmpty()) {
             throw new BusinessException(ErrorCode.CART_EMPTY, "カートに商品がありません。");
         }
@@ -65,7 +65,7 @@ public class OrderService {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "顧客情報が不足しています。");
         }
 
-        for (CartItem cartItem : cart.getItems().values()) {
+         for(CartItemResponse cartItem : cart.getItems().values()) {
             ProductEntity product = productRepository.findById(cartItem.getProductId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "商品が見つかりません: " + cartItem.getName()));
 

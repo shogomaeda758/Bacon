@@ -1,19 +1,25 @@
 package com.example.simplezakka.controller;
 
-import com.example.simplezakka.dto.cart.Cart;
-import com.example.simplezakka.dto.order.OrderRequest;
-import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderDetailResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
-import com.example.simplezakka.service.CartService; // CartService が必要
-import com.example.simplezakka.service.OrderService;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid; // バリデーションのため
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.example.simplezakka.dto.cart.CartRespons;
+import com.example.simplezakka.dto.order.OrderDetailResponse;
+import com.example.simplezakka.dto.order.OrderRequest;
+import com.example.simplezakka.dto.order.OrderResponse;
+import com.example.simplezakka.dto.order.OrderSummaryResponse;
+import com.example.simplezakka.service.CartService; // CartService が必要
+import com.example.simplezakka.service.OrderService;
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid; // バリデーションのため
 import java.util.List;
 
 @RestController // RESTful APIのエンドポイントであることを示す
@@ -35,17 +41,24 @@ public class OrderController {
             // リクエストDTOはAPI仕様に合わせて別途定義・調整してください
             @Valid @RequestBody OrderRequest orderRequest, 
             HttpSession session) {
-        
-        // セッションからカート情報を取得
-        Cart cart = cartService.getCart(session);
-        
-        // OrderServiceを呼び出して注文を確定
-        OrderResponse orderResponse = orderService.placeOrder(cart, orderRequest, session);
-        
-        // 注文確定成功のレスポンスを返す (HTTP 200 OK)
-        return ResponseEntity.ok(orderResponse); // API_08のレスポンスコードは201ですが、ここでは元の実装を維持
-    }
-    @PostMapping("/order/preview") // API_10のエンドポイント
+
+           CartRespons cart = cartService.getCartFromSession(session);
+
+        if (cart == null || cart.getItems().isEmpty()) {
+            // カートが空の場合は400 Bad Requestを返す
+            return ResponseEntity.badRequest().body(new OrderResponse("カートが空か無効です。注文を確定できません。"));
+        }
+        try {
+            // ②のorderService.placeOrder呼び出し
+            OrderResponse orderResponse = orderService.placeOrder(cart, orderRequest, session);
+            // API_08の仕様である201 Createdを返す
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
+        } catch (Exception e) {
+            // 予期せぬサーバー内部エラーが発生した場合は500 Internal Server Errorを返す
+            // 必要に応じてログ出力も追加 (例: logger.error("注文確定中に予期せぬエラーが発生しました", e);)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderResponse("注文確定中に予期せぬエラーが発生しました。"));
+        }
+       @PostMapping("/order/preview") // API_10のエンドポイント
     public ResponseEntity<List<OrderSummaryResponse>> getOrderHistory(
             // リクエストDTOはAPI仕様に合わせて別途定義・調整してください
             @RequestBody String requestBody) { // 仮のRequest Body
