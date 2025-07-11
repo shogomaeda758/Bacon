@@ -86,5 +86,27 @@ public class OrderEntity {
                 .map(OrderDetailEntity::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return subtotal.add(shippingFee);
+
+    
+    }
+
+    public void setTotalAmount(int totalPrice2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setTotalAmount'");
+    }
+
+    public void setShippingAddress(String address) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setShippingAddress'");
+    }
+
+    public void setShippingPhoneNumber(String phoneNumber) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setShippingPhoneNumber'");
+    }
+
+    public void setCustomerName(String name) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setCustomerName'");
     }
 }
