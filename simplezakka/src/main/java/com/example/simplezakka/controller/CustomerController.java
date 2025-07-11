@@ -2,68 +2,57 @@ package com.example.simplezakka.controller;
 
 import com.example.simplezakka.dto.customer.*;
 import com.example.simplezakka.service.CustomerService;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/customers")
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
-
     @PostMapping("/register")
-    public ResponseEntity<CustomerResponse> registerCustomer(
-            @Valid @RequestBody CustomerRegisterRequest request) {
-        CustomerResponse response = customerService.registerCustomer(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<?> register(@RequestBody CustomerRegisterRequest request) {
+        try {
+            CustomerResponse saved = customerService.createCustomer(request);
+            return ResponseEntity.ok(saved);
+        } catch (IllegalArgumentException ex) {
+            return buildError("REGISTER_ERROR", ex.getMessage());
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
-            @RequestParam String email,
-            @RequestParam String password,
-            HttpSession session) {
-        boolean success = customerService.authenticate(email, password, session);
-        if (success) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+        try {
+            CustomerResponse customer = customerService.login(email, password);
+            return ResponseEntity.ok(customer);
+        } catch (IllegalArgumentException ex) {
+            return buildError("LOGIN_ERROR", ex.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok().build();
+    @PutMapping("/{customerId}")
+    public ResponseEntity<?> update(@PathVariable Integer customerId,
+                                    @RequestBody CustomerUpdateRequest request) {
+        try {
+            CustomerResponse updated = customerService.updateCustomer(customerId, request);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException ex) {
+            return buildError("UPDATE_ERROR", ex.getMessage());
+        }
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<CustomerResponse> getMyProfile(HttpSession session) {
-        Integer customerId = (Integer) session.getAttribute("customerId");
-        if (customerId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        CustomerResponse response = customerService.getCustomerById(customerId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<CustomerResponse> updateMyProfile(
-            @Valid @RequestBody CustomerUpdateRequest request,
-            HttpSession session) {
-        Integer customerId = (Integer) session.getAttribute("customerId");
-        if (customerId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        CustomerResponse response = customerService.updateCustomer(customerId, request);
-        return ResponseEntity.ok(response);
+    
+    private ResponseEntity<Map<String, Object>> buildError(String code, String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("errorCode", code);
+        error.put("message", message);
+        return ResponseEntity.badRequest().body(error);
     }
 }
