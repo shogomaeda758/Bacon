@@ -1,6 +1,6 @@
 package com.example.simplezakka.controller;
 
-import com.example.simplezakka.dto.cart.Cart;
+import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
 import com.example.simplezakka.service.CartService;
@@ -33,7 +33,7 @@ public class OrderController {
             @Valid @RequestBody OrderRequest orderRequest,
             HttpSession session) {
         
-        Cart cart = cartService.getCartFromSession(session);
+        CartRespons cart = cartService.getCartFromSession(session);
         
         if (cart == null || cart.getItems().isEmpty()) {
             return ResponseEntity.badRequest().build();
