@@ -21,20 +21,15 @@ public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer categoryId;
-   
     @Column(nullable = false)
     private String categoryName;
-   
     private LocalDateTime createdAt;
-   
     private LocalDateTime updatedAt;
-   
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-   
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
