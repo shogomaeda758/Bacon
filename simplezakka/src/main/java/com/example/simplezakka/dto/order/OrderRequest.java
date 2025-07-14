@@ -1,12 +1,15 @@
 package com.example.simplezakka.dto.order;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * 注文リクエストDTO。
+ * クライアントから注文情報を受け取るためのデータ構造。
+ */
 @Data
 public class OrderRequest {
-    @Valid
-    @NotNull(message = "顧客情報は必須です")
-    private CustomerInfo customerInfo;
+    private CustomerInfo customerInfo; 
+    private String paymentMethod;
+    
+    
 }

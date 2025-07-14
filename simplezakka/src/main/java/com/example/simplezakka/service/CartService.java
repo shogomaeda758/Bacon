@@ -1,11 +1,9 @@
 package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,7 +15,6 @@ public class CartService {
     
     private final ProductRepository productRepository;
     
-    @Autowired
     public CartService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
