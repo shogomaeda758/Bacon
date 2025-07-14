@@ -41,8 +41,11 @@ button.btn {
     border: #383028;
     font-size: 15px;     /* 文字サイズ */
     padding: 10px 20px;  /* 内側の余白 */
-    width: 200px;        /* 横幅 */
+    min-width: 150px;     /* 最小幅は150px */
+    width: auto;         
+    white-space: nowrap;  
     height: 50px;        /* 高さ */
+    margin-right: 10px;
 
 }
 /* ホバー時 */

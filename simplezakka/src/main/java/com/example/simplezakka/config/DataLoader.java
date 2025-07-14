@@ -57,7 +57,7 @@ public class DataLoader implements CommandLineRunner {
         Category fashion = createCategory("ファッション雑貨");
         Category kitchen = createCategory("キッチン用品");
 
-        // カテゴリを保存 (saveAllでまとめても良い)
+        // カテゴリを保存 
         categoryRepository.save(interior);
         categoryRepository.save(homeGoods);
         categoryRepository.save(fashion);
@@ -72,7 +72,7 @@ public class DataLoader implements CommandLineRunner {
                 20,
                 "/images/desk-organizer.png",
                 true,
-                interior // ここでカテゴリを設定
+                interior 
             ),
             createProduct(
                 "アロマディフューザー（ウッド）",
@@ -81,7 +81,7 @@ public class DataLoader implements CommandLineRunner {
                 15,
                 "/images/aroma-diffuser.png",
                 true,
-                interior // ここでカテゴリを設定
+                interior 
             ),
             createProduct(
                 "コットンブランケット",
@@ -90,7 +90,7 @@ public class DataLoader implements CommandLineRunner {
                 10,
                 "/images/cotton-blanket.png",
                 false,
-                homeGoods // ここでカテゴリを設定
+                homeGoods 
             ),
             createProduct(
                 "ステンレスタンブラー",
@@ -99,7 +99,7 @@ public class DataLoader implements CommandLineRunner {
                 30,
                 "/images/tumbler.png",
                 false,
-                kitchen // ここでカテゴリを設定
+                kitchen
             ),
             createProduct(
                 "ミニマルウォールクロック",
@@ -108,7 +108,7 @@ public class DataLoader implements CommandLineRunner {
                 25,
                 "/images/wall-clock.png",
                 false,
-                interior // ここでカテゴリを設定
+                interior 
             ),
             createProduct(
                 "リネンクッションカバー",
@@ -117,7 +117,7 @@ public class DataLoader implements CommandLineRunner {
                 40,
                 "/images/cushion-cover.png",
                 true,
-                homeGoods // ここでカテゴリを設定
+                homeGoods 
             ),
             createProduct(
                 "陶器フラワーベース",
@@ -126,7 +126,7 @@ public class DataLoader implements CommandLineRunner {
                 15,
                 "/images/flower-vase.png",
                 false,
-                interior // ここでカテゴリを設定
+                interior 
             ),
             createProduct(
                 "木製コースター（4枚セット）",
@@ -135,7 +135,7 @@ public class DataLoader implements CommandLineRunner {
                 50,
                 "/images/wooden-coaster.png",
                 false,
-                kitchen // ここでカテゴリを設定
+                kitchen 
             ),
             createProduct(
                 "キャンバストートバッグ",
@@ -144,7 +144,7 @@ public class DataLoader implements CommandLineRunner {
                 35,
                 "/images/tote-bag.png",
                 true,
-                fashion // ここでカテゴリを設定
+                fashion 
             ),
             createProduct(
                 "ガラス保存容器セット",
@@ -153,14 +153,14 @@ public class DataLoader implements CommandLineRunner {
                 20,
                 "/images/glass-container.png",
                 false,
-                kitchen // ここでカテゴリを設定
+                kitchen 
             )
         );
 
         productRepository.saveAll(products);
     }
 
-    // CategoryEntityを作成するヘルパーメソッド
+  
     private Category createCategory(String categoryName) {
         Category category = new Category();
         category.setCategoryName(categoryName);
@@ -169,12 +169,12 @@ public class DataLoader implements CommandLineRunner {
         return category;
     }
 
-    // Productを作成するヘルパーメソッドにCategoryEntity引数を追加
+
     private Product createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended, Category category) {
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);
-        product.setPrice(BigDecimal.valueOf(price)); // priceはBigDecimal型なので変換
+        product.setPrice(BigDecimal.valueOf(price)); 
         product.setStock(stock);
         product.setImageUrl(imageUrl);
         product.setIsRecommended(isRecommended);
