@@ -101,7 +101,7 @@ public class CustomerService {
             customer.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
 
-        CustomerEntity updated = customerRepository.save(customer);
+        Customer updated = customerRepository.save(customer);
         return toResponse(updated);
     }
 

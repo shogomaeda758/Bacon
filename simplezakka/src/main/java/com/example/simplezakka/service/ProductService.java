@@ -2,7 +2,7 @@ package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.product.ProductDetail;
 import com.example.simplezakka.dto.product.ProductListItem;
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class ProductService {
     }
     
     public ProductDetail findProductById(Integer productId) {
-        Optional<ProductEntity> productOpt = productRepository.findById(productId);
+        Optional<Product> productOpt = productRepository.findById(productId);
         return productOpt.map(this::convertToDetail).orElse(null);
     }
     

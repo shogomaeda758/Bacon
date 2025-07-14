@@ -3,7 +3,7 @@
 // =============================================================================
 package com.example.simplezakka.repository;
 
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

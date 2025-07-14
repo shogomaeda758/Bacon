@@ -11,7 +11,8 @@ import com.example.simplezakka.dto.order.OrderSummaryResponse;
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
-import com.example.simplezakka.entity.OrderDetai;
+import com.example.simplezakka.entity.OrderDetail;
+import com.example.simplezakka.entity.OrderDetail;
 import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.exception.BusinessException;
 import com.example.simplezakka.exception.ErrorCode;
@@ -26,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class OrderService {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "顧客情報が不足しています。");
         }
 
-         for(CartItemResponse cartItem : cart.getItems().values()) {
+        for(CartItemResponse cartItem : cart.getItems().values()) {
             Product product = productRepository.findById(cartItem.getProductId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "商品が見つかりません: " + cartItem.getName()));
 

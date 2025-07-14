@@ -46,7 +46,7 @@ public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSessio
         // 🔽 在庫チェック
         if (currentInCart + quantity > product.getStock()) {
             throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
-             "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
+            "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
         }
             return cart;
         }
