@@ -2,7 +2,7 @@ package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.product.ProductDetail;
 import com.example.simplezakka.dto.product.ProductListItem;
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class ProductService {
      * @return 商品詳細情報（存在しない場合はnull）
      */
     public ProductDetail findProductById(Integer productId) {
-        Optional<ProductEntity> productOpt = productRepository.findById(productId);
+        Optional<Product> productOpt = productRepository.findById(productId);
         return productOpt.map(this::convertToDetail).orElse(null);
     }
     
@@ -99,11 +99,11 @@ public class ProductService {
     }
     
     /**
-     * ProductEntityをProductListItemに変換
+     * ProductをProductListItemに変換
      * @param product 商品エンティティ
      * @return 商品リストアイテム
      */
-    private ProductListItem convertToListItem(ProductEntity product) {
+    private ProductListItem convertToListItem(Product product) {
         return new ProductListItem(
                 product.getProductId(),
                 product.getName(),
@@ -113,11 +113,11 @@ public class ProductService {
     }
     
     /**
-     * ProductEntityをProductDetailに変換
+     * ProductをProductDetailに変換
      * @param product 商品エンティティ
      * @return 商品詳細
      */
-    private ProductDetail convertToDetail(ProductEntity product) {
+    private ProductDetail convertToDetail(Product product) {
         return new ProductDetail(
                 product.getProductId(),
                 product.getName(),

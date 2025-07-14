@@ -15,7 +15,7 @@ public class CustomerInfo {
 
     /** 顧客ID (会員の場合に設定、ゲストの場合は0) */
     // ここは@NotNullではなくnullを許容することで、Controllerでの判断を容易にする
-    private Integer customerId; // 会員の場合はCustomerEntityのID、ゲストの場合は0
+    private Integer customerId; // 会員の場合はCustomerのID、ゲストの場合は0
 
     @NotBlank(message = "氏名は必須です。")
     @Size(max = 100, message = "氏名は100文字以内で入力してください。")
