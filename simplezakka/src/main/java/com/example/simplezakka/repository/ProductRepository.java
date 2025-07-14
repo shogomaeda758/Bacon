@@ -2,7 +2,6 @@
 // ProductRepository.java
 // =============================================================================
 package com.example.simplezakka.repository;
-
 import com.example.simplezakka.entity.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,11 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Integer> {
     
@@ -25,14 +22,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Integer>
     // 商品名での部分一致検索
     List<ProductEntity> findByNameContaining(String keyword);
     
-    // おすすめ商品の取得
-    List<ProductEntity> findByIsRecommendedTrue();
-    
     // 在庫あり商品の取得
     List<ProductEntity> findByStockGreaterThan(Integer stock);
-    
-    // 価格範囲での検索
-    List<ProductEntity> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
     
     // 在庫減少処理（カスタムクエリ）
     @Modifying

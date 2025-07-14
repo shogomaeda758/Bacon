@@ -57,6 +57,6 @@ public class ProductEntity {
 
     public void setPrice(Integer price2) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
+         this.price = BigDecimal.valueOf(price2);
     }
 }
