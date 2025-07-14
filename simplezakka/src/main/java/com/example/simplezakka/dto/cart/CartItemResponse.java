@@ -16,8 +16,8 @@ public class CartItemResponse implements Serializable {
     private String id;
     private Integer productId;
     private String name;
-    private Integer price;
+    private BigDecimal price;
     private String imageUrl;
     private int quantity;
-    private int subtotal;
+    private BigDecimal subtotal;
 }

@@ -92,7 +92,7 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        BigDecimal subtotal = BigDecimal.valueOf(cart.getTotalPrice());
+        BigDecimal subtotal = cart.getTotalPrice(); 
         BigDecimal shippingFee = calculateShippingFee(subtotal);
         order.setShippingFee(shippingFee);
 
