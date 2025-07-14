@@ -308,61 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('confirm-order-btn').addEventListener('click', submitOrder);
         }
     }
-        // セッションストレージに保存
-            sessionStorage.setItem('order_name', name);
-            sessionStorage.setItem('order_email', email);
-            sessionStorage.setItem('order_address', address);
-            sessionStorage.setItem('order_phone', phone);
-            sessionStorage.setItem('order_payment', paymentLabel);
-
-        // 確認画面（C0402）へ遷移
-            window.location.href = 'C0402.html';
-        });
-
-        // 注文データの取得
-        const orderData = {
-        items: JSON.parse(sessionStorage.getItem('order_items') || '[]'),
-        total: parseInt(sessionStorage.getItem('order_total')) || 0,
-        name: sessionStorage.getItem('order_name') || '',
-        email: sessionStorage.getItem('order_email') || '',
-        address: sessionStorage.getItem('order_address') || '',
-        phone: sessionStorage.getItem('order_phone') || '',
-        payment: sessionStorage.getItem('order_payment') || ''
-        };
-
-        // 商品一覧表示（商品名、数量、小計）
-        const itemsContainer = document.getElementById('order-items');
-        orderData.items.forEach(item => {
-        const subtotal = item.quantity * item.price;
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `
-            <div>
-            ${item.name} × ${item.quantity}
-            </div>
-            <div>
-            ¥${subtotal.toLocaleString()}
-            </div>
-        `;
-        itemsContainer.appendChild(li);
-        });
-
-        // 合計金額
-        document.getElementById('total-amount').textContent = `¥${orderData.total.toLocaleString()}`;
-
-        // お届け先表示
-        document.getElementById('confirm-name').textContent = orderData.name;
-        document.getElementById('confirm-email').textContent = orderData.email;
-        document.getElementById('confirm-address').textContent = orderData.address;
-        document.getElementById('confirm-phone').textContent = orderData.phone;
-
-        // 支払い方法
-        document.getElementById('confirm-payment').textContent = orderData.payment;
-
-
-
     
-
     // カート内の商品数量を更新する関数
     async function updateItemQuantity(itemId, quantity) {
         try {
@@ -477,5 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
             <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
             <p>決済方法: ${order.paymentMethod === 'credit_card' ? 'クレジットカード' : order.paymentMethod === 'bank_transfer' ? '銀行振込' : '代金引換'}</p>
+
         `;
     }
+});
