@@ -22,7 +22,6 @@ public class DataLoader implements CommandLineRunner {
     public DataLoader(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -35,7 +34,7 @@ public class DataLoader implements CommandLineRunner {
             return; // すでにデータが存在する場合はスキップ
         }
 
-        List<CategoryEntity> categories = Arrays.asList(
+        List<Category> categories = Arrays.asList(
             createCategory("インテリア"),
             createCategory("キッチン用品"),
             createCategory("バッグ・アクセサリー"),
@@ -171,7 +170,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     // Productを作成するヘルパーメソッドにCategoryEntity引数を追加
-    private Product createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended, CategoryEntity category) {
+    private Product createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended, Category category) {
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);
