@@ -30,7 +30,7 @@ public class ProductService {
         return productOpt.map(this::convertToDetail).orElse(null);
     }
     
-    private ProductListItem convertToListItem(ProductEntity product) {
+    private ProductListItem convertToListItem(Product product) {
         return new ProductListItem(
                 product.getProductId(),
                 product.getName(),
@@ -39,7 +39,7 @@ public class ProductService {
         );
     }
     
-    private ProductDetail convertToDetail(ProductEntity product) {
+    private ProductDetail convertToDetail(Product product) {
         return new ProductDetail(
                 product.getProductId(),
                 product.getName(),

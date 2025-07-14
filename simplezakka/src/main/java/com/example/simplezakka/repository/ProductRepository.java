@@ -16,23 +16,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<ProductEntity, Integer> {
+public interface ProductRepository extends JpaRepository<Product, Integer> {
     
     // カテゴリID別商品検索
     @Query("SELECT p FROM Product p WHERE p.category.categoryId = :categoryId")
-    List<ProductEntity> findByCategoryId(@Param("categoryId") Integer categoryId);
+    List<Product> findByCategoryId(@Param("categoryId") Integer categoryId);
     
     // 商品名での部分一致検索
-    List<ProductEntity> findByNameContaining(String keyword);
+    List<Product> findByNameContaining(String keyword);
     
     // おすすめ商品の取得
-    List<ProductEntity> findByIsRecommendedTrue();
+    List<Product> findByIsRecommendedTrue();
     
     // 在庫あり商品の取得
-    List<ProductEntity> findByStockGreaterThan(Integer stock);
+    List<Product> findByStockGreaterThan(Integer stock);
     
     // 価格範囲での検索
-    List<ProductEntity> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
+    List<Product> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
     
     // 在庫減少処理（カスタムクエリ）
     @Modifying

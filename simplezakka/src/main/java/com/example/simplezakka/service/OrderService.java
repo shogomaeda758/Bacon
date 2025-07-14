@@ -9,10 +9,10 @@ import com.example.simplezakka.dto.order.OrderItemDetailResponse;
 import com.example.simplezakka.dto.order.OrderDetailResponse;
 import com.example.simplezakka.dto.order.OrderSummaryResponse;
 
-import com.example.simplezakka.entity.CustomerEntity;
-import com.example.simplezakka.entity.OrderEntity;
-import com.example.simplezakka.entity.OrderDetailEntity;
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Customer;
+import com.example.simplezakka.entity.Order;
+import com.example.simplezakka.entity.OrderDetai;
+import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.exception.BusinessException;
 import com.example.simplezakka.exception.ErrorCode;
 
@@ -63,7 +63,7 @@ public class OrderService {
         }
 
          for(CartItemResponse cartItem : cart.getItems().values()) {
-            ProductEntity product = productRepository.findById(cartItem.getProductId())
+            Product product = productRepository.findById(cartItem.getProductId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "商品が見つかりません: " + cartItem.getName()));
 
             if (product.getStock() < cartItem.getQuantity()) {
@@ -72,11 +72,11 @@ public class OrderService {
             }
         }
 
-        OrderEntity order = new OrderEntity();
+        Order order = new Order();
 
         Integer customerId = customerInfo.getCustomerId();
         if (customerId != null && customerId != 0) {
-            CustomerEntity customer = customerRepository.findById(customerId)
+            Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CUSTOMER_NOT_FOUND, "会員情報が見つかりません。ID: " + customerId));
             order.setCustomer(customer);
             order.setIsGuest(false);
@@ -101,11 +101,11 @@ public class OrderService {
         order.setTotalPrice(subtotal.add(shippingFee));
 
         for (CartItemResponse cartItem : cart.getItems().values()) {
-            ProductEntity product = productRepository.findById(cartItem.getProductId()).orElseThrow(
+            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow(
                 () -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "在庫確認後に商品が見つかりません: " + cartItem.getName())
             );
 
-            OrderDetailEntity orderDetail = new OrderDetailEntity();
+            OrderDetail orderDetail = new OrderDetail();
             orderDetail.setProduct(product);
             orderDetail.setUnitPrice(product.getPrice());
             orderDetail.setQuantity(cartItem.getQuantity());
@@ -120,13 +120,13 @@ public class OrderService {
             }
         }
 
-        OrderEntity savedOrder = orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
         cartService.clearCart(session);
 
         List<OrderItemDetailResponse> responseItems = savedOrder.getOrderDetails().stream()
             .map(detail -> {
-                ProductEntity product = detail.getProduct();
+                Product product = detail.getProduct();
                 return new OrderItemDetailResponse(
                     product.getProductId(),
                     product.getName(),

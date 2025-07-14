@@ -1,7 +1,7 @@
 package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.customer.*;
-import com.example.simplezakka.entity.CustomerEntity;
+import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,7 @@ public class CustomerService {
             throw new IllegalArgumentException("既にこのメールアドレスは登録されています。");
         }
 
-        CustomerEntity customer = new CustomerEntity();
+        Customer customer = new Customer();
         String[] names = splitName(info.getName());
         customer.setLastName(names[0]);
         customer.setFirstName(names[1]);
@@ -37,7 +37,7 @@ public class CustomerService {
         customer.setPhoneNumber(info.getPhoneNumber());
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        CustomerEntity saved = customerRepository.save(customer);
+        Customer saved = customerRepository.save(customer);
         return toResponse(saved);
     }
 
@@ -45,7 +45,7 @@ public class CustomerService {
      * ログイン
      */
     public CustomerResponse login(String email, String password) {
-        CustomerEntity customer = customerRepository.findByEmail(email)
+        Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("メールアドレスが見つかりません。"));
 
         if (!passwordEncoder.matches(password, customer.getPassword())) {
@@ -60,7 +60,7 @@ public class CustomerService {
      */
     public List<CustomerResponse> searchByNameOrPhone(String keyword) {
     // 部分一致で名前・電話番号検索
-    List<CustomerEntity> customers = customerRepository
+    List<Customer> customers = customerRepository
             .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
                     keyword, keyword, keyword);
 
@@ -73,7 +73,7 @@ public class CustomerService {
      * 会員情報取得
      */
     public CustomerResponse getCustomerById(Integer customerId) {
-        CustomerEntity customer = customerRepository.findById(customerId)
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
         return toResponse(customer);
     }
@@ -82,7 +82,7 @@ public class CustomerService {
      * 会員情報更新
      */
     public CustomerResponse updateCustomer(Integer customerId, CustomerUpdateRequest request) {
-        CustomerEntity customer = customerRepository.findById(customerId)
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), customer.getPassword())) {
@@ -120,7 +120,7 @@ public class CustomerService {
     /**
      * DTO変換
      */
-    private CustomerResponse toResponse(CustomerEntity customer) {
+    private CustomerResponse toResponse(Customer customer) {
         return new CustomerResponse(
                 customer.getCustomerId(),
                 customer.getFullName(),

@@ -1,7 +1,7 @@
 package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,10 @@ public class CartService {
     }
     
 public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-    Optional<ProductEntity> productOpt = productRepository.findById(productId);
+    Optional<Product> productOpt = productRepository.findById(productId);
 
     if (productOpt.isPresent()) {
-        ProductEntity product = productOpt.get();
+        Product product = productOpt.get();
         CartRespons cart = getCartFromSession(session);
 
         String itemId = String.valueOf(productId); // カートのキー
