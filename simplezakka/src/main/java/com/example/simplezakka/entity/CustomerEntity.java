@@ -40,6 +40,11 @@ public class CustomerEntity {
    
     @Column(nullable = false)
     private String address;
+
+    public String getFullName() {
+    return lastName + " " + firstName;
+}
+
    
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderEntity> orders = new ArrayList<>();

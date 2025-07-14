@@ -3,7 +3,6 @@ package com.example.simplezakka.controller;
 import com.example.simplezakka.dto.product.ProductDetail;
 import com.example.simplezakka.dto.product.ProductListItem;
 import com.example.simplezakka.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,6 @@ public class ProductController {
 
     private final ProductService productService;
     
-    @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }

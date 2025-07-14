@@ -2,7 +2,6 @@ package com.example.simplezakka.config;
 
 import com.example.simplezakka.entity.ProductEntity;
 import com.example.simplezakka.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
