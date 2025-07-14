@@ -37,3 +37,16 @@ body {
 button.btn {
     background-color: rgb(191, 232, 191);
 }
+
+.remove-item {
+    background-color:rgb(191, 232, 191);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* ホバー時に茶色に変える */
+.remove-item:hover {
+  background-color:#383028; /* 文字色を濃い茶色に設定 */
+}
