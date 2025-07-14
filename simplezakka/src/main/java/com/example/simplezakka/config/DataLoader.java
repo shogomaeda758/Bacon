@@ -22,11 +22,28 @@ public class DataLoader implements CommandLineRunner {
     public DataLoader(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public void run(String... args) {
         loadSampleData(); // メソッド名を汎用的に変更
+    }
+
+    private void loadSampleCategories() {
+        if (categoryRepository.count() > 0) {
+            return; // すでにデータが存在する場合はスキップ
+        }
+
+        List<CategoryEntity> categories = Arrays.asList(
+            createCategory("インテリア"),
+            createCategory("キッチン用品"),
+            createCategory("バッグ・アクセサリー"),
+            createCategory("生活雑貨"),
+            createCategory("文房具・オフィス用品")
+        );
+        
+        categoryRepository.saveAll(categories);
     }
 
     private void loadSampleData() {

@@ -2,14 +2,11 @@
 // Product Entity
 // ===============================
 package com.example.simplezakka.entity;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "products")
 @Data
@@ -54,9 +51,8 @@ public class Product {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    public void setPrice(Integer price2) {
+    public void setPrice(BigDecimal price2) {
         // TODO Auto-generated method stub
-         this.price = BigDecimal.valueOf(price2);
+        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
     }
 }
