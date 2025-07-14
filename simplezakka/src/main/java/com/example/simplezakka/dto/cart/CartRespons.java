@@ -54,4 +54,9 @@ public class CartRespons implements Serializable {
             totalPrice += item.getSubtotal();
         }
     }
+
+    public void addItem(Integer productId, Integer quantity) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addItem'");
+    }
 }

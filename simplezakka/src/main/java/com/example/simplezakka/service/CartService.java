@@ -1,8 +1,7 @@
 package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.dto.cart.CartItemResponse;
-import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
@@ -23,18 +22,18 @@ public class CartService {
     public CartRespons getCartFromSession(HttpSession session) {
         CartRespons cart = (CartRespons) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
-            cart = new CartRespons();
+            cart = new CartRespons(); //カートがなければ新しく作成
             session.setAttribute(CART_SESSION_KEY, cart);
         }
         return cart;
     }
     
-    public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-        Optional<ProductEntity> productOpt = productRepository.findById(productId);
+public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
+    Optional<Product> productOpt = productRepository.findById(productId);
 
-        if (productOpt.isPresent()) {
-            ProductEntity product = productOpt.get();
-            CartRespons cart = getCartFromSession(session);
+    if (productOpt.isPresent()) {
+        Product product = productOpt.get();
+        CartRespons cart = getCartFromSession(session);
 
             String itemId = String.valueOf(productId);
             int currentInCart = 0;
@@ -44,6 +43,18 @@ public class CartService {
                 currentInCart = cart.getItems().get(itemId).getQuantity();
             }
 
+        // 🔽 在庫チェック
+        if (currentInCart + quantity > product.getStock()) {
+            throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
+             "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
+        }
+
+        //商品を追加
+        cart.addItem(productId,quantity); 
+        
+        //セッションの更新
+        session.setAttribute(CART_SESSION_KEY, cart);
+        return cart;
             // 在庫チェック
             if (currentInCart + quantity > product.getStock()) {
                 throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
@@ -72,6 +83,7 @@ public class CartService {
         // 商品が存在しない場合
         return null;
     }
+    
     
     public CartRespons updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
         CartRespons cart = getCartFromSession(session);
