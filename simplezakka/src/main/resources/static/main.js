@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // モーダル要素の取得
     const productModal = new bootstrap.Modal(document.getElementById('productModal'));
     const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-    const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
     const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
     
     // APIのベースURL
@@ -16,19 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // カートボタンクリックイベント
     document.getElementById('cart-btn').addEventListener('click', function() {
-        updateCartModalContent();
-        cartModal.show();
-    });
-    
-    // 注文手続きボタンクリックイベント
-    document.getElementById('checkout-btn').addEventListener('click', function() {
-        cartModal.hide();
-        checkoutModal.show();
-    });
-    
-    // 注文確定ボタンクリックイベント
-    document.getElementById('confirm-order-btn').addEventListener('click', function() {
-        submitOrder();
+        showCartModal();
     });
     
     // 商品一覧を取得して表示する関数
@@ -174,24 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
         cartModal.show();
     }
 
-     // カートモーダルの内容を更新する関数
-    async function updateCartModalContent() {
-        try {
-            const response = await fetch(`${API_BASE}/cart`);
-            if (!response.ok) {
-                throw new Error('カート情報の取得に失敗しました');
-            }
-            const cart = await response.json();
-            displayCart(cart);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('カート情報の読み込みに失敗しました');
-        }
-    }
-    
-    // カート内容を表示する関数
-    function displayCart(cart) {
+    // カートモーダルの内容を更新する関数 (カート表示と注文フォームの切り替えを内包)
+    async function updateCartModalContent(showCheckoutForm = false) {
+        const modalTitle = document.getElementById('cartModalTitle');
         const modalBody = document.getElementById('cartModalBody');
+        const modalFooter = document.getElementById('cartModalFooter');
+
         if (!showCheckoutForm) {
             // カート内容の表示
             modalTitle.textContent = 'ショッピングカート';
@@ -448,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
             <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
             <p>決済方法: ${order.paymentMethod === 'credit_card' ? 'クレジットカード' : order.paymentMethod === 'bank_transfer' ? '銀行振込' : '代金引換'}</p>
-
+            <p>お客様のメールアドレスに注文確認メールをお送りしました。</p>
         `;
     }
 });
