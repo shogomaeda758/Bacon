@@ -25,14 +25,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Integer>
     // 商品名での部分一致検索
     List<ProductEntity> findByNameContaining(String keyword);
     
-    // おすすめ商品の取得
-    List<ProductEntity> findByIsRecommendedTrue();
-    
     // 在庫あり商品の取得
     List<ProductEntity> findByStockGreaterThan(Integer stock);
-    
-    // 価格範囲での検索
-    List<ProductEntity> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
     
     // 在庫減少処理（カスタムクエリ）
     @Modifying
