@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     
-    // 会員の注文履歴を取得（注文日時の降順）
+    // 会員の注文履歴を取得
     List<Order> findByCustomerOrderByOrderDateDesc(Customer customer);
     
     // 会員IDによる注文履歴取得
