@@ -178,7 +178,7 @@ public class DataLoader implements CommandLineRunner {
         product.setStock(stock);
         product.setImageUrl(imageUrl);
         product.setIsRecommended(isRecommended);
-        product.setCategory(category); // ★ここが最も重要です★
+        product.setCategory(category);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         return product;
