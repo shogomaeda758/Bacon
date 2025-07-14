@@ -1,19 +1,17 @@
 package com.example.simplezakka.dto.product;
 
-import java.math.BigDecimal;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 商品詳細用 DTO
+ * 商品詳細画面で表示する詳細な商品情報を格納
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDetail {
-    public ProductDetail(Integer productId2, String name2, BigDecimal price2, String description2, Integer stock2,
-            String imageUrl2) {
-        //TODO Auto-generated constructor stub
-    }
     private Integer productId;
     private String name;
     private Integer price;
