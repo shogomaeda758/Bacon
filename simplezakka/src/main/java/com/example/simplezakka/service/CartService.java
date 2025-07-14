@@ -22,7 +22,7 @@ public class CartService {
     public CartRespons getCartFromSession(HttpSession session) {
         CartRespons cart = (CartRespons) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
-            cart = new CartRespons();
+            cart = new CartRespons(); //カートがなければ新しく作成
             session.setAttribute(CART_SESSION_KEY, cart);
         }
         return cart;
@@ -48,11 +48,19 @@ public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSessio
             throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
              "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
         }
-            return cart;
+
+        //商品を追加
+        cart.addItem(productId,quantity); 
+        
+        //セッションの更新
+        session.setAttribute(CART_SESSION_KEY, cart);
+        return cart;
         }
         
+        //商品が存在しない場合
         return null;
     }
+    
     
     public CartRespons updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
         CartRespons cart = getCartFromSession(session);
