@@ -1,10 +1,13 @@
 package com.example.simplezakka.config;
 
+import com.example.simplezakka.entity.CategoryEntity;
 import com.example.simplezakka.entity.ProductEntity;
+import com.example.simplezakka.repository.CategoryRepository;
 import com.example.simplezakka.repository.ProductRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -13,21 +16,46 @@ import java.util.List;
 public class DataLoader implements CommandLineRunner {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-  
-    public DataLoader(ProductRepository productRepository) {
+    public DataLoader(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public void run(String... args) {
+        loadSampleCategories();
         loadSampleProducts();
+    }
+
+    private void loadSampleCategories() {
+        if (categoryRepository.count() > 0) {
+            return; // すでにデータが存在する場合はスキップ
+        }
+
+        List<CategoryEntity> categories = Arrays.asList(
+            createCategory("インテリア"),
+            createCategory("キッチン用品"),
+            createCategory("バッグ・アクセサリー"),
+            createCategory("生活雑貨"),
+            createCategory("文房具・オフィス用品")
+        );
+        
+        categoryRepository.saveAll(categories);
     }
 
     private void loadSampleProducts() {
         if (productRepository.count() > 0) {
             return; // すでにデータが存在する場合はスキップ
         }
+
+        // カテゴリーを取得
+        CategoryEntity interiorCategory = categoryRepository.findByCategoryName("インテリア").orElse(null);
+        CategoryEntity kitchenCategory = categoryRepository.findByCategoryName("キッチン用品").orElse(null);
+        CategoryEntity bagCategory = categoryRepository.findByCategoryName("バッグ・アクセサリー").orElse(null);
+        CategoryEntity lifestyleCategory = categoryRepository.findByCategoryName("生活雑貨").orElse(null);
+        CategoryEntity officeCategory = categoryRepository.findByCategoryName("文房具・オフィス用品").orElse(null);
 
         List<ProductEntity> products = Arrays.asList(
             createProduct(
@@ -36,7 +64,8 @@ public class DataLoader implements CommandLineRunner {
                 3500, 
                 20, 
                 "/images/desk-organizer.png", 
-                true
+                true,
+                officeCategory
             ),
             createProduct(
                 "アロマディフューザー（ウッド）", 
@@ -44,7 +73,8 @@ public class DataLoader implements CommandLineRunner {
                 4200, 
                 15, 
                 "/images/aroma-diffuser.png", 
-                true
+                true,
+                interiorCategory
             ),
             createProduct(
                 "コットンブランケット", 
@@ -52,7 +82,8 @@ public class DataLoader implements CommandLineRunner {
                 5800, 
                 10, 
                 "/images/cotton-blanket.png", 
-                false
+                false,
+                interiorCategory
             ),
             createProduct(
                 "ステンレスタンブラー", 
@@ -60,7 +91,8 @@ public class DataLoader implements CommandLineRunner {
                 2800, 
                 30, 
                 "/images/tumbler.png", 
-                false
+                false,
+                kitchenCategory
             ),
             createProduct(
                 "ミニマルウォールクロック", 
@@ -68,7 +100,8 @@ public class DataLoader implements CommandLineRunner {
                 3200, 
                 25, 
                 "/images/wall-clock.png", 
-                false
+                false,
+                interiorCategory
             ),
             createProduct(
                 "リネンクッションカバー", 
@@ -76,7 +109,8 @@ public class DataLoader implements CommandLineRunner {
                 2500, 
                 40, 
                 "/images/cushion-cover.png", 
-                true
+                true,
+                interiorCategory
             ),
             createProduct(
                 "陶器フラワーベース", 
@@ -84,7 +118,8 @@ public class DataLoader implements CommandLineRunner {
                 4000, 
                 15, 
                 "/images/flower-vase.png", 
-                false
+                false,
+                interiorCategory
             ),
             createProduct(
                 "木製コースター（4枚セット）", 
@@ -92,7 +127,8 @@ public class DataLoader implements CommandLineRunner {
                 1800, 
                 50, 
                 "/images/wooden-coaster.png", 
-                false
+                false,
+                kitchenCategory
             ),
             createProduct(
                 "キャンバストートバッグ", 
@@ -100,7 +136,8 @@ public class DataLoader implements CommandLineRunner {
                 3600, 
                 35, 
                 "/images/tote-bag.png", 
-                true
+                true,
+                bagCategory
             ),
             createProduct(
                 "ガラス保存容器セット", 
@@ -108,25 +145,34 @@ public class DataLoader implements CommandLineRunner {
                 4500, 
                 20, 
                 "/images/glass-container.png", 
-                false
+                false,
+                kitchenCategory
             )
         );
         
         productRepository.saveAll(products);
     }
     
-    private ProductEntity createProduct(String name, String description, Integer price, Integer stock, String imageUrl, Boolean isRecommended) {
+    private CategoryEntity createCategory(String categoryName) {
+        CategoryEntity category = new CategoryEntity();
+        category.setCategoryName(categoryName);
+        category.setCreatedAt(LocalDateTime.now());
+        category.setUpdatedAt(LocalDateTime.now());
+        return category;
+    }
+    
+    private ProductEntity createProduct(String name, String description, Integer price, Integer stock, 
+                                      String imageUrl, Boolean isRecommended, CategoryEntity category) {
         ProductEntity product = new ProductEntity();
         product.setName(name);
         product.setDescription(description);
-        product.setPrice(price);
+        product.setPrice(new BigDecimal(price)); // BigDecimalに変更
         product.setStock(stock);
         product.setImageUrl(imageUrl);
         product.setIsRecommended(isRecommended);
+        product.setCategory(category); // カテゴリーを設定
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         return product;
     }
 }
-
-
