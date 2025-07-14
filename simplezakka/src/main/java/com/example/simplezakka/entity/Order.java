@@ -1,5 +1,5 @@
 // ===============================
-// Order Entity
+// Order 
 // ===============================
 package com.example.simplezakka.entity;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @Table(name = "orders")
 @Data
 @NoArgsConstructor
-public class OrderEntity {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class OrderEntity {
     
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    private CustomerEntity customer;
+    private Customer customer;
     
     @Column(nullable = false)
     private String orderEmail;
@@ -57,7 +57,7 @@ public class OrderEntity {
     private Boolean isGuest;
     
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetailEntity> orderDetails = new ArrayList<>();
+    private List<OrderDetail> orderDetails = new ArrayList<>();
     
     private LocalDateTime createdAt;
     
@@ -75,7 +75,7 @@ public class OrderEntity {
     }
     
     // Helper method to add order detail
-    public void addOrderDetail(OrderDetailEntity orderDetail) {
+    public void addOrderDetail(OrderDetail orderDetail) {
         orderDetails.add(orderDetail);
         orderDetail.setOrder(this);
     }
@@ -83,7 +83,7 @@ public class OrderEntity {
     // Helper method to calculate total
     public BigDecimal calculateTotal() {
         BigDecimal subtotal = orderDetails.stream()
-                .map(OrderDetailEntity::getSubtotal)
+                .map(OrderDetail::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return subtotal.add(shippingFee);
 

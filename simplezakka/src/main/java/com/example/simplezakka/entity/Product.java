@@ -1,5 +1,5 @@
 // ===============================
-// Product Entity
+// Product 
 // ===============================
 package com.example.simplezakka.entity;
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "products")
 @Data
 @NoArgsConstructor
-public class ProductEntity {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public class ProductEntity {
     
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
+    private Category category;
     
     private LocalDateTime createdAt;
     
