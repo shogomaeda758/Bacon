@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDateTime;
 
 
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "categories")
 @Data
 @NoArgsConstructor
-public class CategoryEntity {
+public class Category {
 
 
     @Id

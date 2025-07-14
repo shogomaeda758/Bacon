@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "order_details")
 @Data
 @NoArgsConstructor
-public class OrderDetailEntity {
+public class OrderDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +22,11 @@ public class OrderDetailEntity {
     
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity order;
+    private Order order;
     
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    private ProductEntity product;
+    private Product product;
     
     @Column(nullable = false)
     private Integer quantity;

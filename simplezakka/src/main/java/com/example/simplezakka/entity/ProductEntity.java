@@ -38,7 +38,7 @@ public class ProductEntity {
     
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
+    private Category category;
     
     private LocalDateTime createdAt;
     

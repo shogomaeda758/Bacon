@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "customers")
 @Data
 @NoArgsConstructor
-public class CustomerEntity {
+public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +47,7 @@ public class CustomerEntity {
 
    
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderEntity> orders = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
     private LocalDateTime createdAt;
    
@@ -65,7 +65,7 @@ public class CustomerEntity {
     }
    
     // Helper method to add order
-    public void addOrder(OrderEntity order) {
+    public void addOrder(Order order) {
         orders.add(order);
         order.setCustomer(this);
     }
