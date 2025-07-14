@@ -24,7 +24,7 @@ public class OrderEntity {
     
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    private CustomerEntity customer;
+    private Integer customer;
     
     @Column(nullable = false)
     private String orderEmail;
