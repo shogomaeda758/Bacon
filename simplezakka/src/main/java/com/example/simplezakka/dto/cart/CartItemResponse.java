@@ -20,8 +20,4 @@ public class CartItemResponse implements Serializable {
     private String imageUrl;
     private int quantity;
     private int subtotal;
-    public void setPrice(BigDecimal price2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
-    }
 }

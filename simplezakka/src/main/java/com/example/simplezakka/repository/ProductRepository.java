@@ -40,6 +40,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Integer>
     // 価格更新処理
     @Modifying
     @Transactional
-    @Query("UPDATE Product p SET p.price = :newPrice WHERE p.productId = :productId")
+    @Query("UPDATE ProductEntity p SET p.price = :newPrice WHERE p.productId = :productId")
     int updatePrice(@Param("productId") Integer productId, @Param("newPrice") BigDecimal newPrice);
 }
