@@ -54,13 +54,5 @@ public class OrderDetailEntity {
         return unitPrice.multiply(new BigDecimal(quantity));
     }
 
-    public void setPrice(BigDecimal price) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPrice'");
-    }
-
-    public void setProductName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setProductName'");
-    }
+   
 }
