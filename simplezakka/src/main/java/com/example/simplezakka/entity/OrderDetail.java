@@ -1,5 +1,5 @@
 // ===============================
-// Product Entity
+// OrderDetail Entity
 // ===============================
 package com.example.simplezakka.entity;
 
@@ -11,34 +11,28 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "order_details")
 @Data
 @NoArgsConstructor
-public class ProductEntity {
+public class OrderDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer productId;
-    
-    @Column(nullable = false)
-    private String name;
-    
-    @Column(length = 1000)
-    private String description;
-    
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
-    
-    @Column(nullable = false)
-    private Integer stock;
-    
-    private String imageUrl;
-    
-    private Boolean isRecommended;
+    private Integer orderDetailId;
     
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+    
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+    
+    @Column(nullable = false)
+    private Integer quantity;
+    
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal unitPrice;
     
     private LocalDateTime createdAt;
     
@@ -54,9 +48,11 @@ public class ProductEntity {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    public void setPrice(Integer price2) {
-        // TODO Auto-generated method stub
-         this.price = BigDecimal.valueOf(price2);
+    
+    // Helper method to calculate subtotal
+    public BigDecimal getSubtotal() {
+        return unitPrice.multiply(new BigDecimal(quantity));
     }
+
+   
 }

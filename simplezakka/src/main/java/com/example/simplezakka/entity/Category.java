@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "categories")
 @Data
 @NoArgsConstructor
-public class CategoryEntity {
+public class Category {
 
 
     @Id
