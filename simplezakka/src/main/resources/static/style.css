@@ -64,5 +64,13 @@ a:hover {
     color:    #ffffff;       /* マウスオーバー時の色 */
 
 }
+#searchInput {
+            margin-bottom: 1em;
+            padding: 0.8em;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #f9fdf9;
+        }
 
 
