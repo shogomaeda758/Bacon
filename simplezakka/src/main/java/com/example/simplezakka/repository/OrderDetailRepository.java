@@ -18,11 +18,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     // 注文IDによる注文明細取得
     List<OrderDetail> findByOrderOrderByOrderDetailIdAsc(Order order);
     
-    // 注文IDによる注文明細取得（Order entityを使わない版）
+    // 注文IDによる注文明細取得
     @Query("SELECT od FROM OrderDetail od WHERE od.order.orderId = :orderId ORDER BY od.orderDetailId ASC")
     List<OrderDetail> findByOrderIdOrderByOrderDetailIdAsc(@Param("orderId") Integer orderId);
     
-    // 商品IDによる注文明細検索（売上分析等で使用）
+    // 商品IDによる注文明細検索
     @Query("SELECT od FROM OrderDetail od WHERE od.product.productId = :productId")
     List<OrderDetail> findByProductId(@Param("productId") Integer productId);
     

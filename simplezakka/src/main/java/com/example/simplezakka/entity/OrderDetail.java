@@ -49,7 +49,6 @@ public class OrderDetail {
         updatedAt = LocalDateTime.now();
     }
     
-    // Helper method to calculate subtotal
     public BigDecimal getSubtotal() {
         return unitPrice.multiply(new BigDecimal(quantity));
     }

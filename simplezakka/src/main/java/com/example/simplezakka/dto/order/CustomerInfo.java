@@ -14,12 +14,11 @@ import jakarta.validation.constraints.Size;
 public class CustomerInfo {
 
     /** 顧客ID (会員の場合に設定、ゲストの場合は0) */
-    // ここは@NotNullではなくnullを許容することで、Controllerでの判断を容易にする
-    private Integer customerId; // 会員の場合はCustomerEntityのID、ゲストの場合は0
+    private Integer customerId; 
 
     @NotBlank(message = "氏名は必須です。")
     @Size(max = 100, message = "氏名は100文字以内で入力してください。")
-    private String name; // 例: "山田 太郎" - フロントエンドで姓と名を結合して表示することを想定
+    private String name; // フロントエンドで姓と名を結合して表示することを想定
 
     @NotBlank(message = "メールアドレスは必須です。")
     @Email(message = "有効なメールアドレス形式で入力してください。")
