@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
     const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
 
-
+    // APIのベースURL。開発環境ではlocalhost、デプロイ時は相対パスを使用するなど調整してください。
     const API_BASE = 'http://localhost:8080/api';
 
     // 注文処理全体で共有するデータ構造
@@ -18,9 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         paymentMethod: '', // ★ ここに paymentMethod を移動しました
         items: [],
-        totalPrice: 0
+        totalPrice: 0 // totalPrice は最終合計額ではなく、商品合計を保持するようにします
     };
-
 
     // 共通のエラーハンドリング関数
     async function handleError(response, defaultMessage) {
@@ -128,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const quantity = parseInt(quantityInput.value);
             const stock = parseInt(document.getElementById('product-stock').textContent);
 
- // 在庫数と入力数量のバリデーション
+            // 在庫数と入力数量のバリデーション
             if (quantity <= 0 || isNaN(quantity)) {
                 alert('数量は1以上で入力してください。');
                 quantityInput.value = 1;
@@ -137,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (quantity > stock) {
                 alert(`数量は在庫数(${stock})以下で入力してください。`);
                 quantityInput.value = stock;
-
                 return;
             }
             addToCart(product.productId, quantity);
@@ -207,7 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (cart.items && Object.keys(cart.items).length > 0) {
                     const { shippingFee, grandTotal } = cart; // 分割代入で変数宣言を簡潔に
 
-                    modalBody.innerHTML = `
+                    // html 変数をここで宣言し、初期値を設定
+                    let html = `
                         <table class="table">
                             <thead>
                                 <tr>
@@ -223,24 +222,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     Object.values(cart.items).forEach(item => {
                         html += `
-                            <tr>
-                                <td>${item.name}</td>
-                                <td>¥${item.price.toLocaleString()}</td>
-                                <td>
-                                    <input type="number" class="form-control form-control-sm update-quantity"
-                                             data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
-                                </td>
-                                <td>¥${item.subtotal.toLocaleString()}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">削除</button>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>¥${item.price.toLocaleString()}</td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm update-quantity"
+                                                data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
+                                    </td>
+                                    <td>¥${item.subtotal.toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">削除</button>
+                                    </td>
+                                </tr>
                         `;
                     });
 
                     html += `
-
-
                             </tbody>
                             <tfoot>
                                 <tr>
@@ -262,6 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </table>
                     `;
 
+                    modalBody.innerHTML = html; // 最後に一度だけ代入
+
+                    // 数量更新イベントの設定
                     document.querySelectorAll('.update-quantity').forEach(input => {
                         input.addEventListener('change', function() {
                             const newQuantity = parseInt(this.value);
@@ -271,7 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (newQuantity <= 0 || isNaN(newQuantity)) {
                                 alert('数量は1以上で入力してください。');
                                 this.value = 1;
-
                                 return;
                             }
                             if (newQuantity > maxStock) {
@@ -361,11 +360,12 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('email').value = currentOrderData.customerInfo.email || '';
             document.getElementById('address').value = currentOrderData.customerInfo.address || '';
             document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
-            if (currentOrderData.paymentMethod) { // ★ currentOrderData.paymentMethod を参照
+            if (currentOrderData.paymentMethod) { // currentOrderData.paymentMethod を参照
                 const radio = document.querySelector(`input[name="paymentMethod"][value="${currentOrderData.paymentMethod}"]`);
                 if (radio) radio.checked = true;
             }
 
+            // バリデーションイベントリスナーを追加
             const form = document.getElementById('order-form');
             form.querySelectorAll('input, select').forEach(input => {
                 const validateInput = () => {
@@ -381,17 +381,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.addEventListener('blur', validateInput);
             });
 
+            // 決済方法のラジオボタンに対するバリデーション表示
             const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
             const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
             paymentRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
-
                     if (document.querySelector('input[name="paymentMethod"]:checked')) {
                         paymentMethodFeedback.style.display = 'none';
                     } else {
                         paymentMethodFeedback.style.display = 'block';
                     }
-
                 });
             });
             // 初期表示時にも決済方法が選択されているかチェック
@@ -420,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCartBadge(cart.totalQuantity);
         } catch (error) {
             console.error(error.message);
-            updateCartModalContent();
+            updateCartModalContent(); // 失敗時は元の状態に戻す
         }
     }
 
@@ -449,17 +448,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
-            form.querySelector(':invalid')?.focus();
+            // スクロールして最初の無効なフィールドにフォーカス
+            form.querySelector(':invalid')?.focus(); // develop の optional chaining を適用
             return;
         }
-
 
         // 決済方法の選択チェック
         const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
         const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
         if (!paymentMethodElement) {
             paymentMethodFeedback.style.display = 'block'; // エラーメッセージを表示
-
             alert('決済方法を選択してください。');
             return;
         } else {
@@ -472,10 +470,9 @@ document.addEventListener('DOMContentLoaded', function() {
             email: document.getElementById('email').value,
             address: document.getElementById('address').value,
             phoneNumber: document.getElementById('phone').value
-
         };
 
-        // ★ currentOrderData のトップレベルに paymentMethod を追加しました
+        // currentOrderData のトップレベルに paymentMethod を追加
         currentOrderData.paymentMethod = paymentMethodElement.value;
 
         try {
@@ -488,11 +485,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // currentOrderDataにカート情報を保存
             currentOrderData.items = Object.values(cart.items);
-            currentOrderData.totalPrice = cart.totalPrice;
+            currentOrderData.totalPrice = cart.totalPrice; // 商品合計を保持
 
-            cartModal.hide(); // カートモーダルを閉じる
+            toggleModal(cartModal, false); // カートモーダルを閉じる (develop の汎用関数を適用)
             showOrderConfirmation(); // 注文確認モーダルを表示
-
         } catch (error) {
             console.error('Error preparing order confirmation:', error);
             alert(`注文情報の準備中にエラーが発生しました: ${error.message}`);
@@ -587,15 +583,15 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         document.getElementById('back-to-customer-form').addEventListener('click', function() {
-            orderConfirmationModal.hide();
+            toggleModal(orderConfirmationModal, false); // develop の汎用関数を適用
             // カートモーダルを再表示し、注文フォームの状態にする
-            cartModal.show();
+            toggleModal(cartModal, true); // develop の汎用関数を適用
             updateCartModalContent(true); // 注文フォームを表示
         });
 
         document.getElementById('final-confirm-order-btn').addEventListener('click', confirmOrder);
 
-        orderConfirmationModal.show();
+        toggleModal(orderConfirmationModal, true); // develop の汎用関数を適用
     }
 
     // 注文を確定する関数（API送信）
@@ -604,12 +600,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // currentOrderData には既にカート情報とお客様情報が含まれている
             const response = await fetch(`${API_BASE}/order/confirm`, {
                 method: 'POST',
-
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(currentOrderData) // currentOrderData を送信
-
             });
 
             if (!response.ok) {
@@ -639,16 +633,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // currentOrderData もリセット
             currentOrderData = {
                 customerInfo: {
-                    name: '', email: '', address: '', phoneNumber: '' // paymentMethod を削除
+                    name: '', email: '', address: '', phoneNumber: ''
                 },
-                paymentMethod: '', // ★ paymentMethod をトップレベルでリセット
+                paymentMethod: '', // paymentMethod をトップレベルでリセット
                 items: [],
                 totalPrice: 0
             };
 
-            orderConfirmationModal.hide(); // 注文確認モーダルを閉じる
+            toggleModal(orderConfirmationModal, false); // 注文確認モーダルを閉じる (develop の汎用関数を適用)
             displayOrderComplete(orderResult); // 注文完了モーダルを表示
-            orderCompleteModal.show();
+            toggleModal(orderCompleteModal, true); // develop の汎用関数を適用
 
 
         } catch (error) {
@@ -664,16 +658,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const displayPaymentMethod = (order.paymentMethod === 'bank_transfer') ? '銀行振込' :
                                      (order.paymentMethod === 'cash_on_delivery') ? '代金引換' :
-                                     order.paymentMethod || '不明'; // 不明な場合も考慮
-
+                                     order.paymentMethod || ''; // 追加
         modalBody.innerHTML = `
-            <div class="alert alert-success" role="alert">
-                <p>ご注文いただきありがとうございます。</p>
-                <p>ご注文番号: <strong>${order.orderId || 'N/A'}</strong></p>
-                <p>ご注文日時: ${order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A'}</p>
-                <p>決済方法: ${displayPaymentMethod}</p>
-            </div>
-
+            <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
+            <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
+            <p>決済方法: ${displayPaymentMethod}</p>
+            <p>商品合計: ¥${order.totalPrice.toLocaleString()}</p>
+            <p>送料: ¥${order.shippingFee.toLocaleString()}</p>
+            <p class="fs-5">最終お支払い金額: ¥${order.grandTotal.toLocaleString()}</p>
         `;
         const modalFooter = document.getElementById('orderCompleteModalFooter');
         modalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>`;
