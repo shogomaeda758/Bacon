@@ -251,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     modalFooter.innerHTML = `
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">買い物を続ける</button>
+                        <button type="button" class="btn btn-secondary" id="login-to-purchase-btn">ログインして購入</button>
                         <button type="button" class="btn btn-primary" id="proceed-to-checkout-form">注文手続きへ</button>
                     `;
                     document.getElementById('proceed-to-checkout-form').addEventListener('click', () => updateCartModalContent(true));
