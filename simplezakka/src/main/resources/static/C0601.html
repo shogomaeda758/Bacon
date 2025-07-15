@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>シンプル雑貨</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>シンプル雑貨 ログイン</title>
     <style>
         body {
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -16,6 +15,7 @@
             padding: 2em;
         }
 
+
         .container {
             background: #ffffff;
             padding: 2em;
@@ -24,16 +24,19 @@
             width: 300px;
         }
 
+
         h1 {
             font-size: 1.5em;
             margin-bottom: 1em;
             text-align: center;
         }
 
+
         form {
             display: flex;
             flex-direction: column;
         }
+
 
         input {
             margin-bottom: 1em;
@@ -43,6 +46,7 @@
             font-size: 1em;
             background-color: #f9fdf9;
         }
+
 
         button, input[type="submit"] {
             padding: 0.8em;
@@ -56,19 +60,28 @@
             border: 1px solid #383028;
 }
 
+            transition: background-color 0.3s;
+        }
+
 
         button:hover, input[type="submit"]:hover {
             background-color: #57a05a;
         }
 
+
+        button:active, input[type="submit"]:active {
+            background-color: #57a05a; /* hoverと同じ色にして黒くならないように */
+        }
+
+
         .message {
             margin-top: 1em;
             font-size: 0.9em;
-            color: #d9534f;
+            color: #388e3c;
             text-align: center;
         }
 
-        /* 最初は会員登録フォームを非表示 */
+
         #register-container {
             display: none;
         }
@@ -76,44 +89,78 @@
 </head>
 <body>
 
-    <!-- ログイン画面 -->
-    <div class="container" id="login-container">
-        <h1>会員のお客様</h1>
-        <form id="loginForm">
-            <label for="email">会員ID</label>
-            <input type="email" id="email" placeholder="メールアドレス" required>
 
-            <label for="password">パスワード</label>
-            <input type="password" id="password" required>
+<div class="container" id="login-container">
+    <h1>会員のお客様</h1>
+    <form id="loginForm">
+        <label for="email">会員ID</label>
+        <input type="email" id="email" placeholder="メールアドレス" required />
 
-            <input type="submit" value="ログイン">
-        </form>
 
-        <h1>はじめてご利用のお客様</h1>
-        <button id="show-register-btn">新規会員登録へ</button>
-    </div>
+        <label for="password">パスワード</label>
+        <input type="password" id="password" required />
 
-    <!-- 会員登録画面 -->
-    <div class="container" id="register-container">
-        <h1>会員登録</h1>
-        <form id="registerForm">
-            <input type="text" name="name" placeholder="名前" required />
-            <input type="email" name="email" placeholder="メールアドレス" required />
-            <input type="text" name="address" placeholder="住所" required />
-            <input type="tel" name="phoneNumber" placeholder="電話番号" required />
-            <input type="password" name="password" placeholder="パスワード" required />
-            <button type="submit">登録する</button>
-        </form>
-        <div id="registerMessage" class="message"></div>
-    </div>
+
+        <input type="submit" value="ログイン" />
+    </form>
+
+
+    <h1>はじめてご利用のお客様</h1>
+    <button id="show-register-btn">新規会員登録へ</button>
+</div>
+
+
+<div class="container" id="register-container">
+    <h1>会員登録</h1>
+    <form id="registerForm">
+        <input type="text" name="name" placeholder="名前" required />
+        <input type="email" name="email" placeholder="メールアドレス" required />
+        <input type="text" name="address" placeholder="住所" required />
+        <input type="tel" name="phoneNumber" placeholder="電話番号" required />
+        <input type="password" name="password" placeholder="パスワード" required />
+        <button type="submit">登録する</button>
+    </form>
+    <div id="registerMessage" class="message"></div>
+</div>
+
 
 <script>
-    // 「新規会員登録へ」ボタンで画面切り替え
+    // 最初の読み込み時にログイン済みならログイン後画面に遷移
+    window.addEventListener("load", function(){
+        if (sessionStorage.getItem("userName")) {
+            window.location.href = "index_logged_in.html";
+        }
+    });
+
+
     document.getElementById("show-register-btn").addEventListener("click", function() {
         document.getElementById("login-container").style.display = "none";
         document.getElementById("register-container").style.display = "block";
     });
+
+
+    // 会員登録
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const name = e.target.name.value;
+        sessionStorage.setItem("userName", name + "さん");
+        document.getElementById("registerMessage").textContent = "会員登録が完了しました！";
+        setTimeout(() => {
+            window.location.href = "index_logged_in.html";
+        }, 2000);
+    });
+
+
+    // ログイン
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const localPart = email.split('@')[0];
+        sessionStorage.setItem("userName", localPart + "さん");
+        window.location.href = "index_logged_in.html"; // 商品画面（ログイン後）に遷移
+    });
 </script>
+
 
 </body>
 </html>

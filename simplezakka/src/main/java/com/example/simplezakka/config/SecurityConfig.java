@@ -15,13 +15,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 最低限の設定例
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // REST APIの場合CSRF不要
+            .csrf(csrf -> csrf.disable())  
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin())  
+            )
             .authorizeHttpRequests(authz -> authz
-                .anyRequest().permitAll() // 全て許可（必要に応じ制御）
+                .anyRequest().permitAll()
             );
         return http.build();
     }
