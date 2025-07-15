@@ -122,7 +122,6 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        cartService.clearCart(session);
 
         List<OrderItemDetailResponse> responseItems = savedOrder.getOrderDetails().stream()
             .map(detail -> {
@@ -138,6 +137,7 @@ public class OrderService {
             })
             .collect(Collectors.toList());
 
+        cartService.clearCart(session); 
         return new OrderResponse(
             savedOrder.getOrderId(),
             savedOrder.getOrderDate(),
