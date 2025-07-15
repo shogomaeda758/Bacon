@@ -1,7 +1,7 @@
 package com.example.simplezakka.service;
 
-import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.cart.CartItemResponse;
+import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.order.CustomerInfo;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,19 +84,21 @@ public class OrderService {
         }
 
         order.setOrderEmail(customerInfo.getEmail());
-        order.setOrderName(customerInfo.getName()); 
-        order.setOrderAddress(customerInfo.getAddress()); 
-        order.setOrderPhoneNumber(customerInfo.getPhoneNumber()); 
+        order.setOrderName(customerInfo.getName());
+        order.setOrderAddress(customerInfo.getAddress());
+        order.setOrderPhoneNumber(customerInfo.getPhoneNumber());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
 
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        BigDecimal subtotal = cart.getTotalPrice(); 
-        BigDecimal shippingFee = calculateShippingFee(subtotal);
-        order.setShippingFee(shippingFee);
+        // 商品合計はCartResponsから取得
+        BigDecimal productSubtotal = cart.getTotalPrice();
+        BigDecimal shippingFee = calculateShippingFee(productSubtotal);
+        BigDecimal orderGrandTotal = productSubtotal.add(shippingFee);
 
-        order.setTotalPrice(subtotal.add(shippingFee));
+        order.setShippingFee(shippingFee);
+        order.setTotalPrice(orderGrandTotal); // OrderエンティティのtotalPriceは最終合計
 
         for (CartItemResponse cartItem : cart.getItems().values()) {
             Product product = productRepository.findById(cartItem.getProductId()).orElseThrow(
@@ -139,8 +141,9 @@ public class OrderService {
         return new OrderResponse(
             savedOrder.getOrderId(),
             savedOrder.getOrderDate(),
-            savedOrder.getTotalPrice(),
-            savedOrder.getShippingFee(),
+            productSubtotal,          // OrderResponseのtotalPriceには「商品合計」を渡す
+            savedOrder.getShippingFee(), // OrderResponseのshippingFeeには「送料」を渡す
+            savedOrder.getTotalPrice(),  // OrderResponseのgrandTotalには「最終合計金額」を渡す
             savedOrder.getPaymentMethod(),
             savedOrder.getStatus(),
             responseItems,
@@ -157,6 +160,7 @@ public class OrderService {
         }
     }
 
+    // 以下のメソッドはダミー実装のままですが、冗長なコメントを削除しました。
     public List<OrderSummaryResponse> getOrderHistoryByCustomer(Integer customerId) {
         System.out.println("getOrderHistoryByCustomer called for customer ID: " + customerId);
         return List.of();
@@ -193,7 +197,7 @@ public class OrderService {
         return new OrderDetailResponse(
             orderId,
             LocalDateTime.now().minusDays(5),
-            BigDecimal.valueOf(5500),
+            BigDecimal.valueOf(5500), // ここも商品合計として設定すべきか、それとも合計金額か検討が必要
             BigDecimal.ZERO,
             "銀行振込",
             dummyItems,
