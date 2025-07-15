@@ -1,23 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // モーダル要素の取得
+    // モーダル要素の取得 (productModal と cartModal は引き続き使用)
     const productModal = new bootstrap.Modal(document.getElementById('productModal'));
     const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-    const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
-    
+    // orderCompleteModal は注文完了ページで制御するため、ここでは定義しない
+    // const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal')); 
+
     // APIのベースURL
     const API_BASE = '/api';
-    
+
     // 商品一覧の取得と表示
     fetchProducts();
-    
+
     // カート情報の取得と表示
     updateCartDisplay();
-    
+
     // カートボタンクリックイベント
     document.getElementById('cart-btn').addEventListener('click', function() {
         showCartModal();
     });
-    
+
     // 商品一覧を取得して表示する関数
     async function fetchProducts() {
         try {
@@ -32,12 +33,12 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('商品の読み込みに失敗しました');
         }
     }
-    
+
     // 商品一覧を表示する関数
     function displayProducts(products) {
         const container = document.getElementById('products-container');
         container.innerHTML = '';
-        
+
         products.forEach(product => {
             const card = document.createElement('div');
             card.className = 'col';
@@ -52,14 +53,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             container.appendChild(card);
-            
+
             // 詳細ボタンのイベント設定
             card.querySelector('.view-product').addEventListener('click', function() {
                 fetchProductDetail(product.productId);
             });
         });
     }
-    
+
     // 商品詳細を取得する関数
     async function fetchProductDetail(productId) {
         try {
@@ -74,11 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('商品詳細の読み込みに失敗しました');
         }
     }
-    
+
     // 商品詳細を表示する関数
     function displayProductDetail(product) {
         document.getElementById('productModalTitle').textContent = product.name;
-        
+
         const modalBody = document.getElementById('productModalBody');
         modalBody.innerHTML = `
             <div class="row">
@@ -97,16 +98,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
+
         // カートに追加ボタンのイベント設定
         modalBody.querySelector('.add-to-cart').addEventListener('click', function() {
             const quantity = parseInt(document.getElementById('quantity').value);
             addToCart(product.productId, quantity);
         });
-        
+
         productModal.show();
     }
-    
+
     // カートに商品を追加する関数
     async function addToCart(productId, quantity) {
         try {
@@ -120,14 +121,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     quantity: quantity
                 })
             });
-            
+
             if (!response.ok) {
                 throw new Error('カートへの追加に失敗しました');
             }
-            
+
             const cart = await response.json();
             updateCartBadge(cart.totalQuantity);
-            
+
             productModal.hide();
             alert('商品をカートに追加しました');
         } catch (error) {
@@ -135,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('カートへの追加に失敗しました');
         }
     }
-    
+
     // カート情報を取得する関数 (バッジ更新用)
     async function updateCartDisplay() {
         try {
@@ -149,12 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         }
     }
-    
+
     // カートバッジを更新する関数
     function updateCartBadge(count) {
         document.getElementById('cart-count').textContent = count;
     }
-    
+
     // カートモーダルを表示する関数
     async function showCartModal() {
         await updateCartModalContent(); // 最新のカート情報を取得して表示
@@ -177,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const cart = await response.json();
                 
+                // カートが空の場合はメッセージを表示
                 if (cart.items && Object.keys(cart.items).length > 0) {
                     let html = `
                         <table class="table">
@@ -191,15 +193,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             </thead>
                             <tbody>
                     `;
-                    
+
                     Object.values(cart.items).forEach(item => {
                         html += `
                             <tr>
                                 <td>${item.name}</td>
                                 <td>¥${item.price.toLocaleString()}</td>
                                 <td>
-                                    <input type="number" class="form-control form-control-sm update-quantity" 
-                                            data-id="${item.id}" value="${item.quantity}" min="1" style="width: 70px">
+                                    <input type="number" class="form-control form-control-sm update-quantity"
+                                             data-id="${item.id}" value="${item.quantity}" min="1" style="width: 70px">
                                 </td>
                                 <td>¥${item.subtotal.toLocaleString()}</td>
                                 <td>
@@ -208,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </tr>
                         `;
                     });
-                    
+
                     html += `
                             </tbody>
                             <tfoot>
@@ -220,30 +222,30 @@ document.addEventListener('DOMContentLoaded', function() {
                             </tfoot>
                         </table>
                     `;
-                    
+
                     modalBody.innerHTML = html;
-                    
+
                     // 数量更新イベントの設定
                     document.querySelectorAll('.update-quantity').forEach(input => {
                         input.addEventListener('change', function() {
                             updateItemQuantity(this.dataset.id, this.value);
                         });
                     });
-                    
+
                     // 削除ボタンイベントの設定
                     document.querySelectorAll('.remove-item').forEach(button => {
                         button.addEventListener('click', function() {
                             removeItem(this.dataset.id);
                         });
                     });
-                    
+
                     // フッターのボタン設定
                     modalFooter.innerHTML = `
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">買い物を続ける</button>
                         <button type="button" class="btn btn-primary" id="proceed-to-checkout-form">注文手続きへ</button>
                     `;
                     document.getElementById('proceed-to-checkout-form').addEventListener('click', () => updateCartModalContent(true));
-                    
+
                 } else {
                     modalBody.innerHTML = '<p class="text-center">カートは空です</p>';
                     modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>`;
@@ -285,30 +287,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h5>決済方法の選択</h5>
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentBankTransfer" value="bank_transfer" required>
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentBankTransfer" value="銀行振込" required>
                             <label class="form-check-label" for="paymentBankTransfer">
                                 銀行振込
+                            </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCashOnDelivery" value="cash_on_delivery" required>
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCashOnDelivery" value="代金引換" required>
                             <label class="form-check-label" for="paymentCashOnDelivery">
                                 代金引換
                             </label>
                         </div>
-                            </label>
                         <div class="invalid-feedback">決済方法を選択してください</div>
                     </div>
                 </form>
             `;
             modalFooter.innerHTML = `
                 <button type="button" class="btn btn-secondary" id="back-to-cart">カートに戻る</button>
-                <button type="button" class="btn btn-primary" id="confirm-order-btn">注文を確定する</button>
+                <button type="button" class="btn btn-primary" id="proceed-to-confirmation">注文内容を確認する</button>
             `;
             document.getElementById('back-to-cart').addEventListener('click', () => updateCartModalContent(false));
-            document.getElementById('confirm-order-btn').addEventListener('click', submitOrder);
+            document.getElementById('proceed-to-confirmation').addEventListener('click', submitOrder); // ここでsubmitOrderを呼び出す
         }
     }
-    
+
     // カート内の商品数量を更新する関数
     async function updateItemQuantity(itemId, quantity) {
         try {
@@ -321,11 +323,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     quantity: parseInt(quantity)
                 })
             });
-            
+
             if (!response.ok) {
                 throw new Error('数量の更新に失敗しました');
             }
-            
+
             const cart = await response.json();
             updateCartModalContent(); // カート表示を更新
             updateCartBadge(cart.totalQuantity);
@@ -335,18 +337,18 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCartModalContent(); // 失敗時は元の状態に戻す
         }
     }
-    
+
     // カート内の商品を削除する関数
     async function removeItem(itemId) {
         try {
             const response = await fetch(`${API_BASE}/cart/items/${itemId}`, {
                 method: 'DELETE'
             });
-            
+
             if (!response.ok) {
                 throw new Error('商品の削除に失敗しました');
             }
-            
+
             const cart = await response.json();
             updateCartModalContent(); // カート表示を更新
             updateCartBadge(cart.totalQuantity);
@@ -355,74 +357,51 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('商品の削除に失敗しました');
         }
     }
-    
-    // 注文を確定する関数
+
+    // 注文フォームのデータをセッションストレージに保存し、C0402.htmlへリダイレクトする関数
     async function submitOrder() {
         const form = document.getElementById('order-form');
-        
+
         // フォームバリデーション
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
             return;
         }
-        
-        // 決済方法の選択チェック
-        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
 
-        if (!paymentMethod) {
+        // 決済方法の選択チェック
+        const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
+        if (!paymentMethodElement) {
             alert('決済方法を選択してください。');
             return;
         }
 
-        const orderData = {
-            customerInfo: {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                address: document.getElementById('address').value,
-                phoneNumber: document.getElementById('phone').value
-            },
-
-            paymentMethod: paymentMethod.value
-            
+        const customerInfo = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            address: document.getElementById('address').value,
+            phoneNumber: document.getElementById('phone').value,
+            paymentMethod: paymentMethodElement.value
         };
-        
+
         try {
-            const response = await fetch(`${API_BASE}/order/confirm`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderData)
-            });
-            
-            if (!response.ok) {
-                throw new Error('注文の確定に失敗しました');
+            // 現在のカート情報を取得
+            const cartResponse = await fetch(`${API_BASE}/cart`);
+            if (!cartResponse.ok) {
+                throw new Error('カート情報の取得に失敗しました');
             }
-            
-            const order = await response.json();
-            displayOrderComplete(order);
-            
+            const cart = await cartResponse.json();
+
+            // 注文に必要な情報をセッションストレージに保存
+            sessionStorage.setItem('order_customer_info', JSON.stringify(customerInfo));
+            sessionStorage.setItem('order_items', JSON.stringify(Object.values(cart.items))); // カートの商品リスト
+            sessionStorage.setItem('order_total_price', cart.totalPrice.toString()); // 合計金額
+
             cartModal.hide(); // カートモーダルを閉じる
-            orderCompleteModal.show(); // 注文完了モーダルを表示
-            
-            // カート表示をリセット
-            updateCartBadge(0);
-            
-            // フォームリセット
-            form.reset();
-            form.classList.remove('was-validated');
+            window.location.href = 'C0402.html'; // C0402.htmlへリダイレクト
+
         } catch (error) {
-            console.error('Error:', error);
-            alert('注文の確定に失敗しました');
+            console.error('Error saving order data to session or fetching cart:', error);
+            alert('注文情報の準備中にエラーが発生しました。');
         }
-    }
-    
-    // 注文完了画面を表示する関数
-    function displayOrderComplete(order) {
-        document.getElementById('orderCompleteBody').innerHTML = `
-            <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
-            <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
-            <p>決済方法: ${order.paymentMethod === 'bank_transfer' ? '銀行振込' : '代金引換'}</p>
-        `;
     }
 });
