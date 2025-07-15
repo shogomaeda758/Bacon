@@ -670,7 +670,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const displayPaymentMethod = (order.paymentMethod === 'bank_transfer') ? '銀行振込' :
                                      (order.paymentMethod === 'cash_on_delivery') ? '代金引換' :
-                                     order.paymentMethod || '不明'; // 不明な場合も考慮 (suzuki_cover の修正を適用)
 
         modalBody.innerHTML = `
             <div class="alert alert-success" role="alert">
