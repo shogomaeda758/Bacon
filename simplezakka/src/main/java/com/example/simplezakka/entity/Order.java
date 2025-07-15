@@ -80,7 +80,6 @@ public class Order {
         orderDetail.setOrder(this);
     }
     
-    // Helper method to calculate total
     public BigDecimal calculateTotal() {
         BigDecimal subtotal = orderDetails.stream()
                 .map(OrderDetail::getSubtotal)
@@ -88,25 +87,5 @@ public class Order {
         return subtotal.add(shippingFee);
 
     
-    }
-
-    public void setTotalAmount(int totalPrice2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setTotalAmount'");
-    }
-
-    public void setShippingAddress(String address) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setShippingAddress'");
-    }
-
-    public void setShippingPhoneNumber(String phoneNumber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setShippingPhoneNumber'");
-    }
-
-    public void setCustomerName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCustomerName'");
     }
 }

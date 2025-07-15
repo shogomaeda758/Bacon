@@ -1,16 +1,16 @@
 package com.example.simplezakka.dto.order;
 
 import lombok.Data;
-import lombok.AllArgsConstructor; // ★ この行を追加
-import lombok.NoArgsConstructor;  // ★ 柔軟性のため、これも追加しておくのが良いプラクティス
+import lombok.AllArgsConstructor; 
+import lombok.NoArgsConstructor; 
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@NoArgsConstructor // 引数なしのコンストラクタを自動生成
-@AllArgsConstructor // ★ これが、全てのフィールドを引数にとるコンストラクタを生成し、今回のエラーを解決します
+@NoArgsConstructor 
+@AllArgsConstructor 
 public class OrderDetailResponse {
 
     /** 注文ID */
@@ -23,17 +23,17 @@ public class OrderDetailResponse {
     private BigDecimal shippingFee;
 
     /** 合計金額（商品合計 + 送料） */
-    private BigDecimal totalAmount; // OrderResponse との整合性を考慮し、totalAmount にしています
+    private BigDecimal totalAmount; 
 
     /** 支払い方法 */
     private String paymentMethod;
 
-    /** 注文ステータス。例: "PENDING", "CONFIRMED" */
+    /** 注文ステータス
     private String status;
 
     /** 注文されsた個々の商品アイテムのリスト */
     private List<OrderItemDetailResponse> items;
 
-      /** 顧客情報（注文時の配送先・連絡先） */
+      /** 顧客情報 */
     private CustomerInfo customerInfo;
 }

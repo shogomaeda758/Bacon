@@ -99,7 +99,7 @@ public class ProductService {
     }
     
     /**
-     * ProductEntityをProductListItemに変換
+     * 
      * @param product 商品エンティティ
      * @return 商品リストアイテム
      */
@@ -107,13 +107,13 @@ public class ProductService {
         return new ProductListItem(
                 product.getProductId(),
                 product.getName(),
-                product.getPrice().intValue(), // BigDecimalをIntegerに変換
+                product.getPrice().intValue(), 
                 product.getImageUrl()
         );
     }
     
     /**
-     * ProductEntityをProductDetailに変換
+     * 
      * @param product 商品エンティティ
      * @return 商品詳細
      */
@@ -121,7 +121,7 @@ public class ProductService {
         return new ProductDetail(
                 product.getProductId(),
                 product.getName(),
-                product.getPrice().intValue(), // BigDecimalをIntegerに変換
+                product.getPrice().intValue(),
                 product.getDescription(),
                 product.getStock(),
                 product.getImageUrl()

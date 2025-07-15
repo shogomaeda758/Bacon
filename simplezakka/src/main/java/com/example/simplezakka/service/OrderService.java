@@ -84,9 +84,9 @@ public class OrderService {
         }
 
         order.setOrderEmail(customerInfo.getEmail());
-        order.setCustomerName(customerInfo.getName());
-        order.setShippingAddress(customerInfo.getAddress());
-        order.setShippingPhoneNumber(customerInfo.getPhoneNumber());
+        order.setOrderName(customerInfo.getName()); 
+        order.setOrderAddress(customerInfo.getAddress()); 
+        order.setOrderPhoneNumber(customerInfo.getPhoneNumber()); 
         order.setPaymentMethod(orderRequest.getPaymentMethod());
 
         order.setOrderDate(LocalDateTime.now());
@@ -195,8 +195,7 @@ public class OrderService {
             LocalDateTime.now().minusDays(5),
             BigDecimal.valueOf(5500),
             BigDecimal.ZERO,
-            "クレジットカード",
-            "COMPLETED",
+            "銀行振込",
             dummyItems,
             dummyCustomerInfo
         );

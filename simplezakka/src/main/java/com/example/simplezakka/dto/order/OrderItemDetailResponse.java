@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 public class OrderItemDetailResponse {
 
     /** 商品ID */
-    private Integer productId; // 追加：商品特定のため
+    private Integer productId; 
 
     /** 商品名 */
     private String productName;
 
     /** 商品画像URL */
-    private String imageUrl; // 追加：詳細表示に便利
+    private String imageUrl; 
 
     /** 数量 */
     private Integer quantity;
