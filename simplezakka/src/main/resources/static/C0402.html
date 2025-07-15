@@ -53,40 +53,32 @@
   </div>
 
   <script>
-    // C0401からデータを取得したと仮定して代入（仮データ例）
     const orderData = {
-      items: [
-        { name: '〇〇', quantity: 〇〇　},
-        { name: '〇〇', quantity: 〇〇  }
-      ],
-      total: 〇〇　,
-      name: sessionStorage.getItem('order_name') || '〇〇',
-      email: sessionStorage.getItem('order_email') || 'example@example.com',
-      address: sessionStorage.getItem('order_address') || '〇〇',
-      phone: sessionStorage.getItem('order_phone') || '090-1234-5678',
-      payment: '〇〇'
-    };
+  items: JSON.parse(sessionStorage.getItem('order_items') || '[]'),
+  total: parseInt(sessionStorage.getItem('order_total') || '0'),
+  name: sessionStorage.getItem('order_name') || '',
+  email: sessionStorage.getItem('order_email') || '',
+  address: sessionStorage.getItem('order_address') || '',
+  phone: sessionStorage.getItem('order_phone') || '',
+  payment: sessionStorage.getItem('order_payment') || ''
+};
 
-    // 商品一覧の表示
-    const itemsContainer = document.getElementById('order-items');
-    orderData.items.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'list-group-item';
-      li.textContent = `${item.name} × ${item.quantity}`;
-      itemsContainer.appendChild(li);
-    });
+const itemsContainer = document.getElementById('order-items');
+orderData.items.forEach(item => {
+  const subtotal = item.quantity * item.price;
+  const li = document.createElement('li');
+  li.className = 'list-group-item d-flex justify-content-between align-items-center';
+  li.innerHTML = `<div>${item.name} × ${item.quantity}</div><div>¥${subtotal.toLocaleString()}</div>`;
+  itemsContainer.appendChild(li);
+});
 
-    // 合計金額
-    document.getElementById('total-amount').textContent = `¥${orderData.total.toLocaleString()}`;
+document.getElementById('total-amount').textContent = `¥${orderData.total.toLocaleString()}`;
+document.getElementById('confirm-name').textContent = orderData.name;
+document.getElementById('confirm-email').textContent = orderData.email;
+document.getElementById('confirm-address').textContent = orderData.address;
+document.getElementById('confirm-phone').textContent = orderData.phone;
+document.getElementById('confirm-payment').textContent = orderData.payment;
 
-    // お届け先情報
-    document.getElementById('confirm-name').textContent = orderData.name;
-    document.getElementById('confirm-email').textContent = orderData.email;
-    document.getElementById('confirm-address').textContent = orderData.address;
-    document.getElementById('confirm-phone').textContent = orderData.phone;
-
-    // 支払い方法
-    document.getElementById('confirm-payment').textContent = orderData.payment;
   </script>
 
 </body>

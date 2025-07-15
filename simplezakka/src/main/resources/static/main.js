@@ -417,6 +417,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    
+
     // 注文完了画面を表示する関数
     function displayOrderComplete(order) {
         document.getElementById('orderCompleteBody').innerHTML = `
