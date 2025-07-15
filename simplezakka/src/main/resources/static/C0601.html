@@ -5,48 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>シンプル雑貨</title>
     <link rel="stylesheet" href="style.css">
-   <style>
-    .container {
-      display: flex;
-    }
-    .box-link {
-      text-decoration: none; /* 下線を消す */
-    }
-    .box {
-      width: 200px;
-      height: 100px;
-      margin: 10px;
-      background-color: rgb(136, 188, 125);
-      color:  #383028;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      border-radius: 8px;
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f0f7f4;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2em;
+        }
 
-    }
-  </style>
-   
+        .container {
+            background: #ffffff;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 1em;
+            color: #388e3c;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input {
+            margin-bottom: 1em;
+            padding: 0.8em;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #f9fdf9;
+        }
+
+        button, input[type="submit"] {
+            padding: 0.8em;
+            background-color: #66bb6a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #57a05a;
+        }
+
+        .message {
+            margin-top: 1em;
+            font-size: 0.9em;
+            color: #d9534f;
+            text-align: center;
+        }
+
+        /* 最初は会員登録フォームを非表示 */
+        #register-container {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<h1>会員のお客様</h1>
-<form>
 
-    <label for="email">会員ID</label>
-    <input type="email" id="email"placeholder="メールアドレス">
-    <br>
+    <!-- ログイン画面 -->
+    <div class="container" id="login-container">
+        <h1>会員のお客様</h1>
+        <form id="loginForm">
+            <label for="email">会員ID</label>
+            <input type="email" id="email" placeholder="メールアドレス" required>
 
-    <label for="password">パスワード</label>
-    <input type="password" id="password">
-    <br>
+            <label for="password">パスワード</label>
+            <input type="password" id="password" required>
 
+            <input type="submit" value="ログイン">
+        </form>
 
-    <input type="submit" value="ログイン">
-</form>
-<h1>はじめてご利用のお客様</h1><br>
-                <button id="cart-btn" class="btn btn-outline-dark position-relative">
-                    <a href="C0501.html">新規会員登録へ</a>
-                    </span>
+        <h1>はじめてご利用のお客様</h1>
+        <button id="show-register-btn">新規会員登録へ</button>
+    </div>
+
+    <!-- 会員登録画面 -->
+    <div class="container" id="register-container">
+        <h1>会員登録</h1>
+        <form id="registerForm">
+            <input type="text" name="name" placeholder="名前" required />
+            <input type="email" name="email" placeholder="メールアドレス" required />
+            <input type="text" name="address" placeholder="住所" required />
+            <input type="tel" name="phoneNumber" placeholder="電話番号" required />
+            <input type="password" name="password" placeholder="パスワード" required />
+            <button type="submit">登録する</button>
+        </form>
+        <div id="registerMessage" class="message"></div>
+    </div>
+
+<script>
+    // 「新規会員登録へ」ボタンで画面切り替え
+    document.getElementById("show-register-btn").addEventListener("click", function() {
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("register-container").style.display = "block";
+    });
+</script>
+
 </body>
-
 </html>
