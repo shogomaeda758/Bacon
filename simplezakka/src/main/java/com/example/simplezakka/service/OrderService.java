@@ -84,9 +84,9 @@ public class OrderService {
         }
 
         order.setOrderEmail(customerInfo.getEmail());
-        order.setCustomerName(customerInfo.getName());
-        order.setShippingAddress(customerInfo.getAddress());
-        order.setShippingPhoneNumber(customerInfo.getPhoneNumber());
+        order.setOrderName(customerInfo.getName()); 
+        order.setOrderAddress(customerInfo.getAddress()); 
+        order.setOrderPhoneNumber(customerInfo.getPhoneNumber()); 
         order.setPaymentMethod(orderRequest.getPaymentMethod());
 
         order.setOrderDate(LocalDateTime.now());
