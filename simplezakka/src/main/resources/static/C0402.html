@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>注文確認 - SIMPLE GOODS ONLINE</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     .section-title {
       font-size: 1.25rem;
@@ -43,33 +43,19 @@
   <!-- 支払い方法 -->
   <div class="confirmation-box">
     <div class="section-title">お支払い方法</div>
-    <p id="confirm-payment"></p>
+    <p id="confirm-payment">銀行振込</p> <!-- 固定 or 選択肢に応じて変更可 -->
   </div>
 
   <div class="text-end">
     <button class="btn btn-secondary" onclick="history.back()">戻る</button>
-    <button class="btn btn-primary" id="final-confirm-btn">注文を確定する</button>
+    <button id="final-confirm-btn" class="btn btn-primary">注文を確定する</button>
   </div>
 
-  <!-- 注文完了モーダル -->
-  <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-labelledby="orderCompleteLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderCompleteLabel">注文完了</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
-        </div>
-        <div class="modal-body" id="orderCompleteBody">
-          <!-- 注文完了メッセージがmain.jsから挿入される -->
-        </div>
-        <div class="modal-footer">
-          <a href="index.html" class="btn btn-primary">トップページに戻る</a>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Bootstrap JS（モーダル表示などのため） -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // セッションストレージから注文情報を取得
     const orderData = {
       items: JSON.parse(sessionStorage.getItem('order_items') || '[]'),
       total: parseInt(sessionStorage.getItem('order_total') || '0'),
@@ -77,15 +63,10 @@
       email: sessionStorage.getItem('order_email') || '',
       address: sessionStorage.getItem('order_address') || '',
       phone: sessionStorage.getItem('order_phone') || '',
-      payment: sessionStorage.getItem('order_payment') || ''
+      payment: sessionStorage.getItem('order_payment') || '銀行振込'  // デフォルト銀行振込に修正
     };
 
-    const paymentMap = {
-      credit_card: 'クレジットカード',
-      bank_transfer: '銀行振込',
-      cash_on_delivery: '代金引換'
-    };
-
+    // 注文商品一覧の表示
     const itemsContainer = document.getElementById('order-items');
     orderData.items.forEach(item => {
       const subtotal = item.quantity * item.price;
@@ -95,15 +76,18 @@
       itemsContainer.appendChild(li);
     });
 
+    // その他情報表示
     document.getElementById('total-amount').textContent = `¥${orderData.total.toLocaleString()}`;
     document.getElementById('confirm-name').textContent = orderData.name;
     document.getElementById('confirm-email').textContent = orderData.email;
     document.getElementById('confirm-address').textContent = orderData.address;
     document.getElementById('confirm-phone').textContent = orderData.phone;
-    document.getElementById('confirm-payment').textContent = paymentMap[orderData.payment] || '未指定';
-  </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="main.js"></script>
+    // 支払い方法表示（クレジットカード表記は削除済み）
+    document.getElementById('confirm-payment').textContent = orderData.payment;
+
+    // 「注文を確定する」ボタン押下時の処理はmain.js内で制御予定
+
+  </script>
 </body>
 </html>
