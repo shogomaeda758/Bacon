@@ -219,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </tr>
                             </thead>
                             <tbody>
-<<<<<<< HEAD
                     `;
 
                     Object.values(cart.items).forEach(item => {
