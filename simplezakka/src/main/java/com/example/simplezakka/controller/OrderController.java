@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.MethodArgumentNotValidException; // バリデーションエラーのため追加
-import org.springframework.web.bind.annotation.ExceptionHandler; // エラーハンドリングのため追加
-import org.springframework.context.support.DefaultMessageSourceResolvable; // エラーメッセージのため追加
+import org.springframework.web.bind.MethodArgumentNotValidException; 
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.context.support.DefaultMessageSourceResolvable; 
 
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.order.OrderDetailResponse;
@@ -23,7 +23,7 @@ import com.example.simplezakka.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors; // エラーメッセージのため追加
+import java.util.stream.Collectors; 
 
 @RestController
 @RequestMapping("/api")
@@ -57,13 +57,11 @@ public class OrderController {
             // 在庫不足など、処理状態の不正
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new OrderResponse(e.getMessage()));
         } catch (Exception e) {
-            // その他の予期せぬエラー
-            // logger.error("注文確定中に予期せぬエラーが発生しました", e); 
+            // その他の予期せぬエラー。cartControllerlogger.error("注文確定中に予期せぬエラーが発生しました", e); 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderResponse( "注文確定中に予期せぬエラーが発生しました。"));
         }
     }
 
-    // @Valid によるバリデーションエラーをハンドリングするメソッド
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<OrderResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getAllErrors().stream()
@@ -72,28 +70,23 @@ public class OrderController {
         return ResponseEntity.badRequest().body(new OrderResponse( errorMessage));
     }
 
-
-    // 以下、既存のAPI_10, API_13, 従来のOrderDetail取得エンドポイントは省略
-    // ...
-    @PostMapping("/order/preview") // API_10のエンドポイント
+    @PostMapping("/order/preview") 
     public ResponseEntity<List<OrderSummaryResponse>> getOrderHistory(
-            @RequestBody String requestBody) { // 仮のRequest Body
+            @RequestBody String requestBody) { 
 
-        // ここにAPI_10のロジック（小計、送料、合計金額の計算）が入ります
         List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(1); // ダミーのcustomerId
         return ResponseEntity.ok(orderHistory);
     }
 
-    @GetMapping("/member/me/orders") // API_13のエンドポイント
+    @GetMapping("/member/me/orders") 
     public ResponseEntity<List<OrderSummaryResponse>> getOrderHistoryForMember(
-            HttpSession session) { // API_13は認証トークンによるが、ここではセッションを仮定
-        // 実際には認証情報からcustomerIdを取得
-        Integer customerId = 1; // ダミーのcustomerId
+            HttpSession session) { 
+        Integer customerId = 1; 
         List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(customerId);
         return ResponseEntity.ok(orderHistory);
     }
 
-    @GetMapping("/orders/{orderId}") // 従来のOrderDetail取得エンドポイント
+    @GetMapping("/orders/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrderDetailByOrderId(
             @PathVariable Integer orderId) {
         OrderDetailResponse orderDetail = orderService.getOrderDetail(orderId);
