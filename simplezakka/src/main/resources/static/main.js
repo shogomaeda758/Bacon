@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // APIのベースURL。開発環境ではlocalhost、デプロイ時は相対パスを使用するなど調整してください。
     const API_BASE = 'http://localhost:8080/api';
 
-
     // 注文処理全体で共有するデータ構造
     // お客様情報とカート情報を一時的に保持します
     let currentOrderData = {
@@ -137,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (quantity > stock) {
                 alert(`数量は在庫数(${stock})以下で入力してください。`);
                 quantityInput.value = stock;
-
                 return;
             }
             addToCart(product.productId, quantity);
@@ -207,7 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (cart.items && Object.keys(cart.items).length > 0) {
                     const { shippingFee, grandTotal } = cart; // 分割代入で変数宣言を簡潔に
 
-                    modalBody.innerHTML = `
+                    // html 変数をここで宣言し、初期値を設定
+                    let html = `
                         <table class="table">
                             <thead>
                                 <tr>
@@ -223,24 +222,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     Object.values(cart.items).forEach(item => {
                         html += `
-                            <tr>
-                                <td>${item.name}</td>
-                                <td>¥${item.price.toLocaleString()}</td>
-                                <td>
-                                    <input type="number" class="form-control form-control-sm update-quantity"
-                                             data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
-                                </td>
-                                <td>¥${item.subtotal.toLocaleString()}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">削除</button>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>¥${item.price.toLocaleString()}</td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm update-quantity"
+                                                data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
+                                    </td>
+                                    <td>¥${item.subtotal.toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">削除</button>
+                                    </td>
+                                </tr>
                         `;
                     });
 
                     html += `
-
-
                             </tbody>
                             <tfoot>
                                 <tr>
@@ -262,6 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         </table>
                     `;
 
+                    modalBody.innerHTML = html; // 最後に一度だけ代入
+
                     // 数量更新イベントの設定
                     document.querySelectorAll('.update-quantity').forEach(input => {
                         input.addEventListener('change', function() {
@@ -272,7 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (newQuantity <= 0 || isNaN(newQuantity)) {
                                 alert('数量は1以上で入力してください。');
                                 this.value = 1;
-
                                 return;
                             }
                             if (newQuantity > maxStock) {
@@ -460,7 +458,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
         if (!paymentMethodElement) {
             paymentMethodFeedback.style.display = 'block'; // エラーメッセージを表示
-
             alert('決済方法を選択してください。');
             return;
         } else {
@@ -586,7 +583,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         document.getElementById('back-to-customer-form').addEventListener('click', function() {
-
             toggleModal(orderConfirmationModal, false); // develop の汎用関数を適用
             // カートモーダルを再表示し、注文フォームの状態にする
             toggleModal(cartModal, true); // develop の汎用関数を適用
@@ -656,7 +652,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 注文完了モーダルを表示する関数
-
     function displayOrderComplete(order) {
         document.getElementById('orderCompleteModalTitle').textContent = 'ご注文完了';
         const modalBody = document.getElementById('orderCompleteModalBody');
