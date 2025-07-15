@@ -21,7 +21,7 @@ footer {
 
 }
 header {
-    font-family: Arial, sans-serif; /* フォントを指定 */
+    font-family: 'Nunito', sans-serif; /* フォントを指定 */
     background-color: hsl(57, 40%, 90%); /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
