@@ -381,9 +381,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 address: document.getElementById('address').value,
                 phoneNumber: document.getElementById('phone').value
             },
-            // DTOに合わせて追加
+
             paymentMethod: paymentMethod.value
-            // 配送方法のデータ送信は不要になりました
+            
         };
         
         try {
@@ -422,8 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('orderCompleteBody').innerHTML = `
             <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
             <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
-            <p>決済方法: ${order.paymentMethod === 'credit_card' ? 'クレジットカード' : order.paymentMethod === 'bank_transfer' ? '銀行振込' : '代金引換'}</p>
-            <p>お客様のメールアドレスに注文確認メールをお送りしました。</p>
+            <p>決済方法: ${order.paymentMethod === 'bank_transfer' ? '銀行振込' : '代金引換'}</p>
         `;
     }
 });

@@ -195,8 +195,7 @@ public class OrderService {
             LocalDateTime.now().minusDays(5),
             BigDecimal.valueOf(5500),
             BigDecimal.ZERO,
-            "クレジットカード",
-            "COMPLETED",
+            "銀行振込",
             dummyItems,
             dummyCustomerInfo
         );

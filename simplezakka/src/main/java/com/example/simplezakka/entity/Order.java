@@ -80,7 +80,6 @@ public class Order {
         orderDetail.setOrder(this);
     }
     
-    // Helper method to calculate total
     public BigDecimal calculateTotal() {
         BigDecimal subtotal = orderDetails.stream()
                 .map(OrderDetail::getSubtotal)

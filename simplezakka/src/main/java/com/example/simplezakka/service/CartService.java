@@ -24,11 +24,6 @@ public class CartService {
     public CartRespons getCartFromSession(HttpSession session) {
         CartRespons cart = (CartRespons) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
-            // CartResponsのコンストラクタまたはフィールド初期化で
-            // itemsマップ、totalQuantity、totalPriceが適切に初期化されることを確認してください。
-            // 例: private Map<String, CartItemResponse> items = new HashMap<>();
-            //     private int totalQuantity = 0;
-            //     private BigDecimal totalPrice = BigDecimal.ZERO;
             cart = new CartRespons();
             session.setAttribute(CART_SESSION_KEY, cart);
         }
@@ -39,23 +34,23 @@ public class CartService {
         Optional<Product> productOpt = productRepository.findById(productId);
 
         if (productOpt.isPresent()) {
-            Product product = productOpt.get(); // ProductのpriceはBigDecimalであるべき
+            Product product = productOpt.get(); 
             CartRespons cart = getCartFromSession(session);
 
-            String itemId = String.valueOf(productId); // カートのキー
+            String itemId = String.valueOf(productId); 
             int currentInCart = 0;
 
-            // 🔽 カートにすでに商品がある場合は数量を取得
+            // カートにすでに商品がある場合は数量を取得
             if (cart.getItems() != null && cart.getItems().containsKey(itemId)) {
                 currentInCart = cart.getItems().get(itemId).getQuantity();
             }
 
-            // 🔽 数量が0以下でないかチェック（負の値や0は追加できないようにする）
+            // 数量が0以下でないかチェック
             if (quantity <= 0) {
                 throw new IllegalArgumentException("追加する数量は1以上である必要があります。");
             }
 
-            // 🔽 在庫チェック
+            // 在庫チェック
             if (currentInCart + quantity > product.getStock()) {
                 throw new IllegalArgumentException("在庫が足りません。現在の在庫: " + product.getStock() +
                  "、カート内数量: " + currentInCart + "、追加しようとしている数量: " + quantity);
@@ -65,29 +60,17 @@ public class CartService {
             CartItemResponse newItem = new CartItemResponse();
             newItem.setProductId(product.getProductId());
             newItem.setName(product.getName());
-            newItem.setImageUrl(product.getImageUrl()); // 画像URLもセット
-
-            // ★BigDecimalに揃える処理: Productのpriceをそのままセット（Product.priceがBigDecimalであることを前提）
+            newItem.setImageUrl(product.getImageUrl());
             newItem.setPrice(product.getPrice());
             newItem.setQuantity(quantity);
-            
-            // CartItemResponseのsubtotalは、newItemのpriceとquantityから計算します
-            // newItem.setSubtotal(newItem.getPrice().multiply(BigDecimal.valueOf(quantity)));
-            // もしCartRespons.addItem内でsubtotalが設定されるのであれば、ここでの設定は不要ですが、
-            // CartResponsのaddItem内でnewItemのsubtotalが使われる前提であれば設定しておくと安全です。
-
-            // CartResponsの addItem(CartItemResponse item) メソッドを呼び出す
-            // このメソッドがCartRespons内のitemsマップを更新し、
-            // totalQuantityとtotalPriceを再計算することを前提とします。
             cart.addItem(newItem);
 
             //セッションの更新
             session.setAttribute(CART_SESSION_KEY, cart);
             return cart;
         }
-
         //商品が存在しない場合
-        return null; // または適切な例外をスロー
+        return null; 
     }
 
     public CartRespons updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
@@ -111,9 +94,6 @@ public class CartService {
                     "、設定しようとしている数量: " + quantity);
             }
 
-            // CartResponsのupdateQuantityメソッド（引数にitemIdとquantity）を呼び出す
-            // このメソッドがCartRespons内のitemsマップの該当アイテムの数量と小計を更新し、
-            // totalQuantityとtotalPriceを再計算することを前提とします。
             cart.updateQuantity(itemId, quantity);
         }
         session.setAttribute(CART_SESSION_KEY, cart);
@@ -122,8 +102,7 @@ public class CartService {
 
     public CartRespons removeItemFromCart(String itemId, HttpSession session) {
         CartRespons cart = getCartFromSession(session);
-        // CartRespons内の removeItem メソッドを呼び出す
-        // このメソッドがitemsマップからアイテムを削除し、totalQuantityとtotalPriceを再計算することを前提とします。
+        
         if (cart.getItems() != null && cart.getItems().containsKey(itemId)) {
              cart.removeItem(itemId);
         }
