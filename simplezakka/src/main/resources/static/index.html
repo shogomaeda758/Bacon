@@ -29,7 +29,6 @@
             </div>
         </header>
 
-        <!-- 検索ボックス -->
         <div class="mb-3">
             <input type="text" class="form-control" id="searchInput" placeholder="商品名で検索...">
         </div>
@@ -69,7 +68,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="cartModalBody">
-                </div>
+                    </div>
                 <div class="modal-footer" id="cartModalFooter">
                 </div>
             </div>
@@ -92,11 +91,12 @@
         </div>
     </div>
     
-<footer>
-    <a href="C0701.html">特定商取引法表示</a><br>
-    <a href="C0801.html">プライバシーポリシー</a><br>
-    <a href="C0901.html">FAQ</a>
-</footer>     
+    <footer>
+        <a href="C0701.html">特定商取引法表示</a><br>
+        <a href="C0801.html">プライバシーポリシー</a><br>
+        <a href="C0901.html">FAQ</a>
+    </footer>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>
     <script>
@@ -107,9 +107,7 @@
             
             products.forEach(product => {
                 const productName = product.querySelector('.card-title').textContent.toLowerCase();
-                const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
-                
-                if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
+                if (productName.includes(searchTerm)) { 
                     product.style.display = 'block';
                 } else {
                     product.style.display = 'none';
