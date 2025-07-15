@@ -18,9 +18,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * 会員登録
-     */
+    /** 会員登録*/
     public CustomerResponse createCustomer(CustomerRegisterRequest request) {
         CustomerInfo info = request.getCustomerInfo();
 
@@ -41,9 +39,7 @@ public class CustomerService {
         return toResponse(saved);
     }
 
-    /**
-     * ログイン
-     */
+    /**ログイン*/
     public CustomerResponse login(String email, String password) {
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("メールアドレスが見つかりません。"));
@@ -54,10 +50,8 @@ public class CustomerService {
 
         return toResponse(customer);
     }
-    
-/**
-     * 名前または電話番号で検索
-     */
+
+    /**名前または電話番号で検索 */
     public List<CustomerResponse> searchByNameOrPhone(String keyword) {
     // 部分一致で名前・電話番号検索
     List<Customer> customers = customerRepository
@@ -69,18 +63,14 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 会員情報取得
-     */
+    /**会員情報取得 */
     public CustomerResponse getCustomerById(Integer customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
         return toResponse(customer);
     }
 
-    /**
-     * 会員情報更新
-     */
+    /** 会員情報更新*/
     public CustomerResponse updateCustomer(Integer customerId, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
@@ -105,11 +95,7 @@ public class CustomerService {
         return toResponse(updated);
     }
 
-    
-
-    /**
-     * nameを「姓」「名」に分割
-     */
+    /**nameを「姓」「名」に分割*/
     private String[] splitName(String fullName) {
         String[] parts = fullName.trim().split(" ", 2);
         String lastName = parts.length > 0 ? parts[0] : "";
@@ -117,9 +103,7 @@ public class CustomerService {
         return new String[]{lastName, firstName};
     }
 
-    /**
-     * DTO変換
-     */
+    /**DTO変換*/
     private CustomerResponse toResponse(Customer customer) {
         return new CustomerResponse(
                 customer.getCustomerId(),
