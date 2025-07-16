@@ -21,7 +21,7 @@ footer {
 
 }
 header {
-    font-family: 'Nunito', sans-serif; /* フォントを指定 */
+    font-family: Arial, sans-serif; /* フォントを指定 */
     background-color: #ffffff40; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
@@ -36,8 +36,8 @@ body {
 }
 /* ボタン */
 button.btn {
-    background-color:  #e9e3dd;
-    color: #383028;
+    background-color:  #897765;
+    color: #ffffff;
     border: 1px solid #383028;
     font-size: 15px;     /* 文字サイズ */
     padding: 10px 20px;  /* 内側の余白 */
@@ -56,7 +56,7 @@ button.btn {
 /* 通常リンク */
 a {
     color:  #000000;           /* リンクの文字色 */
-    text-decoration: none;  
+    text-decoration: none;
 }
 
 /* ホバー時のリンク */
