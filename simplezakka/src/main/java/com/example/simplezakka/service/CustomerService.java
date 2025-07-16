@@ -4,19 +4,25 @@ import com.example.simplezakka.dto.customer.*;
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // BCryptPasswordEncoderをインポート
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor // PasswordEncoderのインジェクション方法が変わるのでコメントアウトまたは削除
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder; // PasswordEncoderの代わりにBCryptPasswordEncoderを使う
+
+    // コンストラクタを自分で定義し、BCryptPasswordEncoderを初期化する
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder(); // ここでインスタンス化
+    }
 
     /** 会員登録*/
     public CustomerResponse createCustomer(CustomerRegisterRequest request) {
@@ -33,6 +39,7 @@ public class CustomerService {
         customer.setEmail(info.getEmail());
         customer.setAddress(info.getAddress());
         customer.setPhoneNumber(info.getPhoneNumber());
+        // BCryptPasswordEncoderを使ってハッシュ化
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Customer saved = customerRepository.save(customer);
@@ -44,6 +51,7 @@ public class CustomerService {
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("メールアドレスが見つかりません。"));
 
+        // BCryptPasswordEncoderを使ってパスワードを検証
         if (!passwordEncoder.matches(password, customer.getPassword())) {
             throw new IllegalArgumentException("パスワードが正しくありません。");
         }
@@ -53,10 +61,9 @@ public class CustomerService {
 
     /**名前または電話番号で検索 */
     public List<CustomerResponse> searchByNameOrPhone(String keyword) {
-    // 部分一致で名前・電話番号検索
-    List<Customer> customers = customerRepository
-            .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
-                    keyword, keyword, keyword);
+        List<Customer> customers = customerRepository
+                .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
+                        keyword, keyword, keyword);
 
         return customers.stream()
                 .map(this::toResponse)
@@ -75,6 +82,7 @@ public class CustomerService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
 
+        // BCryptPasswordEncoderを使って現在のパスワードを検証
         if (!passwordEncoder.matches(request.getCurrentPassword(), customer.getPassword())) {
             throw new IllegalArgumentException("現在のパスワードが正しくありません");
         }
@@ -88,6 +96,7 @@ public class CustomerService {
         customer.setPhoneNumber(info.getPhoneNumber());
 
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            // BCryptPasswordEncoderを使って新しいパスワードをハッシュ化
             customer.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
 
@@ -116,4 +125,3 @@ public class CustomerService {
         );
     }
 }
-
