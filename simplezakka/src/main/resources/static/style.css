@@ -4,10 +4,14 @@
 }
 
 
+
+
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+
 
 
 .cart-badge {
@@ -17,15 +21,17 @@
 }
 footer {
     font-family: Arial, sans-serif; /* フォントを指定 */
-    background-color: #ffffff40; /* 背景色を白に設定 */
+    background-color: #f1eeeb; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
+
+
 
 
 }
 header {
     font-family: Arial, sans-serif; /* フォントを指定 */
-    background-color: #ffffff40; /* 背景色を白に設定 */
+    background-color: #f1eeeb; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
    
@@ -51,10 +57,13 @@ button.btn {
     margin-right: 10px;
 
 
+
+
 }
 /* ホバー時 */
-.category-btn:hover {
+button.btn:hover {
     background-color: #383028;  /* 背景色が茶に変わる */
+    border: 1px solid #ffffff;
     color: white;               /* 文字色を白に変える */
 }
 /* 通常リンク */
@@ -62,6 +71,8 @@ a {
     color:  #000000;           /* リンクの文字色 */
     text-decoration: none;
 }
+
+
 
 
 /* ホバー時のリンク */
@@ -78,6 +89,8 @@ a:hover {
             background-color:#f1eeeb;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+
 
 
 /* --- ログインポップアップ用のスタイル --- */
@@ -97,6 +110,8 @@ a:hover {
 }
 
 
+
+
 .custom-modal-content {
     background-color: #fefefe;
     margin: auto; /* display: flex; と併用すると中央配置に効果的 */
@@ -112,11 +127,15 @@ a:hover {
 }
 
 
+
+
 /* ポップアップ表示時のアニメーション */
 @keyframes animatetop {
     from {top: -100px; opacity: 0}
     to {top: 0; opacity: 1}
 }
+
+
 
 
 /* 閉じるボタン */
@@ -132,6 +151,8 @@ a:hover {
 }
 
 
+
+
 .custom-modal .close-button:hover,
 .custom-modal .close-button:focus {
     color: #000;
@@ -139,11 +160,15 @@ a:hover {
 }
 
 
+
+
 /* フォームのラベルと入力欄のスタイル */
 .custom-modal .form-label {
     font-weight: bold;
     margin-bottom: 5px;
 }
+
+
 
 
 .custom-modal .form-control {
@@ -154,15 +179,6 @@ a:hover {
 }
 
 
-/* ログイン・新規登録ボタンのスタイル */
-.custom-modal .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-.custom-modal .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
 
 
 .custom-modal .btn-outline-secondary {
@@ -175,12 +191,9 @@ a:hover {
 }
 
 
+
+
 /* エラーメッセージ */
 .custom-modal .error-message {
     font-size: 0.9em;
 }
-
-
-
-
-
