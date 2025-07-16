@@ -32,20 +32,50 @@
         <div class="mb-3">
             <input type="text" class="form-control" id="searchInput" placeholder="キーワード検索...">
         </div>
-<b>カテゴリから選ぶ</b>
-        <div id="categoryFilter" class="mb-3">
-            <button class="btn btn-outline-primary category-btn" data-category="all">すべて</button>
-            <button class="btn btn-outline-primary category-btn" data-category="1">インテリア雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="2">生活雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="3">ファッション雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="4">キッチン用品</button>
-        </div>
-         <!--商品一覧を表示  -->  
-        <div id="main-content">
-            <div id="products-container" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+<b>カテゴリから選ぶ</b><br>
+
+<form th:action="@{/}" method="get">
+    <input type="hidden" name="categoryId" value="0" />
+    <button type="submit" class="btn btn-outline-primary">すべて</button>
+</form>
+
+<form th:action="@{/}" method="get">
+    <input type="hidden" name="categoryId" value="1" />
+    <button type="submit" class="btn btn-outline-primary">インテリア雑貨</button>
+</form>
+
+<form th:action="@{/category/{categoryId}(categoryId=2)}" method="get">
+    <button type="submit" class="btn btn-outline-primary">生活雑貨</button>
+</form>
+
+<form th:action="@{/category/{categoryId}(categoryId=3)}" method="get">
+    <button type="submit" class="btn btn-outline-primary">ファッション雑貨</button>
+</form>
+
+<form th:action="@{/category/{categoryId}(categoryId=4)}" method="get">
+    <button type="submit" class="btn btn-outline-primary">キッチン用品</button>
+</form>
+
+<!-- 商品一覧を表示 -->
+<div id="main-content">
+    <div id="products-container" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+
+        <div th:each="product : ${products}" class="col">
+            <div class="card h-100">
+                <img th:src="${product.imageUrl}" class="card-img-top" th:alt="${product.name}">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${product.name}">商品名</h5>
+                    <p class="card-text" th:text="${product.description}">説明</p>
+                    <p class="card-text">
+                        価格: ¥<span th:text="${product.price}">0</span>
+                    </p>
+                </div>
             </div>
         </div>
+
     </div>
+</div>
+
 
     <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">

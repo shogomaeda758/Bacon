@@ -73,4 +73,6 @@ a:hover {
             background-color: #f9fdf9;
         }
 
-
+form {
+    display: inline;
+}
