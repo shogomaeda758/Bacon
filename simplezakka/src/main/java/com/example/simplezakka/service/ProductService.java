@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    
+
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
-    
+
     /**
      * 全商品取得
      * @return 全商品リスト
@@ -32,7 +32,7 @@ public class ProductService {
                 .map(this::convertToListItem)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 商品詳細取得
      * @param productId 商品ID
@@ -42,7 +42,7 @@ public class ProductService {
         Optional<Product> productOpt = productRepository.findById(productId);
         return productOpt.map(this::convertToDetail).orElse(null);
     }
-    
+
     /**
      * カテゴリ別商品取得
      * @param categoryId カテゴリID
@@ -53,7 +53,7 @@ public class ProductService {
                 .map(this::convertToListItem)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 商品検索
      * @param keyword 検索キーワード
@@ -64,7 +64,7 @@ public class ProductService {
                 .map(this::convertToListItem)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 在庫あり商品取得
      * @param minStock 最小在庫数
@@ -75,7 +75,7 @@ public class ProductService {
                 .map(this::convertToListItem)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 在庫減少処理
      * @param productId 商品ID
@@ -86,7 +86,7 @@ public class ProductService {
         int updatedRows = productRepository.decreaseStock(productId, quantity);
         return updatedRows > 0;
     }
-    
+
     /**
      * 在庫更新処理
      * @param productId 商品ID
@@ -97,9 +97,9 @@ public class ProductService {
         int updatedRows = productRepository.updateStock(productId, newStock);
         return updatedRows > 0;
     }
-    
+
     /**
-     * 
+     * 商品エンティティをリスト用DTOに変換
      * @param product 商品エンティティ
      * @return 商品リストアイテム
      */
@@ -107,13 +107,14 @@ public class ProductService {
         return new ProductListItem(
                 product.getProductId(),
                 product.getName(),
-                product.getPrice().intValue(), 
-                product.getImageUrl()
+                product.getPrice().intValue(),
+                product.getImageUrl(),
+                product.getCategory().getCategoryName() // ★ 追加：カテゴリ名を含める
         );
     }
-    
+
     /**
-     * 
+     * 商品エンティティを詳細用DTOに変換
      * @param product 商品エンティティ
      * @return 商品詳細
      */
