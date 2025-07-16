@@ -30,17 +30,17 @@
         </header>
 
         <div class="mb-3">
-            <input type="text" class="form-control" id="searchInput" placeholder="キーワード検索...">
+            <input type="text" class="form-control" id="searchInput" placeholder="商品名で検索...">
         </div>
-<b>カテゴリから選ぶ</b>
+
         <div id="categoryFilter" class="mb-3">
             <button class="btn btn-outline-primary category-btn" data-category="all">すべて</button>
-            <button class="btn btn-outline-primary category-btn" data-category="1">インテリア雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="2">生活雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="3">ファッション雑貨</button>
-            <button class="btn btn-outline-primary category-btn" data-category="4">キッチン用品</button>
+            <button class="btn btn-outline-primary category-btn" data-category="インテリア雑貨">インテリア雑貨</button>
+            <button class="btn btn-outline-primary category-btn" data-category="生活雑貨">生活雑貨</button>
+            <button class="btn btn-outline-primary category-btn" data-category="ファッション雑貨">ファッション雑貨</button>
+            <button class="btn btn-outline-primary category-btn" data-category="キッチン用品">キッチン用品</button>
         </div>
-         <!--商品一覧を表示  -->  
+
         <div id="main-content">
             <div id="products-container" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
             </div>
@@ -68,25 +68,39 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="cartModalBody">
-                    </div>
+                </div>
                 <div class="modal-footer" id="cartModalFooter">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-labelledby="orderCompleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">ご注文ありがとうございます</h5>
+                    <h5 class="modal-title" id="orderCompleteModalTitle">ご注文完了</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="orderCompleteBody">
+                <div class="modal-body" id="orderCompleteModalBody">
+                    </div>
+                <div class="modal-footer" id="orderCompleteModalFooter">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-labelledby="orderConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderConfirmationModalTitle">注文内容の確認</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">トップに戻る</button>
-                </div>
+                <div class="modal-body" id="orderConfirmationModalBody">
+                    </div>
+                <div class="modal-footer" id="orderConfirmationModalFooter">
+                    </div>
             </div>
         </div>
     </div>
@@ -115,67 +129,5 @@
             });
         });
     </script>
-    <script>
-const API_BASE = '/api'; 
-
-// 商品一覧を取得して表示
-async function fetchProductsByCategory(category) {
-    let url = `${API_BASE}/products`;
-    if (category !== 'all') {
-        url = `${API_BASE}/products/category/${encodeURIComponent(category)}`;
-    }
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('商品の取得に失敗しました');
-        }
-        const products = await response.json();
-        displayProducts(products);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('商品の読み込みに失敗しました');
-    }
-}
-
-// 商品一覧をHTMLに表示
-function displayProducts(products) {
-    const container = document.getElementById('products-container');
-    container.innerHTML = '';
-
-    if (products.length === 0) {
-        container.innerHTML = '<p>該当する商品はありません。</p>';
-        return;
-    }
-
-    products.forEach(product => {
-        const productCard = `
-            <div class="col">
-                <div class="card h-100">
-                    <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${product.name}</h5>
-                        <p class="card-text">${product.description}</p>
-                        <p class="card-text">価格: ¥${product.price}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', productCard);
-    });
-}
-
-// ボタンクリックイベント登録
-document.querySelectorAll('.category-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const category = button.dataset.category;
-        fetchProductsByCategory(category);
-    });
-});
-
-// 最初にすべての商品を取得して表示
-fetchProductsByCategory('all');
-</script>
-
 </body>
 </html>
