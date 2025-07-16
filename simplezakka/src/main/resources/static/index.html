@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -35,26 +36,30 @@
 <b>カテゴリから選ぶ</b><br>
 
 <form th:action="@{/}" method="get">
-    <input type="hidden" name="categoryId" value="0" />
+    <input type="hidden" name="categoryId" value="0">
     <button type="submit" class="btn btn-outline-primary">すべて</button>
 </form>
 
 <form th:action="@{/}" method="get">
-    <input type="hidden" name="categoryId" value="1" />
+    <input type="hidden" name="categoryId" value="1">
     <button type="submit" class="btn btn-outline-primary">インテリア雑貨</button>
 </form>
 
-<form th:action="@{/category/{categoryId}(categoryId=2)}" method="get">
+<form th:action="@{/}" method="get">
+    <input type="hidden" name="categoryId" value="2">
     <button type="submit" class="btn btn-outline-primary">生活雑貨</button>
 </form>
 
-<form th:action="@{/category/{categoryId}(categoryId=3)}" method="get">
+<form th:action="@{/}" method="get">
+    <input type="hidden" name="categoryId" value="3">
     <button type="submit" class="btn btn-outline-primary">ファッション雑貨</button>
 </form>
 
-<form th:action="@{/category/{categoryId}(categoryId=4)}" method="get">
+<form th:action="@{/}" method="get">
+    <input type="hidden" name="categoryId" value="4">
     <button type="submit" class="btn btn-outline-primary">キッチン用品</button>
 </form>
+
 
 <!-- 商品一覧を表示 -->
 <div id="main-content">
@@ -148,25 +153,76 @@
     <script>
 const API_BASE = '/api'; 
 
-// 商品一覧を取得して表示
-async function fetchProductsByCategory(category) {
-    let url = `${API_BASE}/products`;
-    if (category !== 'all') {
-        url = `${API_BASE}/products/category/${encodeURIComponent(category)}`;
+document.addEventListener('DOMContentLoaded', function() {
+    const API_BASE = '/api/products/category/';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryId = urlParams.get('categoryId');
+
+    if (categoryId) {
+        fetchProductsByCategory(categoryId);
+    } else {
+        fetchAllProducts();
     }
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('商品の取得に失敗しました');
+    async function fetchProductsByCategory(categoryId) {
+        let url;
+        if (categoryId === '0') {
+            url = '/api/products';
+        } else {
+            url = `${API_BASE}${encodeURIComponent(categoryId)}`;
         }
-        const products = await response.json();
-        displayProducts(products);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('商品の読み込みに失敗しました');
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('商品の取得に失敗しました');
+            const products = await response.json();
+            displayProducts(products);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('商品の読み込みに失敗しました');
+        }
     }
-}
+
+    async function fetchAllProducts() {
+        try {
+            const response = await fetch('/api/products');
+            if (!response.ok) throw new Error('商品の取得に失敗しました');
+            const products = await response.json();
+            displayProducts(products);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('商品の読み込みに失敗しました');
+        }
+    }
+
+    function displayProducts(products) {
+        const container = document.getElementById('products-container');
+        container.innerHTML = '';
+
+        if (products.length === 0) {
+            container.innerHTML = '<p>該当する商品はありません。</p>';
+            return;
+        }
+
+        products.forEach(product => {
+            const productCard = `
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">${product.description || ''}</p>
+                            <p class="card-text">価格: ¥${product.price.toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', productCard);
+        });
+    }
+});
+
 
 // 商品一覧をHTMLに表示
 function displayProducts(products) {
