@@ -1,8 +1,10 @@
 // login-popup.js の内容
 
+
 document.addEventListener('DOMContentLoaded', function() {
     // 既存のログインボタンのID
     const loginBtn = document.getElementById('login-btn');
+
 
     // カスタムモーダル要素
     const loginModal = document.getElementById('loginModal');
@@ -12,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('errorMessage');
     const registerBtn = document.getElementById('registerBtn');
+
 
     // --- ログインボタンをクリックでポップアップを表示 ---
     if (loginBtn) {
@@ -23,12 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     // --- 閉じるボタンをクリックでポップアップを非表示 ---
     if (closeButton) {
         closeButton.addEventListener('click', function() {
             loginModal.style.display = 'none';
         });
     }
+
 
     // --- ポップアップの外側をクリックで非表示 ---
     // (ポップアップの背景部分をクリックした場合)
@@ -40,17 +45,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     // --- ログインボタンのクリック処理（仮の検証ロジック） ---
     if (loginSubmitBtn) {
         loginSubmitBtn.addEventListener('click', function(event) {
             event.preventDefault(); // フォームのデフォルトの送信動作（ページのリロードなど）をキャンセル
 
+
             const memberId = memberIdInput.value;
             const password = passwordInput.value;
+
 
             // 仮の正しいログイン情報 (あくまでフロントエンドでのデモンストレーション用)
             const correctMemberId = "testuser";
             const correctPassword = "password123";
+
 
             if (memberId === correctMemberId && password === correctPassword) {
                 // ログイン成功時の処理
@@ -66,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     // --- 新規登録ボタンのクリック処理 ---
     if (registerBtn) {
         registerBtn.addEventListener('click', function() {
@@ -75,3 +85,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
