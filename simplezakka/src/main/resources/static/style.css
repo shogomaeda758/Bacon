@@ -15,14 +15,14 @@
 }
 footer {
     font-family: Arial, sans-serif; /* フォントを指定 */
-    background-color: hsl(57, 40%, 90%); /* 背景色を白に設定 */
+    background-color: #ffffff40; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
 
 }
 header {
     font-family: 'Nunito', sans-serif; /* フォントを指定 */
-    background-color: hsl(57, 40%, 90%); /* 背景色を白に設定 */
+    background-color: #ffffff40; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
     
@@ -36,7 +36,7 @@ body {
 }
 /* ボタン */
 button.btn {
-    background-color: rgb(191, 232, 191);
+    background-color:  #e9e3dd;
     color: #383028;
     border: 1px solid #383028;
     font-size: 15px;     /* 文字サイズ */
@@ -61,16 +61,17 @@ a {
 
 /* ホバー時のリンク */
 a:hover {
-    color:    #ffffff;       /* マウスオーバー時の色 */
-
+    color:    #e9e3dd;       /* マウスオーバー時の色 */
 }
+/*検索バーのリンク*/
 #searchInput {
             margin-bottom: 1em;
             padding: 0.8em;
-            border: 1px solid #c8e6c9;
+            border: 1px solid #ffffff40;
             border-radius: 5px;
             font-size: 1em;
-            background-color: #f9fdf9;
-        }
+            background-color:#f1eeeb;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
 
 
