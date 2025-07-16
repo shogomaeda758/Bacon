@@ -14,10 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
             email: '',
             address: '',
             phoneNumber: ''
+            
         },
         paymentMethod: '',
         items: [],
-        totalPrice: 0
+        totalPrice: 0,
+        shippingFee: 0, // ★この行を追加
+        grandTotal: 0   // ★この行を追加
     };
 
     // 共通のエラーハンドリング関数
@@ -621,6 +624,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             currentOrderData.items = Object.values(cart.items);
             currentOrderData.totalPrice = cart.totalPrice;
+            currentOrderData.shippingFee = cart.shippingFee;
+            currentOrderData.grandTotal = cart.grandTotal;
 
             toggleModal(cartModal, false);
             showOrderConfirmation();
@@ -670,6 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr>
                             <th colspan="3" class="text-end">合計金額:</th>
                             <th>¥${currentOrderData.totalPrice.toLocaleString()}</th>
+                            
                         </tr>
                     </tfoot>
                 </table>
