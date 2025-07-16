@@ -5,6 +5,8 @@ import com.example.simplezakka.dto.product.ProductListItem;
 import com.example.simplezakka.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+
 
 import java.util.List;
 
@@ -59,7 +61,6 @@ public class ProductController {
         List<ProductListItem> products = productService.findProductsByCategory(categoryId);
         return ResponseEntity.ok(products);
     }
-    
     /**
      * 商品検索
      * GET /api/products/search?keyword={keyword}

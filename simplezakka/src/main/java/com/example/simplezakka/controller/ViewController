@@ -1,0 +1,32 @@
+package com.example.simplezakka.controller;
+
+import com.example.simplezakka.dto.product.ProductListItem;
+import com.example.simplezakka.service.ProductService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+@Controller
+public class ProductPageController {
+    
+    private final ProductService productService;
+    
+    public ProductPageController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @GetMapping("/")
+    public String showIndex(@RequestParam(value = "categoryId", required = false) Integer categoryId, Model model) {
+        List<ProductListItem> products;
+        if (categoryId != null && categoryId != 0) {
+            products = productService.findProductsByCategory(categoryId);
+        } else {
+            products = productService.findAllProducts();
+        }
+        model.addAttribute("products", products);
+        return "index"; 
+    }
+}

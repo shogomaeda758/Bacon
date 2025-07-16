@@ -151,27 +151,18 @@
         });
     </script>
     <script>
-const API_BASE = '/api'; 
-
-document.addEventListener('DOMContentLoaded', function() {
-    const API_BASE = '/api/products/category/';
-
+ // URLのクエリパラメータからcategoryIdを取得
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = urlParams.get('categoryId');
 
-    if (categoryId) {
+    if (categoryId && categoryId !== '0') {
         fetchProductsByCategory(categoryId);
     } else {
         fetchAllProducts();
     }
 
     async function fetchProductsByCategory(categoryId) {
-        let url;
-        if (categoryId === '0') {
-            url = '/api/products';
-        } else {
-            url = `${API_BASE}${encodeURIComponent(categoryId)}`;
-        }
+        const url = `${API_BASE}${encodeURIComponent(categoryId)}`;
 
         try {
             const response = await fetch(url);
@@ -221,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
             container.insertAdjacentHTML('beforeend', productCard);
         });
     }
-});
 
 
 // 商品一覧をHTMLに表示
