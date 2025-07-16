@@ -290,6 +290,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+async function fetchLoggedInCustomerInfo() {
+    try {
+        const response = await fetch(`${API_BASE}/customers/profile`, {
+            method: 'GET', // 明示的にGETメソッドを指定しても良い
+            headers: {
+                'Content-Type': 'application/json'
+                // 他のヘッダーが必要であればここに追加
+            },
+            // ★この行が最も重要です★
+            // これにより、ブラウザはセッションCookie（JSESSIONIDなど）をリクエストに含めます。
+            credentials: 'include' 
+        });
+
+        if (response.ok) {
+            const customer = await response.json();
+            console.log("Fetched logged-in customer data:", customer); // デバッグ用
+            return customer;
+        } else if (response.status === 401) { // 未認証の場合
+            console.log("User is not logged in or session expired (401 Unauthorized).");
+            return null;
+        } else {
+            // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
+            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); // JSONパース失敗も考慮
+            console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
+            // handleError 関数があればここで呼び出すことも検討
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching logged-in customer info:', error);
+        return null;
+    }
+}
+
     async function updateCartDisplay() {
         try {
             const response = await fetch(`${API_BASE}/cart`);
@@ -503,10 +536,22 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             document.getElementById('back-to-cart').addEventListener('click', () => updateCartModalContent(false));
             document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
-            document.getElementById('name').value = currentOrderData.customerInfo.name || '';
-            document.getElementById('email').value = currentOrderData.customerInfo.email || '';
-            document.getElementById('address').value = currentOrderData.customerInfo.address || '';
-            document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+            const customer = await fetchLoggedInCustomerInfo();
+            if (customer) {
+                // ログインしているユーザーの情報があればフォームにセット
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('address').value = customer.address || '';
+                // バックエンドのプロパティ名に合わせて 'phoneNumber' または 'phone' などを調整してください
+                document.getElementById('phone').value = customer.phoneNumber || customer.phone || ''; 
+            } else {
+                // ログインしていない場合、または情報取得に失敗した場合は
+                // 既存の currentOrderData に保持されている値をセット（ユーザーが手動で入力していた場合など）
+                document.getElementById('name').value = currentOrderData.customerInfo.name || '';
+                document.getElementById('email').value = currentOrderData.customerInfo.email || '';
+                document.getElementById('address').value = currentOrderData.customerInfo.address || '';
+                document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+            }
             if (currentOrderData.paymentMethod) {
                 const radio = document.querySelector(`input[name="paymentMethod"][value="${currentOrderData.paymentMethod}"]`);
                 if (radio) radio.checked = true;
