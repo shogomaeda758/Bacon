@@ -3,12 +3,12 @@ package com.example.simplezakka.controller;
 import com.example.simplezakka.dto.customer.*;
 import com.example.simplezakka.service.CustomerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus; // HttpStatusをインポート
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException; // ResponseStatusExceptionをインポート
+import org.springframework.web.server.ResponseStatusException;
 
-import jakarta.servlet.http.HttpSession; // HttpSessionをインポート
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,6 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    // 定数としてセッション属性名を定義
     public static final String SESSION_CUSTOMER_ID = "loggedInCustomerId";
     public static final String SESSION_CUSTOMER_NAME = "loggedInCustomerName";
 
@@ -29,62 +28,52 @@ public class CustomerController {
     public ResponseEntity<?> register(@RequestBody CustomerRegisterRequest request) {
         try {
             CustomerResponse saved = customerService.createCustomer(request);
-            // 登録後、自動ログインさせる場合はここでセッションに保存
-            // HttpSession session に保存する場合は、ここにセッション保存ロジックを追加
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved); // 201 Created を返す
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (IllegalArgumentException ex) {
-            return buildError(HttpStatus.CONFLICT, "REGISTER_ERROR", ex.getMessage()); // 409 Conflict
+            return buildError(HttpStatus.CONFLICT, "REGISTER_ERROR", ex.getMessage());
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody CustomerLoginRequest request, HttpSession session) { // ★HttpSessionをインジェクション
+    public ResponseEntity<?> login(@RequestBody CustomerLoginRequest request, HttpSession session) {
         try {
             CustomerResponse customer = customerService.login(request.getEmail(), request.getPassword());
-            
-            // ログイン成功: セッションにユーザー情報を保存
+
             session.setAttribute(SESSION_CUSTOMER_ID, customer.getCustomerId());
-            session.setAttribute(SESSION_CUSTOMER_NAME, customer.getName()); // フロントエンドで利用するため
-            
+            session.setAttribute(SESSION_CUSTOMER_NAME, customer.getName());
+
             return ResponseEntity.ok(customer);
         } catch (IllegalArgumentException ex) {
-            // 認証失敗: 401 Unauthorized を返す
             return buildError(HttpStatus.UNAUTHORIZED, "LOGIN_ERROR", ex.getMessage());
         }
     }
 
-    // ログイン状態確認エンドポイント
     @GetMapping("/status")
     public ResponseEntity<?> getLoginStatus(HttpSession session) {
         Integer customerId = (Integer) session.getAttribute(SESSION_CUSTOMER_ID);
         String customerName = (String) session.getAttribute(SESSION_CUSTOMER_NAME);
 
         if (customerId != null) {
-            // ログイン中の場合、ユーザー情報を返す
             Map<String, Object> response = new HashMap<>();
             response.put("loggedIn", true);
             response.put("customerId", customerId);
             response.put("customerName", customerName);
             return ResponseEntity.ok(response);
         } else {
-            // ログインしていない場合
             Map<String, Object> response = new HashMap<>();
             response.put("loggedIn", false);
             return ResponseEntity.ok(response);
         }
     }
 
-    // ログアウトエンドポイント
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate(); // セッションを無効化する
+        session.invalidate();
         Map<String, String> response = new HashMap<>();
         response.put("message", "ログアウトしました。");
         return ResponseEntity.ok(response);
     }
 
-
-    // 会員情報更新、検索などは省略（変更なし）
     @PutMapping("/{customerId}")
     public ResponseEntity<?> update(@PathVariable Integer customerId,
                                     @RequestBody CustomerUpdateRequest request) {
@@ -92,30 +81,42 @@ public class CustomerController {
             CustomerResponse updated = customerService.updateCustomer(customerId, request);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException ex) {
-            return buildError(HttpStatus.BAD_REQUEST, "UPDATE_ERROR", ex.getMessage()); // 400 Bad Request
+            return buildError(HttpStatus.BAD_REQUEST, "UPDATE_ERROR", ex.getMessage());
         }
     }
 
-    // 検索エンドポイント
     @GetMapping("/search")
     public ResponseEntity<List<CustomerResponse>> searchCustomers(@RequestParam String keyword) {
         List<CustomerResponse> customers = customerService.searchByNameOrPhone(keyword);
         return ResponseEntity.ok(customers);
     }
-    
-    // 会員情報取得エンドポイント
+
     @GetMapping("/{customerId}")
     public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Integer customerId) {
         try {
             CustomerResponse customer = customerService.getCustomerById(customerId);
             return ResponseEntity.ok(customer);
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage()); // 404 Not Found
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<CustomerResponse> getCustomerProfile(HttpSession session) {
+        Integer customerId = (Integer) session.getAttribute(SESSION_CUSTOMER_ID);
+        if (customerId == null) {
+            // ログインしていない場合は401 Unauthorizedを返す
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "認証が必要です。");
+        }
+        try {
+            CustomerResponse customer = customerService.getCustomerById(customerId);
+            return ResponseEntity.ok(customer);
+        } catch (IllegalArgumentException e) {
+            // セッションに顧客IDはあるが、DBに存在しないなど（通常はありえないが念のため）
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "顧客情報が見つかりません。");
         }
     }
 
 
-    // エラーレスポンスのヘルパーメソッドにHttpStatusを追加
     private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String code, String message) {
         Map<String, Object> error = new HashMap<>();
         error.put("errorCode", code);
