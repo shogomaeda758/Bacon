@@ -41,7 +41,7 @@
         input {
             margin-bottom: 1em;
             padding: 0.8em;
-            border: 1px solid #c8e6c9;
+            border: 1px solid #383028;
             border-radius: 5px;
             font-size: 1em;
             background-color: #f9fdf9;
@@ -49,26 +49,30 @@
 
 
         button, input[type="submit"] {
-            padding: 0.8em;
-            background-color: rgb(191, 232, 191);
-            color: #383028;
-            border: #383028;
+            background-color:  #897765;
+            color: #ffffff;
+            border: 1px solid #ffffff;
             border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            width: 100%;
-            border: 1px solid #383028;
+            font-size: 15px;     /* 文字サイズ */
+            padding: 10px 20px;  /* 内側の余白 */
+            min-width: 300px;     /* 最小幅は300px */
+            width: auto;
+            white-space: nowrap;
+            height: 50px;        /* 高さ */
+            margin: auto;
 }
 
 
 
         button:hover, input[type="submit"]:hover {
-            background-color: #57a05a;
+            background-color: #383028;  /* 背景色が茶に変わる */
+            border: 1px solid #ffffff;
         }
 
 
         button:active, input[type="submit"]:active {
-            background-color: #57a05a; /* hoverと同じ色にして黒くならないように */
+            background-color: #383028;  /* 背景色が茶に変わる */
+            border: 1px solid #ffffff;
         }
 
 

@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </span>
                 </button>
                 <button class="btn btn-outline-dark">
-                    <a href="C0601.html" class="text-dark text-decoration-none">ログイン / 新規会員登録</a>
+                    <a href="C0601.html" class="text-light text-decoration-none">ログイン / 新規会員登録</a>
                 </button>
             `;
         }
