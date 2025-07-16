@@ -60,13 +60,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loggedIn) {
             // ログイン中の場合
             buttonsHtml = `
+                <span class="navbar-text me-2">${userName}さん</span>
                 <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
                     <i class="bi bi-cart"></i> カート
                     <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
                         0
                     </span>
                 </button>
-                <span class="navbar-text me-2">${userName}さん</span>
                 <button class="btn btn-outline-dark" id="logoutBtn">ログアウト</button>
             `;
         } else {
