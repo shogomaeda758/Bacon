@@ -14,19 +14,8 @@
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4">シンプル雑貨オンライン</span>
             </a>
-            <div class="text-end">
-                <button id="cart-btn" class="btn btn-outline-dark position-relative">
-                    <i class="bi bi-cart"></i> カート
-                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
-                        0
-                    </span>
-                </button>
-            </div>
-            <div class="text-end">
-                <button class="btn btn-outline-dark position-relative">
-                    <a href="C0601.html" class="text-dark text-decoration-none">ログイン</a>
-                </button>
-            </div>
+            <div class="text-end" id="header-right-buttons">
+                </div>
         </header>
 
         <div class="mb-3">
@@ -121,7 +110,9 @@
             
             products.forEach(product => {
                 const productName = product.querySelector('.card-title').textContent.toLowerCase();
-                if (productName.includes(searchTerm)) { 
+                // この部分で商品説明も検索対象に含める場合、以前のmain.jsのロジックを参考に修正できます
+                // const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
+                if (productName.includes(searchTerm)) { // || productDescription.includes(searchTerm)
                     product.style.display = 'block';
                 } else {
                     product.style.display = 'none';
