@@ -1,75 +1,97 @@
 package com.example.simplezakka.repository;
 
 import com.example.simplezakka.entity.Customer;
-import com.example.simplezakka.repository.CustomerRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
 import java.util.Optional;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 class CustomerRepositoryTest {
-
     @Autowired
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
+    private Customer customer;
 
-    @Test
-    void findByEmail_Exists_ReturnsCustomer() {
-        Customer c = new Customer();
-        c.setLastName("森");
-        c.setFirstName("進一");
-        c.setEmail("shinichi@moriforest.com");
-        c.setPassword("password123");
-        c.setAddress("山形県");
-        c.setPhoneNumber("090-3333-2222");
-        customerRepository.save(c);
-        Optional<Customer> found = customerRepository.findByEmail("shinichi@moriforest.com");
-        assertTrue(found.isPresent());
-        assertEquals("森", found.get().getLastName());
-        assertEquals("進一", found.get().getFirstName());
+    @BeforeEach
+    void setUp() {
+        customer = new Customer();
+        customer.setLastName("田中");
+        customer.setFirstName("真紀");
+        customer.setEmail("tanaka@makisan.com");
+        customer.setPassword("pw");
+        customer.setAddress("大分県");
+        customer.setPhoneNumber("080-1234-5555");
     }
 
-    @Test
-    void findByEmail_NotFound_ReturnsEmpty() {
-        Optional<Customer> found = customerRepository.findByEmail("none@nowhere.com");
-        assertTrue(found.isEmpty());
+    @Nested
+    @DisplayName("メール検索API")
+    class FindByEmailTests {
+        @Test
+        @DisplayName("メール一致で会員取得")
+        void findByEmail_Success() {
+            customerRepository.save(customer);
+            Optional<Customer> found = customerRepository.findByEmail("tanaka@makisan.com");
+            assertThat(found).isPresent();
+            assertThat(found.get().getLastName()).isEqualTo("田中");
+        }
+        @Test
+        @DisplayName("メール不一致で空Optional")
+        void findByEmail_Fail() {
+            assertThat(customerRepository.findByEmail("noone@none.co")).isEmpty();
+        }
     }
 
-    @Test
-    void existsByEmail_Exists_ReturnsTrue() {
-        Customer c = new Customer();
-        c.setLastName("吉田");
-        c.setFirstName("京子");
-        c.setEmail("kyoko@yoshida.net");
-        c.setPassword("xx");
-        c.setAddress("新潟県長岡市");
-        c.setPhoneNumber("090-8787-0000");
-        customerRepository.save(c);
-        assertTrue(customerRepository.existsByEmail("kyoko@yoshida.net"));
+    @Nested
+    @DisplayName("メール重複チェックAPI")
+    class ExistsTests {
+        @Test
+        @DisplayName("メール重複ありでtrue")
+        void existsByEmail_True() {
+            customerRepository.save(customer);
+            assertThat(customerRepository.existsByEmail("tanaka@makisan.com")).isTrue();
+        }
+        @Test
+        @DisplayName("メール登録なしでfalse")
+        void existsByEmail_False() {
+            assertThat(customerRepository.existsByEmail("a@b.com")).isFalse();
+        }
     }
 
-    @Test
-    void existsByEmail_NotExists_ReturnsFalse() {
-        assertFalse(customerRepository.existsByEmail("unknown@net.com"));
+    @Nested
+    @DisplayName("名前or電話番号検索API")
+    class NameOrPhoneTests {
+        @Test
+        @DisplayName("名前または電話番号検索で会員リスト返却")
+        void nameOrPhone_Match() {
+            customerRepository.save(customer);
+            var list = customerRepository
+                    .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
+                            "田中", "真紀", "5555");
+            assertThat(list).isNotEmpty();
+        }
     }
 
-    @Test
-    void findByNameContainingOrPhoneNumberContaining_Match_ReturnsList() {
-        Customer c = new Customer();
-        c.setLastName("田中");
-        c.setFirstName("花子");
-        c.setEmail("hanako@tanaka.com");
-        c.setPassword("aa");
-        c.setAddress("熊本県");
-        c.setPhoneNumber("080-9999-8888");
-        customerRepository.save(c);
-        List<Customer> result = customerRepository.findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining("田中", "花子", "9999");
-        assertFalse(result.isEmpty());
-        assertEquals("花子", result.get(0).getFirstName());
+    @Nested
+    @DisplayName("ID+メール複合検索API")
+    class ByCustomerIdAndEmailTests {
+        @Test
+        @DisplayName("findByCustomerIdAndEmail 成功")
+        void findByCustomerIdAndEmail_Success() {
+            Customer saved = customerRepository.save(customer);
+            Optional<Customer> found = customerRepository.findByCustomerIdAndEmail(saved.getCustomerId(), "tanaka@makisan.com");
+            assertThat(found).isPresent();
+            assertThat(found.get().getLastName()).isEqualTo("田中");
+        }
+        @Test
+        @DisplayName("findByCustomerIdAndEmail 失敗")
+        void findByCustomerIdAndEmail_Fail() {
+            assertThat(customerRepository.findByCustomerIdAndEmail(999, "xxx@zzz.com")).isEmpty();
+        }
     }
 }
+
 

@@ -3,205 +3,196 @@ package com.example.simplezakka.service;
 import com.example.simplezakka.dto.customer.*;
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.repository.CustomerRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
-
     @InjectMocks
-    CustomerService customerService;
-
+    private CustomerService customerService;
     @Mock
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
 
-    // --- register 正常 ---
-    @Test
-    void createCustomer_ValidInput_ShouldCreateCustomer() {
-        // DTO作成
-        CustomerInfo info = new CustomerInfo();
-        info.setName("原田 太郎");
-        info.setEmail("taro@harada.com");
-        info.setAddress("神奈川県横浜市1-2-3");
-        info.setPhoneNumber("090-1234-5678");
+    private Customer customerEntity;
 
-        CustomerRegisterRequest req = new CustomerRegisterRequest();
-        req.setCustomerInfo(info);
-        req.setPassword("testpass123");
-
-        // Entity作成: nameを分割
-        Customer entity = new Customer();
-        entity.setCustomerId(1);
-        entity.setLastName("原田");
-        entity.setFirstName("太郎");
-        entity.setEmail("taro@harada.com");
-        entity.setAddress("神奈川県横浜市1-2-3");
-        entity.setPhoneNumber("090-1234-5678");
-        entity.setPassword("testpass123");
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
-
-        when(customerRepository.existsByEmail("taro@harada.com")).thenReturn(false);
-        when(customerRepository.save(any(Customer.class))).thenReturn(entity);
-
-        CustomerResponse res = customerService.createCustomer(req);
-
-        assertEquals("原田 太郎", res.getName());
-        assertEquals("taro@harada.com", res.getEmail());
-        assertEquals("神奈川県横浜市1-2-3", res.getAddress());
-        assertEquals("090-1234-5678", res.getPhoneNumber());
-        assertNotNull(res.getCreatedAt());
+    @BeforeEach
+    void setUp() {
+        customerEntity = new Customer();
+        customerEntity.setCustomerId(1);
+        customerEntity.setLastName("山田");
+        customerEntity.setFirstName("太郎");
+        customerEntity.setEmail("yamada@example.com");
+        customerEntity.setAddress("東京都");
+        customerEntity.setPhoneNumber("090-1111-2222");
+        customerEntity.setPassword("plainpass");
+        customerEntity.setCreatedAt(LocalDateTime.now());
+        customerEntity.setUpdatedAt(LocalDateTime.now());
     }
 
-    // --- register（重複メール）---
-    @Test
-    void createCustomer_DuplicateEmail_ShouldThrow() {
-        CustomerInfo info = new CustomerInfo();
-        info.setName("原田 太郎");
-        info.setEmail("taro@harada.com");
-        info.setAddress("神奈川県横浜市1-2-3");
-        info.setPhoneNumber("090-1234-5678");
+    @Nested
+    @DisplayName("顧客登録API")
+    class RegisterTests {
+        @Test
+        @DisplayName("新規登録成功")
+        void register_Success() {
+            CustomerInfo info = new CustomerInfo();
+            info.setName("山田 太郎");
+            info.setEmail("yamada@example.com");
+            info.setAddress("東京都");
+            info.setPhoneNumber("090-1111-2222");
+            CustomerRegisterRequest req = new CustomerRegisterRequest();
+            req.setCustomerInfo(info);
+            req.setPassword("plainpass");
 
-        CustomerRegisterRequest req = new CustomerRegisterRequest();
-        req.setCustomerInfo(info);
-        req.setPassword("testpass123");
+            when(customerRepository.existsByEmail("yamada@example.com")).thenReturn(false);
+            when(customerRepository.save(any(Customer.class))).thenReturn(customerEntity);
 
-        when(customerRepository.existsByEmail("taro@harada.com")).thenReturn(true);
+            CustomerResponse res = customerService.createCustomer(req);
+            assertThat(res.getName()).isEqualTo("山田 太郎");
+            assertThat(res.getEmail()).isEqualTo("yamada@example.com");
+        }
 
-        assertThrows(IllegalArgumentException.class, () -> customerService.createCustomer(req));
+        @Test
+        @DisplayName("新規登録失敗（メール重複）")
+        void register_DuplicateEmail() {
+            CustomerInfo info = new CustomerInfo();
+            info.setName("山田 太郎");
+            info.setEmail("yamada@example.com");
+            CustomerRegisterRequest req = new CustomerRegisterRequest();
+            req.setCustomerInfo(info);
+            req.setPassword("plainpass");
+
+            when(customerRepository.existsByEmail("yamada@example.com")).thenReturn(true);
+
+            assertThatThrownBy(() -> customerService.createCustomer(req)).isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
-    // --- login 正常 ---
-    @Test
-    void login_ValidCredentials_ReturnsResponse() {
-        Customer entity = new Customer();
-        entity.setCustomerId(10);
-        entity.setLastName("奈良田");
-        entity.setFirstName("花子");
-        entity.setEmail("hanako@narata.com");
-        entity.setPassword("abcd1234");
-        entity.setAddress("東京都品川区1-2-3");
-        entity.setPhoneNumber("090-5678-0001");
-
-        when(customerRepository.findByEmail("hanako@narata.com")).thenReturn(Optional.of(entity));
-
-        CustomerResponse res = customerService.login("hanako@narata.com", "abcd1234");
-
-        assertEquals("奈良田 花子", res.getName());
-        assertEquals("090-5678-0001", res.getPhoneNumber());
+    @Nested
+    @DisplayName("ログインAPI")
+    class LoginTests {
+        @Test
+        @DisplayName("ログイン成功")
+        void login_Success() {
+            when(customerRepository.findByEmail("yamada@example.com")).thenReturn(Optional.of(customerEntity));
+            CustomerResponse res = customerService.login("yamada@example.com", "plainpass");
+            assertThat(res.getName()).isEqualTo("山田 花子");
+        }
+        @Test
+        @DisplayName("メール未登録")
+        void login_EmailNotFound() {
+            when(customerRepository.findByEmail("nope@no.co")).thenReturn(Optional.empty());
+            assertThatThrownBy(() ->
+                    customerService.login("nope@no.co", "hoge")).isInstanceOf(IllegalArgumentException.class);
+        }
+        @Test
+        @DisplayName("パスワード不一致")
+        void login_WrongPassword() {
+            when(customerRepository.findByEmail("yamada@example.com")).thenReturn(Optional.of(customerEntity));
+            assertThatThrownBy(() -> customerService.login("yamada@example.com", "wrongpw"))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
-    // --- login メール未登録 ---
-    @Test
-    void login_EmailNotFound_ThrowsException() {
-        when(customerRepository.findByEmail("not@found.com")).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> customerService.login("not@found.com", "foo"));
+    @Nested
+    @DisplayName("会員情報更新API")
+    class UpdateTests {
+        @Test
+        @DisplayName("会員情報更新成功")
+        void update_Success() {
+            CustomerInfo info = new CustomerInfo();
+            info.setName("山田 花子");
+            info.setEmail("hanako@yamada.com");
+            info.setAddress("愛知県");
+            info.setPhoneNumber("080-2222-3333");
+            CustomerUpdateRequest req = new CustomerUpdateRequest();
+            req.setCustomerInfo(info);
+            req.setCurrentPassword("plainpass");
+            req.setNewPassword("newpass");
+
+            when(customerRepository.findById(1)).thenReturn(Optional.of(customerEntity));
+            when(customerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            CustomerResponse result = customerService.updateCustomer(1, req);
+            assertThat(result.getName()).isEqualTo("山田 花子");
+            assertThat(customerEntity.getPassword()).isEqualTo("newpass");
+        }
+        @Test
+        @DisplayName("会員情報更新失敗（認証NG）")
+        void update_Fail_WrongPassword() {
+            CustomerUpdateRequest req = new CustomerUpdateRequest();
+            CustomerInfo info = new CustomerInfo();
+            info.setName("山田 太郎");
+            info.setEmail("yamada@example.com");
+            req.setCustomerInfo(info);
+            req.setCurrentPassword("wrongpass");
+            req.setNewPassword("newpass");
+            when(customerRepository.findById(1)).thenReturn(Optional.of(customerEntity));
+            assertThatThrownBy(() -> customerService.updateCustomer(1, req))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
-    // --- login パスワード不一致 ---
-    @Test
-    void login_WrongPassword_ThrowsException() {
-        Customer entity = new Customer();
-        entity.setCustomerId(9);
-        entity.setLastName("鈴木");
-        entity.setFirstName("次郎");
-        entity.setEmail("jiro@suzuki.com");
-        entity.setPassword("rightpw");
-
-        when(customerRepository.findByEmail("jiro@suzuki.com")).thenReturn(Optional.of(entity));
-        assertThrows(IllegalArgumentException.class, () -> customerService.login("jiro@suzuki.com", "wrongpw"));
+    @Nested
+    @DisplayName("会員詳細取得API")
+    class GetTests {
+        @Test
+        @DisplayName("取得成功")
+        void getCustomerById_Success() {
+            when(customerRepository.findById(1)).thenReturn(Optional.of(customerEntity));
+            CustomerResponse res = customerService.getCustomerById(1);
+            assertThat(res.getName()).isEqualTo("山田 太郎");
+        }
+        @Test
+        @DisplayName("取得失敗")
+        void getCustomerById_Fail() {
+            when(customerRepository.findById(99)).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> customerService.getCustomerById(99)).isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
-    // --- update 正常 ---
-    @Test
-    void updateCustomer_ValidInput_ShouldUpdate() {
-        CustomerInfo info = new CustomerInfo();
-        info.setName("鈴木 三郎");
-        info.setEmail("saburo@suzuki.com");
-        info.setAddress("愛知県名古屋市xx-yy-zz");
-        info.setPhoneNumber("090-2222-1111");
+    @Nested
+    @DisplayName("名前or電話検索API")
+    class SearchTests {
+        @Test
+        @DisplayName("名前または電話番号一致で会員リスト返却")
+        void searchsearchByNameOrPhone_Match() {
+            Customer target = new Customer();
+            target.setFirstName("花子");
+            target.setLastName("佐藤");
+            target.setPhoneNumber("090-7777-9999");
+            target.setEmail("sato@hanako.com");
+            when(customerRepository.findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
+                    "花子", "花子", "花子"))
+                    .thenReturn(List.of(target));
+            List<CustomerResponse> result = customerService.searchByNameOrPhone("花子");
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getName()).isEqualTo("佐藤 花子");
+        }
 
-        CustomerUpdateRequest req = new CustomerUpdateRequest();
-        req.setCustomerInfo(info);
-        req.setCurrentPassword("RIGHTPASS");
-        req.setNewPassword("NEWPASS");
-
-        Customer old = new Customer();
-        old.setCustomerId(2);
-        old.setLastName("鈴木");
-        old.setFirstName("三郎");
-        old.setEmail("saburo@suzuki.com");
-        old.setPassword("RIGHTPASS");
-        old.setAddress("愛知県名古屋市xx-yy-zz");
-        old.setPhoneNumber("090-2222-1111");
-        old.setCreatedAt(LocalDateTime.now().minusDays(10));
-
-        when(customerRepository.findById(2)).thenReturn(Optional.of(old));
-        when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
-
-        CustomerResponse res = customerService.updateCustomer(2, req);
-        assertEquals("鈴木 三郎", res.getName());
-        assertEquals("saburo@suzuki.com", res.getEmail());
-        assertEquals("NEWPASS", old.getPassword());
-    }
-
-    // --- update パスワード一致しない ---
-    @Test
-    void updateCustomer_WrongPassword_ThrowsException() {
-        CustomerInfo info = new CustomerInfo();
-        info.setName("名字 名前");
-        info.setEmail("aaa@bbb.com");
-        info.setAddress("どこかの町");
-        info.setPhoneNumber("000-0000-0000");
-
-        CustomerUpdateRequest req = new CustomerUpdateRequest();
-        req.setCustomerInfo(info);
-        req.setCurrentPassword("WRONGPASS");
-        req.setNewPassword("NEWW");
-
-        Customer old = new Customer();
-        old.setCustomerId(10);
-        old.setLastName("名字");
-        old.setFirstName("名前");
-        old.setEmail("aaa@bbb.com");
-        old.setPassword("CORRECT");
-
-        when(customerRepository.findById(10)).thenReturn(Optional.of(old));
-        assertThrows(IllegalArgumentException.class, () -> customerService.updateCustomer(10, req));
-    }
-
-    // --- getCustomerById 正常 ---
-    @Test
-    void getCustomerById_Exists_ReturnsResponse() {
-        Customer c = new Customer();
-        c.setCustomerId(3);
-        c.setLastName("高橋");
-        c.setFirstName("花子");
-        c.setEmail("hanako@takahashi.com");
-        c.setPhoneNumber("090-7777-8888");
-        c.setAddress("北海道札幌市xxx");
-        c.setCreatedAt(LocalDateTime.now().minusYears(1));
-        when(customerRepository.findById(3)).thenReturn(Optional.of(c));
-        CustomerResponse result = customerService.getCustomerById(3);
-        assertEquals("高橋 花子", result.getName());
-        assertEquals("hanako@takahashi.com", result.getEmail());
-    }
-
-    // --- getCustomerById 不正 ---
-    @Test
-    void getCustomerById_NotFound_ThrowsException() {
-        when(customerRepository.findById(-1)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> customerService.getCustomerById(-1));
+        @Test
+        @DisplayName("名前or電話一致なしで空リスト返却")
+        void searchsearchByNameOrPhone_NoMatch() {
+            when(customerRepository.findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
+                    "none", "none", "none"))
+                    .thenReturn(Collections.emptyList());
+            List<CustomerResponse> result = customerService.searchByNameOrPhone("none");
+            assertThat(result).isEmpty();
+        }
     }
 }
+
