@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
             email: '',
             address: '',
             phoneNumber: ''
-            
+
         },
         paymentMethod: '',
         items: [],
         totalPrice: 0,
-        shippingFee: 0, // ★この行を追加
-        grandTotal: 0   // ★この行を追加
+        shippingFee: 0,
+        grandTotal: 0
     };
 
     // 共通のエラーハンドリング関数
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
-        throw new Error(errorMessage); 
+        throw new Error(errorMessage);
     }
 
     // 汎用的なモーダル表示/非表示関数
@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    initializeHeader(); 
-    fetchProducts(); 
+    initializeHeader();
+    fetchProducts();
 
 
     // 検索機能
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterProductsByCategory(category) {
         const products = document.querySelectorAll('#products-container .col');
         products.forEach(product => {
-            const productCategory = product.querySelector('.product-card').dataset.category; 
+            const productCategory = product.querySelector('.product-card').dataset.category;
             if (category === 'all' || productCategory === category) {
                 product.style.display = 'block';
             } else {
@@ -296,19 +296,19 @@ async function fetchLoggedInCustomerInfo() {
                 'Content-Type': 'application/json'
 
             },
-            credentials: 'include' 
+            credentials: 'include'
         });
 
         if (response.ok) {
             const customer = await response.json();
-            console.log("Fetched logged-in customer data:", customer); 
+            console.log("Fetched logged-in customer data:", customer);
             return customer;
-        } else if (response.status === 401) { 
+        } else if (response.status === 401) {
             console.log("User is not logged in or session expired (401 Unauthorized).");
             return null;
         } else {
-            // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
-            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); 
+            // その他のエラー
+            const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
             console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
             return null;
         }
@@ -384,7 +384,7 @@ async function fetchLoggedInCustomerInfo() {
                                     <td>¥${item.price.toLocaleString()}</td>
                                     <td>
                                         <input type="number" class="form-control form-control-sm update-quantity"
-                                                data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
+                                                    data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
                                     </td>
                                     <td>¥${item.subtotal.toLocaleString()}</td>
                                     <td>
@@ -536,8 +536,8 @@ async function fetchLoggedInCustomerInfo() {
                 document.getElementById('name').value = customer.name || '';
                 document.getElementById('email').value = customer.email || '';
                 document.getElementById('address').value = customer.address || '';
-             
-                document.getElementById('phone').value = customer.phoneNumber || customer.phone || ''; 
+
+                document.getElementById('phone').value = customer.phoneNumber || customer.phone || '';
             } else {
 
                 document.getElementById('name').value = currentOrderData.customerInfo.name || '';
@@ -577,7 +577,7 @@ async function fetchLoggedInCustomerInfo() {
             if (document.querySelector('input[name="paymentMethod"]:checked')) {
                 paymentMethodFeedback.style.display = 'none';
             } else {
-                paymentMethodFeedback.style.display = 'block'; 
+                paymentMethodFeedback.style.display = 'block';
             }
         }
     }
@@ -599,7 +599,7 @@ async function fetchLoggedInCustomerInfo() {
             updateCartBadge(cart.totalQuantity);
         } catch (error) {
             console.error(error.message);
-            updateCartModalContent(); 
+            updateCartModalContent();
         }
     }
 
@@ -703,14 +703,21 @@ async function fetchLoggedInCustomerInfo() {
         } else {
             itemsHtml += `<tr><td colspan="4" class="text-center">カートに商品がありません。</td></tr>`;
         }
-        
+
         itemsHtml += `
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3" class="text-end">合計金額:</th>
+                            <th colspan="3" class="text-end">商品合計:</th>
                             <th>¥${currentOrderData.totalPrice.toLocaleString()}</th>
-                            
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">送料:</th>
+                            <th>¥${currentOrderData.shippingFee.toLocaleString()}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end fs-5">最終合計:</th>
+                            <th class="fs-5">¥${currentOrderData.grandTotal.toLocaleString()}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -749,28 +756,20 @@ async function fetchLoggedInCustomerInfo() {
         modalBody.innerHTML = itemsHtml + customerHtml + paymentHtml;
 
         modalFooter.innerHTML = `
-            <button type="button" class="btn btn-secondary" id="back-to-customer-form">戻る</button>
-            <button type="button" class="btn btn-primary" id="final-confirm-order-btn">注文を確定する</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+            <button type="button" class="btn btn-primary" id="place-order-btn">この内容で注文する</button>
         `;
-        
-        document.getElementById('back-to-customer-form').addEventListener('click', function() {
-            toggleModal(orderConfirmationModal, false);
-            toggleModal(cartModal, true);
-            updateCartModalContent(true);
-        });
 
-        document.getElementById('final-confirm-order-btn').addEventListener('click', confirmOrder);
-
+        document.getElementById('place-order-btn').addEventListener('click', placeOrder);
         toggleModal(orderConfirmationModal, true);
     }
 
-    async function confirmOrder() {
+    async function placeOrder() {
+        toggleModal(orderConfirmationModal, false);
         try {
-            const response = await fetch(`${API_BASE}/order/confirm`, {
+            const response = await fetch(`${API_BASE}/orders`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(currentOrderData)
             });
 
@@ -778,65 +777,105 @@ async function fetchLoggedInCustomerInfo() {
                 await handleError(response, '注文の確定に失敗しました');
             }
 
-            const orderResult = await response.json();
-
-            await fetch(`${API_BASE}/cart`, { method: 'DELETE' });
-            updateCartBadge(0);
-
-            const orderForm = document.getElementById('order-form');
-            if (orderForm) {
-                orderForm.reset();
-                orderForm.classList.remove('was-validated');
-                orderForm.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-                    el.classList.remove('is-valid', 'is-invalid');
-                });
-                const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
-                if (paymentMethodFeedback) {
-                    paymentMethodFeedback.style.display = 'block';
-                }
-            }
-            currentOrderData = {
-                customerInfo: {
-                    name: '', email: '', address: '', phoneNumber: ''
-                },
-                paymentMethod: '',
-                items: [],
-                totalPrice: 0
-            };
-
-            toggleModal(orderConfirmationModal, false);
-            displayOrderComplete(orderResult);
-            toggleModal(orderCompleteModal, true);
-
+            const order = await response.json();
+            showOrderComplete(order);
+            updateCartBadge(0); // 注文完了後カートを空にする
         } catch (error) {
-            console.error('Error confirming order:', error);
-            alert(`注文確定中にエラーが発生しました。もう一度お試しください: ${error.message}`);
+            console.error(error.message);
+            alert(`注文処理中にエラーが発生しました: ${error.message}`);
         }
     }
 
-    function displayOrderComplete(order) {
-        document.getElementById('orderCompleteModalTitle').textContent = 'ご注文完了';
+    function showOrderComplete(order) {
+        document.getElementById('orderCompleteModalTitle').textContent = 'ご注文が完了しました！';
         const modalBody = document.getElementById('orderCompleteModalBody');
-
-        const displayPaymentMethod = (order.paymentMethod === 'bank_transfer') ? '銀行振込' :
-                                     (order.paymentMethod === 'cash_on_delivery') ? '代金引換' :
-                                     order.paymentMethod || '';
-        modalBody.innerHTML = `
-            <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
-            <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
-            <p>決済方法: ${displayPaymentMethod}</p>
-            <p>商品合計: ¥${order.totalPrice.toLocaleString()}</p>
-            <p>送料: ¥${order.shippingFee.toLocaleString()}</p>
-            <p class="fs-5">最終お支払い金額: ¥${order.grandTotal.toLocaleString()}</p>
-        `;
         const modalFooter = document.getElementById('orderCompleteModalFooter');
-        modalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>`;
-    }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('showCart') === 'true' && urlParams.get('showCheckoutForm') === 'true') {
-        cartModal.show();
-        updateCartModalContent(true); 
-        history.replaceState({}, document.title, window.location.pathname);
+        let itemsHtml = `
+            <div class="confirmation-box">
+                <div class="section-title">ご注文内容</div>
+                <p><strong>注文番号:</strong> ${order.orderId}</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>商品名</th>
+                            <th>数量</th>
+                            <th>単価</th>
+                            <th>小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        if (order.items && order.items.length > 0) {
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td>${item.quantity}</td>
+                        <td>¥${item.price.toLocaleString()}</td>
+                        <td>¥${(item.quantity * item.price).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            itemsHtml += `<tr><td colspan="4" class="text-center">注文商品がありません。</td></tr>`;
+        }
+        itemsHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">商品合計:</th>
+                            <th>¥${order.totalPrice.toLocaleString()}</th>
+                        </tr>
+                         <tr>
+                            <th colspan="3" class="text-end">送料:</th>
+                            <th>¥${order.shippingFee.toLocaleString()}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end fs-5">最終合計:</th>
+                            <th class="fs-5">¥${order.grandTotal.toLocaleString()}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+
+        const customerInfo = order.customerInfo;
+        let customerHtml = `
+            <div class="confirmation-box">
+                <div class="section-title">お届け先</div>
+                <dl class="row">
+                    <dt class="col-sm-4">お名前</dt>
+                    <dd class="col-sm-8">${customerInfo.name || ''}</dd>
+                    <dt class="col-sm-4">メールアドレス</dt>
+                    <dd class="col-sm-8">${customerInfo.email || ''}</dd>
+                    <dt class="col-sm-4">住所</dt>
+                    <dd class="col-sm-8">${customerInfo.address || ''}</dd>
+                    <dt class="col-sm-4">電話番号</dt>
+                    <dd class="col-sm-8">${customerInfo.phoneNumber || ''}</dd>
+                </dl>
+            </div>
+        `;
+
+        let paymentHtml = `
+            <div class="confirmation-box">
+                <div class="section-title">お支払い方法</div>
+                <p>${order.paymentMethod === 'bank_transfer' ? '銀行振込' :
+                      order.paymentMethod === 'cash_on_delivery' ? '代金引換' :
+                      order.paymentMethod || ''}</p>
+            </div>
+        `;
+
+        modalBody.innerHTML = `
+            <p>ご注文ありがとうございました！</p>
+            ${itemsHtml}
+            ${customerHtml}
+            ${paymentHtml}
+            <p class="text-center mt-4">ご登録のメールアドレスに注文確認メールを送信しました。</p>
+        `;
+
+        modalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">トップページに戻る</button>`;
+
+        toggleModal(orderCompleteModal, true);
     }
 });
