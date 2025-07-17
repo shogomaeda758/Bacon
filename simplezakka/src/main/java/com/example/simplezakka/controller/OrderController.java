@@ -70,22 +70,6 @@ public class OrderController {
         return ResponseEntity.badRequest().body(new OrderResponse( errorMessage));
     }
 
-    @PostMapping("/order/preview") 
-    public ResponseEntity<List<OrderSummaryResponse>> getOrderHistory(
-            @RequestBody String requestBody) { 
-
-        List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(1); // ダミーのcustomerId
-        return ResponseEntity.ok(orderHistory);
-    }
-
-    @GetMapping("/member/me/orders") 
-    public ResponseEntity<List<OrderSummaryResponse>> getOrderHistoryForMember(
-            HttpSession session) { 
-        Integer customerId = 1; 
-        List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(customerId);
-        return ResponseEntity.ok(orderHistory);
-    }
-
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrderDetailByOrderId(
             @PathVariable Integer orderId) {

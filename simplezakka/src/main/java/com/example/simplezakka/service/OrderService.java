@@ -160,11 +160,6 @@ public class OrderService {
         }
     }
 
-    // 以下のメソッドはダミー実装のままですが、冗長なコメントを削除しました。
-    public List<OrderSummaryResponse> getOrderHistoryByCustomer(Integer customerId) {
-        System.out.println("getOrderHistoryByCustomer called for customer ID: " + customerId);
-        return List.of();
-    }
 
     public OrderDetailResponse getOrderDetail(Integer orderId) {
         System.out.println("getOrderDetail called for order ID: " + orderId);
