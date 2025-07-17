@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 商品表示・フィルタリング関連の変数
     let currentSelectedCategory = 'all';
     let currentSearchTerm = '';
-    let allProducts = []; // 全ての商品データを保持する配列
+    let allProducts = []; 
 
     // 共通のエラーハンドリング関数
     async function handleError(response, defaultMessage) {
@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorData = await response.json();
             errorMessage = errorData.message || defaultMessage;
         } catch (e) {
-            // JSON解析エラーの場合は元のdefaultMessageを使用
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
@@ -140,23 +139,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initializeHeader();
 
-    // --- 商品表示・フィルタリング関連の新ロジック ---
 
-    // 全商品を取得し、allProductsに保存して表示する関数
     async function fetchAndDisplayProducts() {
         try {
             const response = await fetch(`${API_BASE}/products`);
             if (!response.ok) {
                 await handleError(response, '商品の取得に失敗しました');
             }
-            allProducts = await response.json(); // 取得した全商品を保存
-            displayFilteredProducts(); // フィルタリングして表示
+            allProducts = await response.json(); 
+            displayFilteredProducts(); 
         } catch (error) {
             console.error(error.message);
         }
     }
 
-    // フィルタリングされた商品を表示する関数
     function displayFilteredProducts() {
         const container = document.getElementById('products-container');
         if (!container) {
@@ -196,27 +192,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 検索機能のイベントリスナー（修正）
     document.getElementById('searchInput').addEventListener('input', function() {
         currentSearchTerm = this.value.toLowerCase();
         displayFilteredProducts(); // 検索条件が変わったら商品を再表示
     });
 
-    // カテゴリーフィルターのイベントリスナー設定（修正）
+ 
     document.querySelectorAll('.category-btn').forEach(button => {
         button.addEventListener('click', function() {
             currentSelectedCategory = this.dataset.category;
-            // アクティブなカテゴリボタンのスタイルを更新（任意）
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
-            displayFilteredProducts(); // カテゴリ条件が変わったら商品を再表示
+            displayFilteredProducts(); 
         });
     });
 
-    // 初回の商品データ取得と表示
+
     fetchAndDisplayProducts();
 
-    // --- ここから既存の関数（変更なし） ---
 
     async function fetchProductDetail(productId) {
         try {
