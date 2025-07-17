@@ -3,12 +3,10 @@
     transition: transform 0.3s;
 }
 
-
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-
 
 .cart-badge {
     position: relative;
@@ -21,14 +19,14 @@ footer {
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
 
-
 }
 header {
     font-family: Arial, sans-serif; /* フォントを指定 */
-    background-color: #f1eeeb; /* 背景色を白に設定 */
-    color: #383028; /* 文字色を濃い茶色に設定 */
+
+    background-color: #ffffff; /* 背景色を白に設定 */
+    color: #ffffff; /* 文字色を白に設定 */
+
     text-align: center; /* 全体の文字を中央揃え */
-   
 }
 body {
     justify-content: center;
@@ -45,25 +43,22 @@ button.btn {
     font-size: 15px;     /* 文字サイズ */
     padding: 10px 20px;  /* 内側の余白 */
     min-width: 150px;     /* 最小幅は150px */
-    width: auto;        
-    white-space: nowrap;  
+    width: auto;
+    white-space: nowrap;
     height: 50px;        /* 高さ */
     margin-right: 10px;
-
 
 }
 /* ホバー時 */
 button.btn:hover {
     background-color: #383028;  /* 背景色が茶に変わる */
     border: 1px solid #ffffff;
-    color: white;               /* 文字色を白に変える */
 }
 /* 通常リンク */
 a {
     color:  #000000;           /* リンクの文字色 */
     text-decoration: none;
 }
-
 
 /* ホバー時のリンク */
 a:hover {
@@ -80,108 +75,7 @@ a:hover {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-
-/* --- ログインポップアップ用のスタイル --- */
-.custom-modal {
-    display: none; /* 初期状態では非表示 */
-    position: fixed; /* 画面に固定 */
-    z-index: 2000; /* 他の要素（Bootstrapモーダルより高い値）の上に表示 */
-    left: 0;
-    top: 0;
-    width: 100%; /* 全幅 */
-    height: 100%; /* 全高 */
-    overflow: auto; /* 内容が画面を超えた場合にスクロール可能にする */
-    background-color: rgba(0,0,0,0.5); /* 半透明の黒い背景 */
-    display: flex; /* 子要素を中央揃えにするためにFlexboxを使用 */
-    justify-content: center; /* 水平方向の中央揃え */
-    align-items: center; /* 垂直方向の中央揃え */
-}
-
-
-.custom-modal-content {
-    background-color: #fefefe;
-    margin: auto; /* display: flex; と併用すると中央配置に効果的 */
-    padding: 25px; /* パディングを少し増やす */
-    border: 1px solid #888;
-    width: 90%; /* 幅の例 */
-    max-width: 400px; /* 最大幅を調整 */
-    border-radius: 8px;
-    position: relative; /* 閉じるボタンの配置のため */
-    box-shadow: 0 4px 10px 0 rgba(0,0,0,0.25); /* 影を強調 */
-    animation-name: animatetop;
-    animation-duration: 0.4s;
-}
-
-
-/* ポップアップ表示時のアニメーション */
-@keyframes animatetop {
-    from {top: -100px; opacity: 0}
-    to {top: 0; opacity: 1}
-}
-
-
-/* 閉じるボタン */
-.custom-modal .close-button { /* より詳細なセレクタで競合を避ける */
-    color: #aaa;
-    font-size: 30px; /* サイズを少し大きく */
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    cursor: pointer;
-    line-height: 1; /* 行の高さを調整 */
-}
-
-
-.custom-modal .close-button:hover,
-.custom-modal .close-button:focus {
-    color: #000;
-    text-decoration: none;
-}
-
-
-/* フォームのラベルと入力欄のスタイル */
-.custom-modal .form-label {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-
-.custom-modal .form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-}
-
-
-/* ログイン・新規登録ボタンのスタイル */
-.custom-modal .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-.custom-modal .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
-
-
-.custom-modal .btn-outline-secondary {
-    border-color: #6c757d;
-    color: #6c757d;
-}
-.custom-modal .btn-outline-secondary:hover {
-    background-color: #6c757d;
-    color: #fff;
-}
-
-
 /* エラーメッセージ */
 .custom-modal .error-message {
     font-size: 0.9em;
 }
-
-
-
-
-
