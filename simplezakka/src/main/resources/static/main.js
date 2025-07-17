@@ -658,6 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             currentOrderData.items = Object.values(cart.items);
             currentOrderData.totalPrice = cart.totalPrice;
+            currentOrderData.shippingFee = cart.shippingFee;
 
             toggleModal(cartModal, false);
             showOrderConfirmation();
@@ -701,12 +702,19 @@ document.addEventListener('DOMContentLoaded', function() {
             itemsHtml += `<tr><td colspan="4" class="text-center">カートに商品がありません。</td></tr>`;
         }
 
-        itemsHtml += `
+         itemsHtml += `
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3" class="text-end">合計金額:</th>
+                            <th colspan="3" class="text-end">商品合計:</th>
                             <th>¥${currentOrderData.totalPrice.toLocaleString()}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">送料:</th>
+                            <th>¥${currentOrderData.shippingFee.toLocaleString()}</th> </tr>
+                        <tr>
+                            <th colspan="3" class="text-end fs-5">最終合計:</th>
+                            <th class="fs-5">¥${(currentOrderData.totalPrice + currentOrderData.shippingFee).toLocaleString()}</th>
                         </tr>
                     </tfoot>
                 </table>
