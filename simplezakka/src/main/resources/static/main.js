@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
     const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
 
-    // APIのベースURL。開発環境ではlocalhost、デプロイ時は相対パスを使用するなど調整してください。
     const API_BASE = 'http://localhost:8080/api';
 
     // 注文処理全体で共有するデータ構造
@@ -30,11 +29,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorData = await response.json();
             errorMessage = errorData.message || defaultMessage;
         } catch (e) {
-            // JSON解析エラーの場合はデフォルトメッセージを使用
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
-        throw new Error(errorMessage); // 後続の処理を中断するためthrowする
+        throw new Error(errorMessage); 
     }
 
     // 汎用的なモーダル表示/非表示関数
@@ -49,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /**
      * ヘッダーの右側ボタン部分をログイン状態に応じて更新する
-     * @param {boolean} loggedIn - ログイン状態 (true: ログイン済み, false: 未ログイン)
-     * @param {string} [userName=''] - ログインユーザー名 (loggedInがtrueの場合のみ使用)
+     * @param {boolean} loggedIn
+     * @param {string} [userName='']
      */
     async function updateHeaderButtons(loggedIn, userName = '') {
         const headerRightButtons = document.getElementById("header-right-buttons");
@@ -88,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         headerRightButtons.innerHTML = buttonsHtml;
 
-        // ボタンが動的に追加された後、イベントリスナーを再設定
         const cartBtn = document.getElementById("cart-btn");
         if (cartBtn) {
             cartBtn.addEventListener("click", showCartModal);
@@ -106,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
-                            window.location.reload(); // ログアウト成功後、ページをリロードして未ログイン状態にする
+                            window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
                             console.error("ログアウト失敗:", errorData.message);
@@ -135,17 +132,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('ログイン状態確認エラー:', error);
-            // エラーが発生した場合も未ログイン状態として表示
             updateHeaderButtons(false);
         }
     }
 
-    // ページロード時の初期化処理
-    initializeHeader(); // ヘッダーの初期化をここで行う
-    fetchProducts(); // 商品リストの取得
+    initializeHeader(); 
+    fetchProducts(); 
 
 
-    // 検索機能の追加 (変更なし)
+    // 検索機能
     document.getElementById('searchInput').addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const products = document.querySelectorAll('#products-container .col');
@@ -172,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterProductsByCategory(category) {
         const products = document.querySelectorAll('#products-container .col');
         products.forEach(product => {
-            const productCategory = product.querySelector('.product-card').dataset.category; // カテゴリー情報がHTMLにないため、後で追加が必要です
+            const productCategory = product.querySelector('.product-card').dataset.category; 
             if (category === 'all' || productCategory === category) {
                 product.style.display = 'block';
             } else {
@@ -199,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('products-container');
         container.innerHTML = products.map(product => `
             <div class="col">
-                <div class="card product-card" data-category="${product.category}"> <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+                <div class="card product-card" data-category="${product.categoryName}"> <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
                     <div class="card-body">
                         <h5 class="card-title">${product.name}</h5>
                         <p class="card-text">¥${product.price.toLocaleString()}</p>
@@ -296,28 +291,25 @@ document.addEventListener('DOMContentLoaded', function() {
 async function fetchLoggedInCustomerInfo() {
     try {
         const response = await fetch(`${API_BASE}/customers/profile`, {
-            method: 'GET', // 明示的にGETメソッドを指定しても良い
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
-                // 他のヘッダーが必要であればここに追加
+
             },
-            // ★この行が最も重要です★
-            // これにより、ブラウザはセッションCookie（JSESSIONIDなど）をリクエストに含めます。
             credentials: 'include' 
         });
 
         if (response.ok) {
             const customer = await response.json();
-            console.log("Fetched logged-in customer data:", customer); // デバッグ用
+            console.log("Fetched logged-in customer data:", customer); 
             return customer;
-        } else if (response.status === 401) { // 未認証の場合
+        } else if (response.status === 401) { 
             console.log("User is not logged in or session expired (401 Unauthorized).");
             return null;
         } else {
             // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
-            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); // JSONパース失敗も考慮
+            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); 
             console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
-            // handleError 関数があればここで呼び出すことも検討
             return null;
         }
     } catch (error) {
@@ -367,7 +359,7 @@ async function fetchLoggedInCustomerInfo() {
                 }
                 const cart = await response.json();
 
-                // カートが空の場合はメッセージを表示
+
                 if (cart.items && Object.keys(cart.items).length > 0) {
                     const { shippingFee, grandTotal } = cart;
 
@@ -541,15 +533,13 @@ async function fetchLoggedInCustomerInfo() {
             document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
             const customer = await fetchLoggedInCustomerInfo();
             if (customer) {
-                // ログインしているユーザーの情報があればフォームにセット
                 document.getElementById('name').value = customer.name || '';
                 document.getElementById('email').value = customer.email || '';
                 document.getElementById('address').value = customer.address || '';
-                // バックエンドのプロパティ名に合わせて 'phoneNumber' または 'phone' などを調整してください
+             
                 document.getElementById('phone').value = customer.phoneNumber || customer.phone || ''; 
             } else {
-                // ログインしていない場合、または情報取得に失敗した場合は
-                // 既存の currentOrderData に保持されている値をセット（ユーザーが手動で入力していた場合など）
+
                 document.getElementById('name').value = currentOrderData.customerInfo.name || '';
                 document.getElementById('email').value = currentOrderData.customerInfo.email || '';
                 document.getElementById('address').value = currentOrderData.customerInfo.address || '';
@@ -587,7 +577,7 @@ async function fetchLoggedInCustomerInfo() {
             if (document.querySelector('input[name="paymentMethod"]:checked')) {
                 paymentMethodFeedback.style.display = 'none';
             } else {
-                paymentMethodFeedback.style.display = 'block'; // デフォルトで表示
+                paymentMethodFeedback.style.display = 'block'; 
             }
         }
     }
@@ -609,7 +599,7 @@ async function fetchLoggedInCustomerInfo() {
             updateCartBadge(cart.totalQuantity);
         } catch (error) {
             console.error(error.message);
-            updateCartModalContent(); // 失敗時は元の状態に戻す
+            updateCartModalContent(); 
         }
     }
 
