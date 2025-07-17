@@ -9,10 +9,27 @@
 }
 
 .cart-badge {
-    position: relative;
-    top: -8px;
-    right: 5px;
+    /* 既存のプロパティ */
+    position: absolute; /* 親要素に対する絶対位置指定（Bootstrapのクラスと連携） */
+    top: 0;             /* 親要素の上端に配置 */
+    right: 0;           /* 親要素の右端に配置 */
+    transform: translate(50%, -50%); /* 右上角に完全に配置するための調整 */
+
+    /* 新しいプロパティまたは調整 */
+    background-color: #dc3545; /* Bootstrapの赤（必要に応じて変更） */
+    color: #ffffff;      /* 白い文字 */
+    font-size: 0.75em;   /* 文字を少し小さく */
+    padding: 0.2em 0.5em; /* 上下左右のパディング */
+    border-radius: 999px; /* 円形にするための大きな値 */
+    min-width: 1.5em;    /* 1桁でも潰れない最小幅 */
+    text-align: center;  /* 数字を中央寄せ */
+    line-height: 1;      /* 文字の行高を調整 */
+    white-space: nowrap; /* テキストが改行されないように */
+    display: flex;       /* Flexboxコンテナにする */
+    align-items: center; /* 縦方向の中央揃え */
+    justify-content: center; /* 横方向の中央揃え */
 }
+
 footer {
     font-family: Arial, sans-serif; /* フォントを指定 */
     background-color: #f1eeeb; /* 背景色を白に設定 */
