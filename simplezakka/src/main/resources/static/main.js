@@ -1,162 +1,146 @@
-// 追加: グローバル変数
-let products = [];
-let categories = [];
+document.addEventListener('DOMContentLoaded', function() {
+    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
+    const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
 
-// 初期化処理
-initializeHeader();
-loadCategories(); // カテゴリー読み込みを追加
-fetchProducts(); // 商品リストの取得
+    const API_BASE = 'http://localhost:8080/api';
 
-// カテゴリー一覧の取得
-async function loadCategories() {
-    try {
-        const response = await fetch(`${API_BASE}/categories`);
-        if (!response.ok) {
-            await handleError(response, 'カテゴリーの取得に失敗しました');
+    // 注文処理全体で共有するデータ構造
+    let currentOrderData = {
+        customerInfo: {
+            name: '',
+            email: '',
+            address: '',
+            phoneNumber: ''
+        },
+        paymentMethod: '',
+        items: [],
+        totalPrice: 0
+    };
+
+    // 商品表示・フィルタリング関連の変数
+    let currentSelectedCategory = 'all';
+    let currentSearchTerm = '';
+    let allProducts = []; 
+
+    // 共通のエラーハンドリング関数
+    async function handleError(response, defaultMessage) {
+        let errorMessage = defaultMessage;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || defaultMessage;
+        } catch (e) {
         }
-        categories = await response.json();
-        updateCategoryButtons();
-    } catch (error) {
-        console.error('カテゴリー取得エラー:', error);
+        console.error('Error:', errorMessage);
+        alert(errorMessage);
+        throw new Error(errorMessage);
     }
-}
 
-// カテゴリーボタンの更新
-function updateCategoryButtons() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (!categoryFilter) return;
-
-    // 既存のボタンをクリア（「すべて」ボタンは残す）
-    categoryFilter.innerHTML = '';
-
-    // 「すべて」ボタンを再追加
-    const allBtn = document.createElement('button');
-    allBtn.className = 'btn btn-primary category-btn';
-    allBtn.dataset.category = 'all';
-    allBtn.textContent = 'すべて';
-    categoryFilter.appendChild(allBtn);
-
-    // DBから取得したカテゴリーでボタンを動的生成
-    categories.forEach(category => {
-        const button = document.createElement('button');
-        button.className = 'btn btn-outline-primary category-btn';
-        button.dataset.category = category.categoryName;
-        button.textContent = category.categoryName;
-        categoryFilter.appendChild(button);
-    });
-
-    // カテゴリーフィルターのイベントリスナー設定
-    categoryFilter.querySelectorAll('.category-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const category = this.dataset.category;
-            filterProductsByCategory(category);
-        });
-    });
-}
-
-// 商品取得
-async function fetchProducts() {
-    try {
-        const response = await fetch(`${API_BASE}/products`);
-        if (!response.ok) {
-            await handleError(response, '商品の取得に失敗しました');
+    // 汎用的なモーダル表示/非表示関数
+    function toggleModal(modalInstance, show) {
+        if (show) {
+            modalInstance.show();
+        } else {
+            modalInstance.hide();
         }
-        products = await response.json(); // グローバル変数に保存
-        displayProducts(products);
-    } catch (error) {
-        console.error(error.message);
-    }
-}
-
-// 商品表示
-function displayProducts(productsToShow) {
-    const container = document.getElementById('products-container');
-    container.innerHTML = productsToShow.map(product => `
-        <div class="col">
-            <div class="card h-100 product-card" data-category="${product.categoryName}">
-                <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}" style="height: 200px; object-fit: cover;">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${product.name}</h5>
-                    <p class="card-text text-muted small">${product.categoryName}</p>
-                    <p class="card-text fw-bold">¥${product.price.toLocaleString()}</p>
-                    <div class="mt-auto">
-                        <button class="btn btn-primary view-product" data-id="${product.productId}">詳細を見る</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-    container.querySelectorAll('.view-product').forEach(button => {
-        button.addEventListener('click', function () {
-            fetchProductDetail(this.dataset.id);
-        });
-    });
-}
-
-// カテゴリーフィルター
-function filterProductsByCategory(category) {
-    let filteredProducts;
-
-    if (category === 'all') {
-        filteredProducts = products;
-    } else {
-        filteredProducts = products.filter(product => product.categoryName === category);
     }
 
-    displayProducts(filteredProducts);
-}
+    /**
+     * ヘッダーの右側ボタン部分をログイン状態に応じて更新する
+     * @param {boolean} loggedIn
+     * @param {string} [userName='']
+     */
+    async function updateHeaderButtons(loggedIn, userName = '') {
+        const headerRightButtons = document.getElementById("header-right-buttons");
+        if (!headerRightButtons) {
+            console.error("Header right buttons container not found!");
+            return;
+        }
 
-// 検索機能
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase();
-        const filteredProducts = products.filter(product =>
-            product.name.toLowerCase().includes(searchTerm) ||
-            product.description.toLowerCase().includes(searchTerm)
-        );
-        displayProducts(filteredProducts);
-    });
-}
-    // 検索機能の追加 (変更なし)
-    document.getElementById('searchInput').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const products = document.querySelectorAll('#products-container .col');
+        let buttonsHtml = '';
+        if (loggedIn) {
+            // ログイン中の場合
+            buttonsHtml = `
+                <span class="navbar-text me-2">${userName}さん</span>
+                <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
+                    <i class="bi bi-cart"></i> カート
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                        0
+                    </span>
+                </button>
+                <button class="btn btn-outline-dark" id="logoutBtn">ログアウト</button>
+            `;
+        } else {
+            // ログインしていない場合
+            buttonsHtml = `
+                <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
+                    <i class="bi bi-cart"></i> カート
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                        0
+                    </span>
+                </button>
+                <button class="btn btn-outline-dark">
+                    <a href="C0601.html" class="text-light text-decoration-none">ログイン / 新規会員登録</a>
+                </button>
+            `;
+        }
+        headerRightButtons.innerHTML = buttonsHtml;
 
-        products.forEach(product => {
-            const productName = product.querySelector('.card-title').textContent.toLowerCase();
-            const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
-            if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
-                product.style.display = 'block';
-            } else {
-                product.style.display = 'none';
+        const cartBtn = document.getElementById("cart-btn");
+        if (cartBtn) {
+            cartBtn.addEventListener("click", showCartModal);
+        }
+
+        if (loggedIn) {
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async function(){
+                    try {
+                        const logoutResponse = await fetch('/api/customers/logout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        if (logoutResponse.ok) {
+                            sessionStorage.removeItem("userName");
+                            window.location.reload();
+                        } else {
+                            const errorData = await logoutResponse.json();
+                            console.error("ログアウト失敗:", errorData.message);
+                            alert("ログアウトに失敗しました: " + (errorData.message || "不明なエラー"));
+                        }
+                    } catch (error) {
+                        console.error("ログアウトエラー:", error);
+                        alert("ネットワークエラーによりログアウトできませんでした。");
+                    }
+                });
             }
-        });
-    });
-
-    // カテゴリーフィルターのイベントリスナー設定
-    document.querySelectorAll('.category-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const category = this.dataset.category;
-            filterProductsByCategory(category);
-        });
-    });
-
-    function filterProductsByCategory(category) {
-        const products = document.querySelectorAll('#products-container .col');
-        products.forEach(product => {
-            const productCategory = product.querySelector('.product-card').dataset.category; // カテゴリー情報がHTMLにないため、後で追加が必要です
-            if (category === 'all' || productCategory === category) {
-                product.style.display = 'block';
-            } else {
-                product.style.display = 'none';
-            }
-        });
+        }
+        // カートバッジの初期更新
+        updateCartDisplay();
     }
 
+    async function initializeHeader() {
+        try {
+            const response = await fetch('/api/customers/status');
+            const data = await response.json();
 
-    async function fetchProducts() {
+            if (response.ok && data.loggedIn) {
+                updateHeaderButtons(true, data.customerName);
+            } else {
+                updateHeaderButtons(false);
+            }
+        } catch (error) {
+            console.error('ログイン状態確認エラー:', error);
+            updateHeaderButtons(false);
+        }
+    }
+
+    initializeHeader();
+
+
+    async function fetchAndDisplayProducts() {
         try {
             const response = await fetch(`${API_BASE}/products`);
             if (!response.ok) {
@@ -301,6 +285,35 @@ if (searchInput) {
             alert('商品をカートに追加しました');
         } catch (error) {
             console.error(error.message);
+        }
+    }
+
+    async function fetchLoggedInCustomerInfo() {
+        try {
+            const response = await fetch(`${API_BASE}/customers/profile`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const customer = await response.json();
+                console.log("Fetched logged-in customer data:", customer);
+                return customer;
+            } else if (response.status === 401) {
+                console.log("User is not logged in or session expired (401 Unauthorized).");
+                return null;
+            } else {
+                // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
+                const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
+                console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching logged-in customer info:', error);
+            return null;
         }
     }
 
@@ -517,10 +530,20 @@ if (searchInput) {
             `;
             document.getElementById('back-to-cart').addEventListener('click', () => updateCartModalContent(false));
             document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
-            document.getElementById('name').value = currentOrderData.customerInfo.name || '';
-            document.getElementById('email').value = currentOrderData.customerInfo.email || '';
-            document.getElementById('address').value = currentOrderData.customerInfo.address || '';
-            document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+            const customer = await fetchLoggedInCustomerInfo();
+            if (customer) {
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('address').value = customer.address || '';
+
+                document.getElementById('phone').value = customer.phoneNumber || customer.phone || '';
+            } else {
+
+                document.getElementById('name').value = currentOrderData.customerInfo.name || '';
+                document.getElementById('email').value = currentOrderData.customerInfo.email || '';
+                document.getElementById('address').value = currentOrderData.customerInfo.address || '';
+                document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+            }
             if (currentOrderData.paymentMethod) {
                 const radio = document.querySelector(`input[name="paymentMethod"][value="${currentOrderData.paymentMethod}"]`);
                 if (radio) radio.checked = true;
@@ -817,7 +840,7 @@ if (searchInput) {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('showCart') === 'true' && urlParams.get('showCheckoutForm') === 'true') {
         cartModal.show();
-        updateCartModalContent(true); 
+        updateCartModalContent(true);
         history.replaceState({}, document.title, window.location.pathname);
     }
-;
+});
