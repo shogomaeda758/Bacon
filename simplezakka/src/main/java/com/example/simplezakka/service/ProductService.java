@@ -107,9 +107,15 @@ public class ProductService {
         return new ProductListItem(
                 product.getProductId(),
                 product.getName(),
+<<<<<<< HEAD
                 product.getPrice().intValue(),
                 product.getImageUrl(),
                 product.getCategory().getCategoryName() // ★ 追加：カテゴリ名を含める
+=======
+                product.getPrice().intValue(), 
+                product.getImageUrl(),
+                product.getCategory().getCategoryName()
+>>>>>>> develop
         );
     }
 

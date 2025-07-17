@@ -16,5 +16,9 @@ public class ProductListItem {
     private String name;
     private Integer price;
     private String imageUrl;
+<<<<<<< HEAD
     private String categoryName; 
+=======
+    private String categoryName;
+>>>>>>> develop
 }

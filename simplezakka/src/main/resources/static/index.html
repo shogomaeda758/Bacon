@@ -14,19 +14,8 @@
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4">シンプル雑貨オンライン</span>
             </a>
-            <div class="text-end">
-                <button id="cart-btn" class="btn btn-outline-dark position-relative">
-                    <i class="bi bi-cart"></i> カート
-                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
-                        0
-                    </span>
-                </button>
-            </div>
-            <div class="text-end">
-                <button class="btn btn-outline-dark position-relative">
-                    <a href="C0601.html" class="text-dark text-decoration-none">ログイン</a>
-                </button>
-            </div>
+            <div class="text-end" id="header-right-buttons">
+                </div>
         </header>
 
         <div class="mb-3">
@@ -68,25 +57,39 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="cartModalBody">
-                    </div>
+                </div>
                 <div class="modal-footer" id="cartModalFooter">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="orderCompleteModal" tabindex="-1" aria-labelledby="orderCompleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">ご注文ありがとうございます</h5>
+                    <h5 class="modal-title" id="orderCompleteModalTitle">ご注文完了</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="orderCompleteBody">
+                <div class="modal-body" id="orderCompleteModalBody">
+                    </div>
+                <div class="modal-footer" id="orderCompleteModalFooter">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-labelledby="orderConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderConfirmationModalTitle">注文内容の確認</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">トップに戻る</button>
-                </div>
+                <div class="modal-body" id="orderConfirmationModalBody">
+                    </div>
+                <div class="modal-footer" id="orderConfirmationModalFooter">
+                    </div>
             </div>
         </div>
     </div>
@@ -107,7 +110,9 @@
             
             products.forEach(product => {
                 const productName = product.querySelector('.card-title').textContent.toLowerCase();
-                if (productName.includes(searchTerm)) { 
+                // この部分で商品説明も検索対象に含める場合、以前のmain.jsのロジックを参考に修正できます
+                // const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
+                if (productName.includes(searchTerm)) { // || productDescription.includes(searchTerm)
                     product.style.display = 'block';
                 } else {
                     product.style.display = 'none';

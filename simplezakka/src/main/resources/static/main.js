@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // 追加: グローバル変数
 let products = [];
 let categories = [];
@@ -136,6 +137,169 @@ if (searchInput) {
     });
 
     // カテゴリーフィルターのイベントリスナー設定
+=======
+document.addEventListener('DOMContentLoaded', function() {
+    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
+    const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
+
+    // APIのベースURL。開発環境ではlocalhost、デプロイ時は相対パスを使用するなど調整してください。
+    const API_BASE = 'http://localhost:8080/api';
+
+    // 注文処理全体で共有するデータ構造
+    let currentOrderData = {
+        customerInfo: {
+            name: '',
+            email: '',
+            address: '',
+            phoneNumber: ''
+        },
+        paymentMethod: '',
+        items: [],
+        totalPrice: 0
+    };
+
+    // 共通のエラーハンドリング関数
+    async function handleError(response, defaultMessage) {
+        let errorMessage = defaultMessage;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || defaultMessage;
+        } catch (e) {
+            // JSON解析エラーの場合はデフォルトメッセージを使用
+        }
+        console.error('Error:', errorMessage);
+        alert(errorMessage);
+        throw new Error(errorMessage); // 後続の処理を中断するためthrowする
+    }
+
+    // 汎用的なモーダル表示/非表示関数
+    function toggleModal(modalInstance, show) {
+        if (show) {
+            modalInstance.show();
+        } else {
+            modalInstance.hide();
+        }
+    }
+
+
+    /**
+     * ヘッダーの右側ボタン部分をログイン状態に応じて更新する
+     * @param {boolean} loggedIn - ログイン状態 (true: ログイン済み, false: 未ログイン)
+     * @param {string} [userName=''] - ログインユーザー名 (loggedInがtrueの場合のみ使用)
+     */
+    async function updateHeaderButtons(loggedIn, userName = '') {
+        const headerRightButtons = document.getElementById("header-right-buttons");
+        if (!headerRightButtons) {
+            console.error("Header right buttons container not found!");
+            return;
+        }
+
+        let buttonsHtml = '';
+        if (loggedIn) {
+            // ログイン中の場合
+            buttonsHtml = `
+                <span class="navbar-text me-2">${userName}さん</span>
+                <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
+                    <i class="bi bi-cart"></i> カート
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                        0
+                    </span>
+                </button>
+                <button class="btn btn-outline-dark" id="logoutBtn">ログアウト</button>
+            `;
+        } else {
+            // ログインしていない場合
+            buttonsHtml = `
+                <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
+                    <i class="bi bi-cart"></i> カート
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
+                        0
+                    </span>
+                </button>
+                <button class="btn btn-outline-dark">
+                    <a href="C0601.html" class="text-light text-decoration-none">ログイン / 新規会員登録</a>
+                </button>
+            `;
+        }
+        headerRightButtons.innerHTML = buttonsHtml;
+
+        // ボタンが動的に追加された後、イベントリスナーを再設定
+        const cartBtn = document.getElementById("cart-btn");
+        if (cartBtn) {
+            cartBtn.addEventListener("click", showCartModal);
+        }
+
+        if (loggedIn) {
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async function(){
+                    try {
+                        const logoutResponse = await fetch('/api/customers/logout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        if (logoutResponse.ok) {
+                            sessionStorage.removeItem("userName");
+                            window.location.reload(); // ログアウト成功後、ページをリロードして未ログイン状態にする
+                        } else {
+                            const errorData = await logoutResponse.json();
+                            console.error("ログアウト失敗:", errorData.message);
+                            alert("ログアウトに失敗しました: " + (errorData.message || "不明なエラー"));
+                        }
+                    } catch (error) {
+                        console.error("ログアウトエラー:", error);
+                        alert("ネットワークエラーによりログアウトできませんでした。");
+                    }
+                });
+            }
+        }
+        // カートバッジの初期更新
+        updateCartDisplay();
+    }
+
+    async function initializeHeader() {
+        try {
+            const response = await fetch('/api/customers/status');
+            const data = await response.json();
+
+            if (response.ok && data.loggedIn) {
+                updateHeaderButtons(true, data.customerName);
+            } else {
+                updateHeaderButtons(false);
+            }
+        } catch (error) {
+            console.error('ログイン状態確認エラー:', error);
+            // エラーが発生した場合も未ログイン状態として表示
+            updateHeaderButtons(false);
+        }
+    }
+
+    // ページロード時の初期化処理
+    initializeHeader(); // ヘッダーの初期化をここで行う
+    fetchProducts(); // 商品リストの取得
+
+
+    // 検索機能の追加 (変更なし)
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const products = document.querySelectorAll('#products-container .col');
+
+        products.forEach(product => {
+            const productName = product.querySelector('.card-title').textContent.toLowerCase();
+            const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
+            if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    });
+
+    // カテゴリーフィルターのイベントリスナー設定
+>>>>>>> develop
     document.querySelectorAll('.category-btn').forEach(button => {
         button.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -267,6 +431,42 @@ if (searchInput) {
         }
     }
 
+<<<<<<< HEAD
+=======
+async function fetchLoggedInCustomerInfo() {
+    try {
+        const response = await fetch(`${API_BASE}/customers/profile`, {
+            method: 'GET', // 明示的にGETメソッドを指定しても良い
+            headers: {
+                'Content-Type': 'application/json'
+                // 他のヘッダーが必要であればここに追加
+            },
+            // ★この行が最も重要です★
+            // これにより、ブラウザはセッションCookie（JSESSIONIDなど）をリクエストに含めます。
+            credentials: 'include' 
+        });
+
+        if (response.ok) {
+            const customer = await response.json();
+            console.log("Fetched logged-in customer data:", customer); // デバッグ用
+            return customer;
+        } else if (response.status === 401) { // 未認証の場合
+            console.log("User is not logged in or session expired (401 Unauthorized).");
+            return null;
+        } else {
+            // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
+            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); // JSONパース失敗も考慮
+            console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
+            // handleError 関数があればここで呼び出すことも検討
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching logged-in customer info:', error);
+        return null;
+    }
+}
+
+>>>>>>> develop
     async function updateCartDisplay() {
         try {
             const response = await fetch(`${API_BASE}/cart`);
@@ -480,10 +680,29 @@ if (searchInput) {
             `;
             document.getElementById('back-to-cart').addEventListener('click', () => updateCartModalContent(false));
             document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
+<<<<<<< HEAD
             document.getElementById('name').value = currentOrderData.customerInfo.name || '';
             document.getElementById('email').value = currentOrderData.customerInfo.email || '';
             document.getElementById('address').value = currentOrderData.customerInfo.address || '';
             document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+=======
+            const customer = await fetchLoggedInCustomerInfo();
+            if (customer) {
+                // ログインしているユーザーの情報があればフォームにセット
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('address').value = customer.address || '';
+                // バックエンドのプロパティ名に合わせて 'phoneNumber' または 'phone' などを調整してください
+                document.getElementById('phone').value = customer.phoneNumber || customer.phone || ''; 
+            } else {
+                // ログインしていない場合、または情報取得に失敗した場合は
+                // 既存の currentOrderData に保持されている値をセット（ユーザーが手動で入力していた場合など）
+                document.getElementById('name').value = currentOrderData.customerInfo.name || '';
+                document.getElementById('email').value = currentOrderData.customerInfo.email || '';
+                document.getElementById('address').value = currentOrderData.customerInfo.address || '';
+                document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+            }
+>>>>>>> develop
             if (currentOrderData.paymentMethod) {
                 const radio = document.querySelector(`input[name="paymentMethod"][value="${currentOrderData.paymentMethod}"]`);
                 if (radio) radio.checked = true;
@@ -767,6 +986,16 @@ if (searchInput) {
         `;
         const modalFooter = document.getElementById('orderCompleteModalFooter');
         modalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>`;
+<<<<<<< HEAD
+=======
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('showCart') === 'true' && urlParams.get('showCheckoutForm') === 'true') {
+        cartModal.show();
+        updateCartModalContent(true); 
+        history.replaceState({}, document.title, window.location.pathname);
+>>>>>>> develop
     }
 
     const urlParams = new URLSearchParams(window.location.search);
