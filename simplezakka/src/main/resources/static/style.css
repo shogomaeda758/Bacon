@@ -28,6 +28,9 @@ header {
 
     text-align: center; /* 全体の文字を中央揃え */
 }
+.navbar-text {
+    color: #383028 !important; /* !important を使うと他のルールよりも優先されますが、通常は推奨されません */
+}
 body {
     justify-content: center;
     font-family: Arial, sans-serif; /* フォントを指定 */
