@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
     const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
 
-    // APIのベースURL。開発環境ではlocalhost、デプロイ時は相対パスを使用するなど調整してください。
     const API_BASE = 'http://localhost:8080/api';
 
     // 注文処理全体で共有するデータ構造
@@ -20,6 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPrice: 0
     };
 
+    // 商品表示・フィルタリング関連の変数
+    let currentSelectedCategory = 'all';
+    let currentSearchTerm = '';
+    let allProducts = []; 
+
     // 共通のエラーハンドリング関数
     async function handleError(response, defaultMessage) {
         let errorMessage = defaultMessage;
@@ -27,11 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorData = await response.json();
             errorMessage = errorData.message || defaultMessage;
         } catch (e) {
-            // JSON解析エラーの場合はデフォルトメッセージを使用
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
-        throw new Error(errorMessage); // 後続の処理を中断するためthrowする
+        throw new Error(errorMessage);
     }
 
     // 汎用的なモーダル表示/非表示関数
@@ -43,11 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
     /**
      * ヘッダーの右側ボタン部分をログイン状態に応じて更新する
-     * @param {boolean} loggedIn - ログイン状態 (true: ログイン済み, false: 未ログイン)
-     * @param {string} [userName=''] - ログインユーザー名 (loggedInがtrueの場合のみ使用)
+     * @param {boolean} loggedIn
+     * @param {string} [userName='']
      */
     async function updateHeaderButtons(loggedIn, userName = '') {
         const headerRightButtons = document.getElementById("header-right-buttons");
@@ -85,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         headerRightButtons.innerHTML = buttonsHtml;
 
-        // ボタンが動的に追加された後、イベントリスナーを再設定
         const cartBtn = document.getElementById("cart-btn");
         if (cartBtn) {
             cartBtn.addEventListener("click", showCartModal);
@@ -103,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
-                            window.location.reload(); // ログアウト成功後、ページをリロードして未ログイン状態にする
+                            window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
                             console.error("ログアウト失敗:", errorData.message);
@@ -132,71 +133,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('ログイン状態確認エラー:', error);
-            // エラーが発生した場合も未ログイン状態として表示
             updateHeaderButtons(false);
         }
     }
 
-    // ページロード時の初期化処理
-    initializeHeader(); // ヘッダーの初期化をここで行う
-    fetchProducts(); // 商品リストの取得
+    initializeHeader();
 
 
-    // 検索機能の追加 (変更なし)
-    document.getElementById('searchInput').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const products = document.querySelectorAll('#products-container .col');
-
-        products.forEach(product => {
-            const productName = product.querySelector('.card-title').textContent.toLowerCase();
-            const productDescription = product.querySelector('.card-text').textContent.toLowerCase();
-            if (productName.includes(searchTerm) || productDescription.includes(searchTerm)) {
-                product.style.display = 'block';
-            } else {
-                product.style.display = 'none';
-            }
-        });
-    });
-
-    // カテゴリーフィルターのイベントリスナー設定
-    document.querySelectorAll('.category-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const category = this.dataset.category;
-            filterProductsByCategory(category);
-        });
-    });
-
-    function filterProductsByCategory(category) {
-        const products = document.querySelectorAll('#products-container .col');
-        products.forEach(product => {
-            const productCategory = product.querySelector('.product-card').dataset.category; // カテゴリー情報がHTMLにないため、後で追加が必要です
-            if (category === 'all' || productCategory === category) {
-                product.style.display = 'block';
-            } else {
-                product.style.display = 'none';
-            }
-        });
-    }
-
-
-    async function fetchProducts() {
+    async function fetchAndDisplayProducts() {
         try {
             const response = await fetch(`${API_BASE}/products`);
             if (!response.ok) {
                 await handleError(response, '商品の取得に失敗しました');
             }
-            const products = await response.json();
-            displayProducts(products);
+            allProducts = await response.json(); 
+            displayFilteredProducts(); 
         } catch (error) {
             console.error(error.message);
         }
     }
 
-    function displayProducts(products) {
+    function displayFilteredProducts() {
         const container = document.getElementById('products-container');
-        container.innerHTML = products.map(product => `
+        if (!container) {
+            console.error("Product container not found!");
+            return;
+        }
+
+        const filteredProducts = allProducts.filter(product => {
+            const matchesCategory = currentSelectedCategory === 'all' || product.categoryName === currentSelectedCategory;
+            const matchesSearchTerm = product.name.toLowerCase().includes(currentSearchTerm) ||
+                                      (product.description && product.description.toLowerCase().includes(currentSearchTerm));
+            return matchesCategory && matchesSearchTerm;
+        });
+
+        if (filteredProducts.length === 0) {
+            container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';
+            return;
+        }
+
+        container.innerHTML = filteredProducts.map(product => `
             <div class="col">
-                <div class="card product-card" data-category="${product.category}"> <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+                <div class="card product-card" data-category="${product.categoryName}">
+                    <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
                     <div class="card-body">
                         <h5 class="card-title">${product.name}</h5>
                         <p class="card-text">¥${product.price.toLocaleString()}</p>
@@ -213,6 +192,25 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        currentSearchTerm = this.value.toLowerCase();
+        displayFilteredProducts(); // 検索条件が変わったら商品を再表示
+    });
+
+ 
+    document.querySelectorAll('.category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            currentSelectedCategory = this.dataset.category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            displayFilteredProducts(); 
+        });
+    });
+
+
+    fetchAndDisplayProducts();
+
 
     async function fetchProductDetail(productId) {
         try {
@@ -291,38 +289,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-async function fetchLoggedInCustomerInfo() {
-    try {
-        const response = await fetch(`${API_BASE}/customers/profile`, {
-            method: 'GET', // 明示的にGETメソッドを指定しても良い
-            headers: {
-                'Content-Type': 'application/json'
-                // 他のヘッダーが必要であればここに追加
-            },
-            // ★この行が最も重要です★
-            // これにより、ブラウザはセッションCookie（JSESSIONIDなど）をリクエストに含めます。
-            credentials: 'include' 
-        });
+    async function fetchLoggedInCustomerInfo() {
+        try {
+            const response = await fetch(`${API_BASE}/customers/profile`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
 
-        if (response.ok) {
-            const customer = await response.json();
-            console.log("Fetched logged-in customer data:", customer); // デバッグ用
-            return customer;
-        } else if (response.status === 401) { // 未認証の場合
-            console.log("User is not logged in or session expired (401 Unauthorized).");
-            return null;
-        } else {
-            // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
-            const errorData = await response.json().catch(() => ({ message: '不明なエラー' })); // JSONパース失敗も考慮
-            console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
-            // handleError 関数があればここで呼び出すことも検討
+            if (response.ok) {
+                const customer = await response.json();
+                console.log("Fetched logged-in customer data:", customer);
+                return customer;
+            } else if (response.status === 401) {
+                console.log("User is not logged in or session expired (401 Unauthorized).");
+                return null;
+            } else {
+                // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
+                const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
+                console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching logged-in customer info:', error);
             return null;
         }
-    } catch (error) {
-        console.error('Error fetching logged-in customer info:', error);
-        return null;
     }
-}
 
     async function updateCartDisplay() {
         try {
@@ -365,7 +359,7 @@ async function fetchLoggedInCustomerInfo() {
                 }
                 const cart = await response.json();
 
-                // カートが空の場合はメッセージを表示
+
                 if (cart.items && Object.keys(cart.items).length > 0) {
                     const { shippingFee, grandTotal } = cart;
 
@@ -390,7 +384,7 @@ async function fetchLoggedInCustomerInfo() {
                                     <td>¥${item.price.toLocaleString()}</td>
                                     <td>
                                         <input type="number" class="form-control form-control-sm update-quantity"
-                                                data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
+                                                    data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
                                     </td>
                                     <td>¥${item.subtotal.toLocaleString()}</td>
                                     <td>
@@ -539,15 +533,13 @@ async function fetchLoggedInCustomerInfo() {
             document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
             const customer = await fetchLoggedInCustomerInfo();
             if (customer) {
-                // ログインしているユーザーの情報があればフォームにセット
                 document.getElementById('name').value = customer.name || '';
                 document.getElementById('email').value = customer.email || '';
                 document.getElementById('address').value = customer.address || '';
-                // バックエンドのプロパティ名に合わせて 'phoneNumber' または 'phone' などを調整してください
-                document.getElementById('phone').value = customer.phoneNumber || customer.phone || ''; 
+
+                document.getElementById('phone').value = customer.phoneNumber || customer.phone || '';
             } else {
-                // ログインしていない場合、または情報取得に失敗した場合は
-                // 既存の currentOrderData に保持されている値をセット（ユーザーが手動で入力していた場合など）
+
                 document.getElementById('name').value = currentOrderData.customerInfo.name || '';
                 document.getElementById('email').value = currentOrderData.customerInfo.email || '';
                 document.getElementById('address').value = currentOrderData.customerInfo.address || '';
@@ -585,7 +577,7 @@ async function fetchLoggedInCustomerInfo() {
             if (document.querySelector('input[name="paymentMethod"]:checked')) {
                 paymentMethodFeedback.style.display = 'none';
             } else {
-                paymentMethodFeedback.style.display = 'block'; // デフォルトで表示
+                paymentMethodFeedback.style.display = 'block';
             }
         }
     }
@@ -607,7 +599,7 @@ async function fetchLoggedInCustomerInfo() {
             updateCartBadge(cart.totalQuantity);
         } catch (error) {
             console.error(error.message);
-            updateCartModalContent(); // 失敗時は元の状態に戻す
+            updateCartModalContent();
         }
     }
 
@@ -667,6 +659,7 @@ async function fetchLoggedInCustomerInfo() {
 
             currentOrderData.items = Object.values(cart.items);
             currentOrderData.totalPrice = cart.totalPrice;
+            currentOrderData.shippingFee = cart.shippingFee;
 
             toggleModal(cartModal, false);
             showOrderConfirmation();
@@ -709,13 +702,20 @@ async function fetchLoggedInCustomerInfo() {
         } else {
             itemsHtml += `<tr><td colspan="4" class="text-center">カートに商品がありません。</td></tr>`;
         }
-        
-        itemsHtml += `
+
+         itemsHtml += `
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3" class="text-end">合計金額:</th>
+                            <th colspan="3" class="text-end">商品合計:</th>
                             <th>¥${currentOrderData.totalPrice.toLocaleString()}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">送料:</th>
+                            <th>¥${currentOrderData.shippingFee.toLocaleString()}</th> </tr>
+                        <tr>
+                            <th colspan="3" class="text-end fs-5">最終合計:</th>
+                            <th class="fs-5">¥${(currentOrderData.totalPrice + currentOrderData.shippingFee).toLocaleString()}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -757,7 +757,7 @@ async function fetchLoggedInCustomerInfo() {
             <button type="button" class="btn btn-secondary" id="back-to-customer-form">戻る</button>
             <button type="button" class="btn btn-primary" id="final-confirm-order-btn">注文を確定する</button>
         `;
-        
+
         document.getElementById('back-to-customer-form').addEventListener('click', function() {
             toggleModal(orderConfirmationModal, false);
             toggleModal(cartModal, true);
@@ -841,7 +841,7 @@ async function fetchLoggedInCustomerInfo() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('showCart') === 'true' && urlParams.get('showCheckoutForm') === 'true') {
         cartModal.show();
-        updateCartModalContent(true); 
+        updateCartModalContent(true);
         history.replaceState({}, document.title, window.location.pathname);
     }
 });
