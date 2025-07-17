@@ -22,8 +22,10 @@ footer {
 }
 header {
     font-family: Arial, sans-serif; /* フォントを指定 */
+
     background-color: #ffffff; /* 背景色を白に設定 */
     color: #ffffff; /* 文字色を白に設定 */
+
     text-align: center; /* 全体の文字を中央揃え */
 }
 body {
@@ -51,7 +53,6 @@ button.btn {
 button.btn:hover {
     background-color: #383028;  /* 背景色が茶に変わる */
     border: 1px solid #ffffff;
-
 }
 /* 通常リンク */
 a {
