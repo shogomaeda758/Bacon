@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('products-container');
         container.innerHTML = products.map(product => `
             <div class="col">
-                <div class="card product-card" data-category="${product.category}"> <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+                <div class="card product-card" data-category="${product.categoryName}"> <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
                     <div class="card-body">
                         <h5 class="card-title">${product.name}</h5>
                         <p class="card-text">¥${product.price.toLocaleString()}</p>
