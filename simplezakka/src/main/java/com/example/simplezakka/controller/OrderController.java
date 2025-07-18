@@ -2,8 +2,6 @@ package com.example.simplezakka.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,16 +11,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.context.support.DefaultMessageSourceResolvable; 
 
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.dto.order.OrderDetailResponse;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
 import com.example.simplezakka.service.CartService;
 import com.example.simplezakka.service.OrderService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.stream.Collectors; 
 
 @RestController
@@ -70,26 +65,4 @@ public class OrderController {
         return ResponseEntity.badRequest().body(new OrderResponse( errorMessage));
     }
 
-    @PostMapping("/order/preview") 
-    public ResponseEntity<List<OrderSummaryResponse>> getOrderHistory(
-            @RequestBody String requestBody) { 
-
-        List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(1); // ダミーのcustomerId
-        return ResponseEntity.ok(orderHistory);
-    }
-
-    @GetMapping("/member/me/orders") 
-    public ResponseEntity<List<OrderSummaryResponse>> getOrderHistoryForMember(
-            HttpSession session) { 
-        Integer customerId = 1; 
-        List<OrderSummaryResponse> orderHistory = orderService.getOrderHistoryByCustomer(customerId);
-        return ResponseEntity.ok(orderHistory);
-    }
-
-    @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderDetailResponse> getOrderDetailByOrderId(
-            @PathVariable Integer orderId) {
-        OrderDetailResponse orderDetail = orderService.getOrderDetail(orderId);
-        return ResponseEntity.ok(orderDetail);
-    }
 }
