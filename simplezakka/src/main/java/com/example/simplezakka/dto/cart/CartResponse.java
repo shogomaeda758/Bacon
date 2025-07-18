@@ -7,14 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
-public class CartRespons implements Serializable {
+public class CartResponse implements Serializable {
     private Map<String, CartItemResponse> items = new LinkedHashMap<>();
     private int totalQuantity;
     private BigDecimal totalPrice;
     private BigDecimal shippingFee;
     private BigDecimal grandTotal;
 
-    public CartRespons() {
+    public CartResponse() {
         this.totalQuantity = 0;
         this.totalPrice = BigDecimal.ZERO;
         this.shippingFee = BigDecimal.ZERO;
