@@ -1,240 +1,281 @@
 package com.example.simplezakka.controller;
 
 import com.example.simplezakka.dto.customer.*;
+import com.example.simplezakka.dto.customer.CustomerInfo;
 import com.example.simplezakka.service.CustomerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
-import java.time.LocalDateTime;
 
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(CustomerController.class)
 class CustomerControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
+
     @MockBean
-    private CustomerService customerService;
-    private ObjectMapper objectMapper;
-    private CustomerResponse sampleResponse;
+    CustomerService customerService;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    CustomerResponse sampleResponse;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
         sampleResponse = new CustomerResponse(
-                1, "山田 太郎", "yamada@example.com", "東京都", "090-1111-2222",
-                LocalDateTime.now(), LocalDateTime.now());
+            1, "山田 太郎", "test@example.com", "東京都", "09011112222",
+            LocalDateTime.now(), LocalDateTime.now());
     }
 
-    @Nested
-    @DisplayName("会員登録API")
-    class RegisterTests {
-        @Test
-        @DisplayName("会員登録成功")
-        void register_Success() throws Exception {
-            CustomerInfo info = new CustomerInfo();
-            info.setName("鈴木 一郎");
-            info.setEmail("ichiro@suzuki.net");
-            info.setAddress("札幌市");
-            info.setPhoneNumber("080-2222-2222");
-            CustomerRegisterRequest req = new CustomerRegisterRequest();
-            req.setCustomerInfo(info);
-            req.setPassword("regpass123");
+    @Test
+    void register_ValidInput_ShouldCreateCustomer() throws Exception {
+        CustomerRegisterRequest req = new CustomerRegisterRequest();
+        CustomerInfo info = new CustomerInfo();
+        info.setName("山田 太郎");
+        info.setEmail("test@example.com");
+        info.setAddress("東京都");
+        info.setPhoneNumber("09011112222");
+        req.setCustomerInfo(info); req.setPassword("securepw");
 
-            CustomerResponse regResponse = new CustomerResponse(
-                    2, "鈴木 一郎", "ichiro@suzuki.net", "札幌市", "080-2222-2222",
-                    LocalDateTime.now(), LocalDateTime.now());
+        when(customerService.createCustomer((CustomerRegisterRequest)any())).thenReturn(sampleResponse);
 
-            when(customerService.createCustomer((CustomerRegisterRequest)any())).thenReturn(regResponse);
-
-            mockMvc.perform(post("/api/customers/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("鈴木 一郎"))
-                .andExpect(jsonPath("$.email").value("ichiro@suzuki.net"));
-        }
-
-        @Test
-        @DisplayName("会員登録（メール重複）")
-        void register_DuplicateEmail() throws Exception {
-            CustomerInfo info = new CustomerInfo();
-            info.setName("重複 太郎");
-            info.setEmail("duplicate@mail.com");
-            info.setAddress("東京都");
-            info.setPhoneNumber("090-1234-5678");
-            CustomerRegisterRequest req = new CustomerRegisterRequest();
-            req.setCustomerInfo(info);
-            req.setPassword("pwdup");
-
-            when(customerService.createCustomer((CustomerRegisterRequest)any()))
-                .thenThrow(new IllegalArgumentException("メールアドレスが既に登録されています"));
-
-            mockMvc.perform(post("/api/customers/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message", containsString("メールアドレスが既に登録されています")));
-        }
+        mockMvc.perform(post("/api/customers/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name").value("山田 太郎"));
     }
 
-    @Nested
-    @DisplayName("ログインAPI")
-    class LoginTests {
-        @Test
-        @DisplayName("ログイン成功")
-        void login_Success() throws Exception {
-            CustomerLoginRequest req = new CustomerLoginRequest();
-            req.setEmail("yamada@example.com");
-            req.setPassword("passw0rd");
-            when(customerService.login(eq("yamada@example.com"), eq("passw0rd")))
-                    .thenReturn(sampleResponse);
+    @Test
+    void register_DuplicateEmail_ShouldReturnConflict() throws Exception {
+        CustomerRegisterRequest req = new CustomerRegisterRequest();
+        CustomerInfo info = new CustomerInfo();
+        info.setName("重複 ユーザー");
+        info.setEmail("dup@example.com");
+        info.setAddress("東京都");
+        info.setPhoneNumber("09012345678");
+        req.setCustomerInfo(info); req.setPassword("dup1234");
 
-            mockMvc.perform(post("/api/customers/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("山田 太郎"));
-        }
+        when(customerService.createCustomer((CustomerRegisterRequest)any()))
+            .thenThrow(new IllegalArgumentException("メールアドレスが既に登録されています"));
 
-        @Test
-        @DisplayName("ログイン失敗（メール未登録）")
-        void login_Fail_EmailNotFound() throws Exception {
-            CustomerLoginRequest req = new CustomerLoginRequest();
-            req.setEmail("notfound@example.com");
-            req.setPassword("abc");
-            when(customerService.login(eq("notfound@example.com"), anyString()))
-                    .thenThrow(new IllegalArgumentException("メールアドレスが見つかりません"));
-
-            mockMvc.perform(post("/api/customers/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.message", containsString("メールアドレスが見つかりません")));
-        }
-
-        @Test
-        @DisplayName("ログイン失敗（パスワード不一致）")
-        void login_Fail_WrongPassword() throws Exception {
-            CustomerLoginRequest req = new CustomerLoginRequest();
-            req.setEmail("yamada@example.com");
-            req.setPassword("wrongpw");
-            when(customerService.login(anyString(), eq("wrongpw")))
-                    .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
-
-            mockMvc.perform(post("/api/customers/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
-        }
+        mockMvc.perform(post("/api/customers/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.errorCode", is("REGISTER_ERROR")))
+            .andExpect(jsonPath("$.message", containsString("メールアドレスが既に登録されています")));
     }
 
-    @Nested
-    @DisplayName("ログイン状態確認API")
-    class LoginStatusTests {
-        @Test
-        @DisplayName("ログイン状態確認（ログイン済）")
-        void status_LoggedIn() throws Exception {
-            MockHttpSession session = new MockHttpSession();
-            session.setAttribute("loggedIncustomerId", 1);
-            session.setAttribute("loggedIncustomerName", "山田 太郎");
+    @Test
+    void register_InvalidInput_Should400ValidationError() throws Exception {
+        String invalidJson = "{\"customerInfo\":{\"name\":\"\",\"email\":\"notmail\",\"address\":\"\",\"phoneNumber\":\"123\"},\"password\":\"\"}";
 
-            mockMvc.perform(get("/api/customers/status").session(session))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.loggedIn", is(true)))
-                    .andExpect(jsonPath("$.customerId").value(1));
-        }
-
-        @Test
-        @DisplayName("ログイン状態確認（未ログイン）")
-        void status_NotLoggedIn() throws Exception {
-            mockMvc.perform(get("/api/customers/status"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.loggedIn", is(false)));
-        }
+        mockMvc.perform(post("/api/customers/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+            .andExpect(status().isBadRequest());
+            // 通常はfieldErrorsなどバリデーション結果の検証だが、@Validがないためエラーbody検証は標準仕様になる
     }
 
-    @Nested
-    @DisplayName("ログアウトAPI")
-    class LogoutTests {
-        @Test
-        @DisplayName("ログアウト成功")
-        void logout_Success() throws Exception {
-            MockHttpSession session = new MockHttpSession();
-            session.setAttribute("customerId", 1);
+    @Test
+    void login_ValidCredential_ShouldSetSession() throws Exception {
+        CustomerLoginRequest req = new CustomerLoginRequest();
+        req.setEmail("test@example.com");
+        req.setPassword("securepw");
 
-            mockMvc.perform(post("/api/customers/logout").session(session))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message", containsString("ログアウトしました")));
-        }
+        when(customerService.login("test@example.com", "securepw"))
+            .thenReturn(sampleResponse);
+
+        mockMvc.perform(post("/api/customers/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("山田 太郎"));
     }
 
-    @Nested
-    @DisplayName("会員情報更新API")
-    class UpdateCustomerTests {
-        @Test
-        @DisplayName("会員情報更新成功")
-        void updateCustomer_Success() throws Exception {
-            CustomerUpdateRequest req = new CustomerUpdateRequest();
-            CustomerInfo info = new CustomerInfo();
-            info.setName("佐藤 一郎");
-            info.setEmail("ichiro@sato.net");
-            info.setAddress("札幌市");
-            info.setPhoneNumber("080-2222-2222");
-            req.setCustomerInfo(info);
-            req.setCurrentPassword("pass1");
-            req.setNewPassword("pass2");
+    @Test
+    void login_EmailNotFound_ShouldReturn401() throws Exception {
+        CustomerLoginRequest req = new CustomerLoginRequest();
+        req.setEmail("notfound@example.com");
+        req.setPassword("pw");
+        when(customerService.login(eq("notfound@example.com"), anyString()))
+            .thenThrow(new IllegalArgumentException("メールアドレスが見つかりません"));
 
-            CustomerResponse updated = new CustomerResponse(
-                    2, "佐藤 一郎", "ichiro@sato.net", "札幌市", "080-2222-2222",
-                    LocalDateTime.now(), LocalDateTime.now());
-
-            when(customerService.updateCustomer(eq(2), (CustomerUpdateRequest)any())).thenReturn(updated);
-
-            mockMvc.perform(put("/api/customers/2")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("佐藤 一郎"));
-        }
-
-        @Test
-        @DisplayName("会員情報更新失敗（認証NG）")
-        void updateCustomer_Fail_InvalidPassword() throws Exception {
-            CustomerUpdateRequest req = new CustomerUpdateRequest();
-            CustomerInfo info = new CustomerInfo();
-            info.setName("佐藤 一郎");
-            info.setEmail("ichiro@sato.net");
-            info.setAddress("札幌市");
-            info.setPhoneNumber("080-2222-2222");
-            req.setCustomerInfo(info);
-            req.setCurrentPassword("wrongpassword");
-            req.setNewPassword("pass2");
-
-            when(customerService.updateCustomer(eq(2),(CustomerUpdateRequest)any()))
-                    .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
-
-            mockMvc.perform(put("/api/customers/2")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
-        }
+        mockMvc.perform(post("/api/customers/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.errorCode", is("LOGIN_ERROR")))
+            .andExpect(jsonPath("$.message", containsString("メールアドレスが見つかりません")));
     }
 
+    @Test
+    void login_InvalidPassword_ShouldReturn401() throws Exception {
+        CustomerLoginRequest req = new CustomerLoginRequest();
+        req.setEmail("test@example.com");
+        req.setPassword("wrongpw");
+        when(customerService.login(eq("test@example.com"), eq("wrongpw")))
+            .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
+
+        mockMvc.perform(post("/api/customers/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.errorCode", is("LOGIN_ERROR")))
+            .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
+    }
+
+    @Test
+    void login_MissingField_Should400ValidationError() throws Exception {
+        String invalidJson = "{\"email\":\"\", \"password\":\"\"}";
+        mockMvc.perform(post("/api/customers/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void status_LoggedIn_ShouldReturnUserInfo() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInCustomerId", 1);
+        session.setAttribute("loggedInCustomerName", "山田 太郎");
+
+        mockMvc.perform(get("/api/customers/status").session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.loggedIn").value(true))
+            .andExpect(jsonPath("$.customerId").value(1))
+            .andExpect(jsonPath("$.customerName").value("山田 太郎"));
+    }
+
+    @Test
+    void status_NotLoggedIn_ShouldReturnFalse() throws Exception {
+        mockMvc.perform(get("/api/customers/status"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.loggedIn").value(false));
+    }
+
+    @Test
+    void logout_ShouldInvalidateSession() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInCustomerId", 1);
+
+        mockMvc.perform(post("/api/customers/logout").session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message", containsString("ログアウトしました")));
+    }
+
+    @Test
+    void updateCustomer_ValidInput_ShouldSucceed() throws Exception {
+        CustomerUpdateRequest req = new CustomerUpdateRequest();
+        CustomerInfo info = new CustomerInfo();
+        info.setName("佐藤 花子");
+        info.setEmail("hanako@sato.com");
+        info.setAddress("神奈川県");
+        info.setPhoneNumber("08023456789");
+        req.setCustomerInfo(info); req.setCurrentPassword("oldpw"); req.setNewPassword("newpw");
+
+        CustomerResponse updated = new CustomerResponse(
+            2, "佐藤 花子", "hanako@sato.com", "神奈川県", "08023456789", LocalDateTime.now(), LocalDateTime.now()
+        );
+        when(customerService.updateCustomer(eq(2), (CustomerUpdateRequest)any())).thenReturn(updated);
+
+        mockMvc.perform(put("/api/customers/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("佐藤 花子"));
+    }
+
+    @Test
+    void updateCustomer_WrongPassword_Should400() throws Exception {
+        CustomerUpdateRequest req = new CustomerUpdateRequest();
+        CustomerInfo info = new CustomerInfo();
+        info.setName("佐藤 花子");
+        info.setEmail("hanako@sato.com");
+        info.setAddress("神奈川県");
+        info.setPhoneNumber("08023456789");
+        req.setCustomerInfo(info); req.setCurrentPassword("wrongpw"); req.setNewPassword("newpw");
+
+        when(customerService.updateCustomer(eq(2), (CustomerUpdateRequest)any()))
+            .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
+
+        mockMvc.perform(put("/api/customers/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errorCode", is("UPDATE_ERROR")))
+            .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
+    }
+
+    @Test
+    void updateCustomer_MissingField_Should400ValidationError() throws Exception {
+        String invalidJson = "{\"customerInfo\":{\"name\":\"\",\"email\":\"invalid\",\"address\":\"\",\"phoneNumber\":\"123\"},\"currentPassword\":\"\",\"newPassword\":\"\"}";
+        mockMvc.perform(put("/api/customers/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void searchCustomers_ShouldReturnList() throws Exception {
+        when(customerService.searchByNameOrPhone("山田"))
+            .thenReturn(List.of(sampleResponse));
+
+        mockMvc.perform(get("/api/customers/search?keyword=山田"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].name").value("山田 太郎"));
+    }
+
+    @Test
+    void getCustomer_Success() throws Exception {
+        when(customerService.getCustomerById(1)).thenReturn(sampleResponse);
+
+        mockMvc.perform(get("/api/customers/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("山田 太郎"));
+    }
+
+    @Test
+    void getCustomer_NotFound_ShouldReturn404() throws Exception {
+        when(customerService.getCustomerById(1234))
+            .thenThrow(new IllegalArgumentException("該当会員が見つかりません"));
+
+        mockMvc.perform(get("/api/customers/1234"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCustomerProfile_Success() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInCustomerId", 1);
+        when(customerService.getCustomerById(1)).thenReturn(sampleResponse);
+
+        mockMvc.perform(get("/api/customers/profile").session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("山田 太郎"));
+    }
+
+    @Test
+    void getCustomerProfile_Unauthorized() throws Exception {
+        mockMvc.perform(get("/api/customers/profile"))
+            .andExpect(status().isUnauthorized());
+    }
 }

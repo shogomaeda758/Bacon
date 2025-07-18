@@ -1,96 +1,171 @@
 package com.example.simplezakka.repository;
 
 import com.example.simplezakka.entity.Customer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.List;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 class CustomerRepositoryTest {
     @Autowired
-    private CustomerRepository customerRepository;
-    private Customer customer;
+    CustomerRepository customerRepository;
+
+    Customer customer;
 
     @BeforeEach
     void setUp() {
         customer = new Customer();
-        customer.setLastName("田中");
-        customer.setFirstName("真紀");
-        customer.setEmail("tanaka@makisan.com");
-        customer.setPassword("pw");
-        customer.setAddress("大分県");
-        customer.setPhoneNumber("080-1234-5555");
+        customer.setLastName("Harada");
+        customer.setFirstName("Taro");
+        customer.setEmail("test@example.com");
+        customer.setPhoneNumber("09087654321");
+        customer.setPassword("abcDEF123");
+        customer.setAddress("Osaka");
     }
 
-    @Nested
-    @DisplayName("メール検索API")
-    class FindByEmailTests {
-        @Test
-        @DisplayName("メール一致で会員取得")
-        void findByEmail_Success() {
-            customerRepository.save(customer);
-            Optional<Customer> found = customerRepository.findByEmail("tanaka@makisan.com");
-            assertThat(found).isPresent();
-            assertThat(found.get().getLastName()).isEqualTo("田中");
-        }
-        @Test
-        @DisplayName("メール不一致で空Optional")
-        void findByEmail_Fail() {
-            assertThat(customerRepository.findByEmail("noone@none.co")).isEmpty();
-        }
+    // 会員作成 (Create) と Read
+    @Test
+    void saveAndFindById_Success() {
+        Customer saved = customerRepository.save(customer);
+        Optional<Customer> found = customerRepository.findById(saved.getCustomerId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getEmail()).isEqualTo("test@example.com");
     }
 
-    @Nested
-    @DisplayName("メール重複チェックAPI")
-    class ExistsTests {
-        @Test
-        @DisplayName("メール重複ありでtrue")
-        void existsByEmail_True() {
-            customerRepository.save(customer);
-            assertThat(customerRepository.existsByEmail("tanaka@makisan.com")).isTrue();
-        }
-        @Test
-        @DisplayName("メール登録なしでfalse")
-        void existsByEmail_False() {
-            assertThat(customerRepository.existsByEmail("a@b.com")).isFalse();
-        }
+    // findByEmail 正常系
+    @Test
+    void findByEmail_Exists_ShouldReturnCustomer() {
+        customerRepository.save(customer);
+        Optional<Customer> found = customerRepository.findByEmail("test@example.com");
+        assertThat(found).isPresent();
+        assertThat(found.get().getLastName()).isEqualTo("Harada");
     }
 
-    @Nested
-    @DisplayName("名前or電話番号検索API")
-    class NameOrPhoneTests {
-        @Test
-        @DisplayName("名前または電話番号検索で会員リスト返却")
-        void nameOrPhone_Match() {
-            customerRepository.save(customer);
-            var list = customerRepository
-                    .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining(
-                            "田中", "真紀", "5555");
-            assertThat(list).isNotEmpty();
-        }
+    // findByEmail 異常系
+    @Test
+    void findByEmail_NotFound_ShouldReturnEmpty() {
+        assertThat(customerRepository.findByEmail("none@example.com")).isEmpty();
     }
 
-    @Nested
-    @DisplayName("ID+メール複合検索API")
-    class ByCustomerIdAndEmailTests {
-        @Test
-        @DisplayName("findByCustomerIdAndEmail 成功")
-        void findByCustomerIdAndEmail_Success() {
-            Customer saved = customerRepository.save(customer);
-            Optional<Customer> found = customerRepository.findByCustomerIdAndEmail(saved.getCustomerId(), "tanaka@makisan.com");
-            assertThat(found).isPresent();
-            assertThat(found.get().getLastName()).isEqualTo("田中");
-        }
-        @Test
-        @DisplayName("findByCustomerIdAndEmail 失敗")
-        void findByCustomerIdAndEmail_Fail() {
-            assertThat(customerRepository.findByCustomerIdAndEmail(999, "xxx@zzz.com")).isEmpty();
-        }
+    // existsByEmail（正常/異常）
+    @Test
+    void existsByEmail_Exists_ShouldReturnTrue() {
+        customerRepository.save(customer);
+        assertThat(customerRepository.existsByEmail("test@example.com")).isTrue();
+    }
+
+    @Test
+    void existsByEmail_NotExists_ShouldReturnFalse() {
+        assertThat(customerRepository.existsByEmail("nope@domain.com")).isFalse();
+    }
+
+    // 名前・電話 検索
+    @Test
+    void findByNameOrPhone_WithMatch_ShouldReturnList() {
+        customerRepository.save(customer);
+        List<Customer> list = customerRepository
+            .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining("Harada", "", "");
+        assertThat(list).isNotEmpty();
+    }
+
+    @Test
+    void findByNameOrPhone_PhoneMatch_ShouldReturnList() {
+        customerRepository.save(customer);
+        List<Customer> list = customerRepository
+            .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining("", "", "090");
+        assertThat(list).isNotEmpty();
+    }
+
+    @Test
+    void findByNameOrPhone_NoMatch_ShouldReturnEmptyList() {
+        customerRepository.save(customer);
+        List<Customer> list = customerRepository
+            .findByLastNameContainingOrFirstNameContainingOrPhoneNumberContaining("XYZ", "XYZ", "XYZ");
+        assertThat(list).isEmpty();
+    }
+
+    // findAll・境界値
+    @Test
+    void findAll_ShouldReturnAllCustomers() {
+        customerRepository.save(customer);
+        Customer c2 = new Customer(); c2.setLastName("Suzuki"); c2.setFirstName("Saburo");
+        c2.setEmail("suzuki@ex.co"); c2.setPassword("pw"); c2.setPhoneNumber("09013245768"); c2.setAddress("Tokyo");
+        customerRepository.save(c2);
+        List<Customer> all = customerRepository.findAll();
+        assertThat(all).hasSize(2);
+    }
+
+    @Test
+    void findAll_WhenNoCustomers_ShouldReturnEmptyList() {
+        assertThat(customerRepository.findAll()).isEmpty();
+    }
+
+    // CRUD更新
+    @Test
+    void updateCustomer_ShouldReflectChanges() {
+        Customer saved = customerRepository.save(customer);
+        saved.setAddress("Nagoya");
+        customerRepository.save(saved);
+        Customer found = customerRepository.findById(saved.getCustomerId()).get();
+        assertThat(found.getAddress()).isEqualTo("Nagoya");
+    }
+
+    // CRUD削除
+    @Test
+    void deleteCustomer_ShouldRemoveFromDatabase() {
+        Customer saved = customerRepository.save(customer);
+        customerRepository.deleteById(saved.getCustomerId());
+        assertThat(customerRepository.findById(saved.getCustomerId())).isEmpty();
+    }
+
+    // 制約違反（メール重複)
+    @Test
+    void saveCustomer_WithDuplicateEmail_ShouldThrowException() {
+        customerRepository.save(customer);
+        Customer dup = new Customer();
+        dup.setLastName("Yamada"); dup.setFirstName("Hanako");
+        dup.setEmail("test@example.com");
+        dup.setPassword("hoge1234");
+        dup.setPhoneNumber("08012345679");
+        dup.setAddress("Tokyo");
+        assertThatThrownBy(() -> {
+            customerRepository.saveAndFlush(dup);
+        }).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    // 制約違反（必須）
+    @Test
+    void saveCustomer_WithNullRequiredField_ShouldThrowException() {
+        Customer ng = new Customer();
+        ng.setLastName(null); 
+        ng.setFirstName("Taro");
+        ng.setEmail("taro2@mail.com");
+        ng.setPassword("pw");
+        ng.setAddress("Nagoya");
+        ng.setPhoneNumber("09022223333");
+        assertThatThrownBy(() -> {
+            customerRepository.saveAndFlush(ng);
+        }).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    // ID+メール複合検索 正常・異常
+    @Test
+    void findByCustomerIdAndEmail_Valid_ShouldReturn() {
+        Customer saved = customerRepository.save(customer);
+        Optional<Customer> found = customerRepository.findByCustomerIdAndEmail(saved.getCustomerId(), saved.getEmail());
+        assertThat(found).isPresent();
+    }
+
+    @Test
+    void findByCustomerIdAndEmail_Invalid_ShouldReturnEmpty() {
+        customerRepository.save(customer);
+        assertThat(customerRepository.findByCustomerIdAndEmail(999, "wrong@none.com")).isEmpty();
     }
 }
 
