@@ -99,3 +99,129 @@ a:hover {
 .custom-modal .error-message {
     font-size: 0.9em;
 }
+ body.C0601-page {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2em;
+        
+
+        .container {
+            background: #ffffff;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            width: 300px; /* この幅は維持 */
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            /* ここでのgapは、labelとinputのペア（またはinput単体）のdiv要素に適用されます */
+            /* gap: 1em; /* 今回は個別のマージンで調整するため削除またはコメントアウト */
+        }
+
+        /* 各入力フィールドグループに適用するマージン */
+        .form-group {
+            margin-bottom: 1em; /* 各入力フィールドの下に適切な余白を追加 */
+        }
+
+        /* 最後のform-groupの下のマージンは不要な場合があるため調整 */
+        #registerForm .form-group:last-of-type {
+            margin-bottom: 0; /* 最後のグループの下の余白を削除 */
+        }
+
+
+        /* パスワード入力とボタンをまとめるコンテナ */
+        .password-container {
+            position: relative; /* ボタンの絶対配置のために必要 */
+            display: flex; /* Flexboxを使って内部要素を配置 */
+            align-items: center; /* 垂直方向中央揃え */
+            /* form-groupでマージンが設定されるので、ここでの個別のmargin-bottomは不要 */
+        }
+
+        /* 全てのinput要素の共通スタイル */
+        input {
+            padding: 0.8em;
+            border: 1px solid #383028;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #f9fdf9;
+            flex-grow: 1; /* 親の幅に合わせて伸びる */
+            width: 100%; /* 親要素の幅いっぱいに広げる */
+            box-sizing: border-box; /* paddingとborderをwidthに含める */
+            margin-bottom: 0; /* form-groupにマージンを持たせるためリセット */
+        }
+
+        /* パスワード入力フィールドのスタイル調整 */
+        .password-container input {
+            padding-right: 40px; /* ボタンが重ならないように右側に余白 */
+            /* widthは既に100%なので、calcは不要になる可能性が高い */
+        }
+
+        /* パスワード表示切り替えボタンのスタイル */
+        .toggle-password {
+            position: absolute; /* 親要素 .password-container に対して絶対配置 */
+            right: 10px; /* 右端からの距離 */
+            background: none;
+            border: none;
+            color: #897765; /* ボタンの色 */
+            cursor: pointer;
+            font-size: 0.8em;
+            padding: 0.5em;
+            min-width: unset;
+            width: auto;
+            height: auto;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .toggle-password:hover {
+            color: #383028; /* ホバー時の色 */
+        }
+
+        /* ボタンとSubmitボタンの共通スタイル */
+        button, input[type="submit"] {
+            background-color: #897765;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            font-size: 15px;
+            padding: 10px 20px;
+            min-width: 300px;
+            width: auto;
+            white-space: nowrap;
+            height: 50px;
+            margin: auto; /* 中央揃え用 */
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #383028;
+            border: 1px solid #ffffff;
+        }
+
+        button:active, input[type="submit"]:active {
+            background-color: #383028;
+            border: 1px solid #ffffff;
+        }
+
+        .message {
+            margin-top: 1em;
+            font-size: 0.9em;
+            color: #388e3c;
+            text-align: center;
+        }
+
+        #register-container {
+            display: none;
+        }
+    }
