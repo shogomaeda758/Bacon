@@ -7,7 +7,6 @@ import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
 import com.example.simplezakka.dto.order.OrderItemDetailResponse;
 import com.example.simplezakka.dto.order.OrderDetailResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final CartService cartService;
@@ -44,7 +42,6 @@ public class OrderService {
             CustomerRepository customerRepository,
             CartService cartService) {
         this.orderRepository = orderRepository;
-        this.orderDetailRepository = orderDetailRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.cartService = cartService;
@@ -160,11 +157,6 @@ public class OrderService {
         }
     }
 
-    // 以下のメソッドはダミー実装のままですが、冗長なコメントを削除しました。
-    public List<OrderSummaryResponse> getOrderHistoryByCustomer(Integer customerId) {
-        System.out.println("getOrderHistoryByCustomer called for customer ID: " + customerId);
-        return List.of();
-    }
 
     public OrderDetailResponse getOrderDetail(Integer orderId) {
         System.out.println("getOrderDetail called for order ID: " + orderId);
