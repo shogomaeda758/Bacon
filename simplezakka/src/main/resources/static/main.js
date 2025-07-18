@@ -844,4 +844,144 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartModalContent(true);
         history.replaceState({}, document.title, window.location.pathname);
     }
+
 });
+ // パスワードの表示・非表示を切り替える関数
+    function togglePasswordVisibility(id) {
+        const passwordField = document.getElementById(id);
+        const toggleButton = passwordField.nextElementSibling; // 次の要素（ボタン）を取得
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleButton.textContent = '隠す';
+        } else {
+            passwordField.type = 'password';
+            toggleButton.textContent = '表示';
+        }
+    }
+
+// 最初の読み込み時にログイン済みならログイン後画面に遷移
+window.addEventListener("load", async function(){
+    try {
+        // サーバーサイドのログイン状態確認APIを呼び出す
+        const response = await fetch('/api/customers/status');
+        const data = await response.json();
+
+        if (response.ok && data.loggedIn) {
+            // index.html以外の画面でのみリダイレクトする
+            if (!window.location.pathname.includes("index.html")) {
+                sessionStorage.setItem("userName", data.customerName + "さん");
+                window.location.href = "index.html";
+            }
+        }
+    } catch (error) {
+        console.error('ログイン状態確認エラー:', error);
+    }
+});
+
+
+    document.getElementById("show-register-btn").addEventListener("click", function() {
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("register-container").style.display = "block";
+    });
+
+    // 会員登録処理
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const name = e.target.name.value;
+        const email = e.target.email.value;
+        const address = e.target.address.value;
+        const phoneNumber = e.target.phoneNumber.value;
+        const password = e.target.password.value;
+
+        const requestBody = {
+            customerInfo: {
+                name: name,
+                email: email,
+                address: address,
+                phoneNumber: phoneNumber
+            },
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/customers/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            const registerMessageElement = document.getElementById("registerMessage");
+
+            if (response.ok) {
+                sessionStorage.setItem("userName", data.name + "さん");
+                registerMessageElement.textContent = "会員登録が完了しました！";
+                registerMessageElement.style.color = "#388e3c";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+            } else {
+                registerMessageElement.textContent = "登録失敗: " + (data.message || "不明なエラー");
+                registerMessageElement.style.color = "red";
+            }
+        } catch (error) {
+            console.error('登録エラー:', error);
+            document.getElementById("registerMessage").textContent = "ネットワークエラーが発生しました。";
+            document.getElementById("registerMessage").style.color = "red";
+        }
+    });
+
+    // ログイン処理
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const requestBody = {
+            email: email,
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/customers/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            let loginErrorElement = document.querySelector('#login-container .message');
+
+            if (response.ok) {
+                sessionStorage.setItem("userName", data.name + "さん");
+                window.location.href = "index.html";
+            } else {
+                if (!loginErrorElement) {
+                    const newErrorElement = document.createElement('div');
+                    newErrorElement.className = 'message';
+                    newErrorElement.style.color = 'red';
+                    document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
+                    loginErrorElement = newErrorElement;
+                }
+                loginErrorElement.textContent = data.message || "ログイン失敗: メールアドレスまたはパスワードが正しくありません。";
+            }
+        } catch (error) {
+            console.error('ログインエラー:', error);
+            let loginErrorElement = document.querySelector('#login-container .message');
+            if (!loginErrorElement) {
+                const newErrorElement = document.createElement('div');
+                newErrorElement.className = 'message';
+                newErrorElement.style.color = 'red';
+                document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
+                loginErrorElement = newErrorElement;
+            }
+            loginErrorElement.textContent = "ネットワークエラーが発生しました。";
+        }
+    });
