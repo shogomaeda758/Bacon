@@ -3,19 +3,16 @@ package com.example.simplezakka.service;
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.order.CustomerInfo;
-import com.example.simplezakka.dto.order.OrderDetailResponse;
 import com.example.simplezakka.dto.order.OrderItemDetailResponse;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
 import com.example.simplezakka.entity.OrderDetail;
 import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.CustomerRepository;
-import com.example.simplezakka.repository.OrderDetailRepository;
-import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
+import com.example.simplezakka.repository.OrderRepository;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,10 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +39,6 @@ class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
-    @Mock
-    private OrderDetailRepository orderDetailRepository;
     @Mock
     private ProductRepository productRepository;
     @Mock
@@ -79,23 +70,23 @@ class OrderServiceTest {
         // --- モックカートの設定 ---
         mockCart = new CartRespons();
         CartItemResponse cartItem = new CartItemResponse(
-            "p001",
-            1,
-            "テスト商品",
-            BigDecimal.valueOf(1000),
-            "http://example.com/test_product.jpg",
-            2,
-            BigDecimal.valueOf(2000)
+                "p001",
+                1,
+                "テスト商品",
+                BigDecimal.valueOf(1000),
+                "http://example.com/test_product.jpg",
+                2,
+                BigDecimal.valueOf(2000)
         );
         mockCart.addItem(cartItem);
 
         // --- 有効な顧客情報と注文リクエストの設定 ---
         validCustomerInfo = new CustomerInfo(
-            10, // customerId
-            "テスト顧客", // name
-            "test@example.com", // email
-            "テスト住所", // address
-            "09011112222" // phoneNumber
+                10, // customerId
+                "テスト顧客", // name
+                "test@example.com", // email
+                "テスト住所", // address
+                "09011112222" // phoneNumber
         );
 
         validOrderRequest = new OrderRequest();
@@ -122,16 +113,14 @@ class OrderServiceTest {
                 if (detail.getOrderDetailId() == null) {
                     detail.setOrderDetailId(101);
                 }
-                // ★修正点1: OrderDetailのsetSubtotal()呼び出しを削除
-                // detail.setSubtotal(detail.getUnitPrice().multiply(BigDecimal.valueOf(detail.getQuantity())));
+                // OrderDetailのsetSubtotal()呼び出しは対象ファイルから削除されたため、テストからも削除
             });
             return order;
         });
         when(customerRepository.findById(eq(10))).thenReturn(Optional.of(mockCustomer));
     }
 
-    //  placeOrder method
-
+    // placeOrder method
     @Nested
     @DisplayName("placeOrder method")
     class PlaceOrderTests {
@@ -140,17 +129,15 @@ class OrderServiceTest {
         @DisplayName("正常系: 注文が正常に確定されるべき（5000円未満の送料込み）")
         void placeOrder_ValidScenario_SuccessWithShippingFee() {
             // カートの合計金額は2000円なので、送料500円が加算されることを期待
-
-            // テスト実行
             OrderResponse response = orderService.placeOrder(mockCart, validOrderRequest, session);
 
             // 検証: OrderResponseの内容
             assertThat(response).isNotNull();
             assertThat(response.getOrderId()).isEqualTo(1);
             assertThat(response.getMessage()).isEqualTo("注文が正常に完了しました。");
-            assertThat(response.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(2000));
+            assertThat(response.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(2000)); // 商品合計
             assertThat(response.getShippingFee()).isEqualByComparingTo(BigDecimal.valueOf(500));
-            assertThat(response.getGrandTotal()).isEqualByComparingTo(BigDecimal.valueOf(2500));
+            assertThat(response.getGrandTotal()).isEqualByComparingTo(BigDecimal.valueOf(2500)); // 最終合計
             assertThat(response.getPaymentMethod()).isEqualTo(validOrderRequest.getPaymentMethod());
             assertThat(response.getStatus()).isEqualTo("PENDING");
             assertThat(response.getCustomerInfo()).isEqualTo(validCustomerInfo);
@@ -159,13 +146,13 @@ class OrderServiceTest {
             assertThat(response.getItems().get(0).getProductName()).isEqualTo("テスト商品");
             assertThat(response.getItems().get(0).getQuantity()).isEqualTo(2);
 
-            // 検証: Repositoryの呼び出し
+            // Repositoryの呼び出し
             verify(productRepository, times(1)).findById(eq(1));
             verify(productRepository, times(1)).decreaseStock(eq(1), eq(2));
             verify(orderRepository, times(1)).save(any(Order.class));
             verify(cartService, times(1)).clearCart(eq(session));
 
-            // 検証: Orderエンティティに正しい情報が設定されたか
+            // Orderエンティティに正しい情報が設定されたか
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
             verify(orderRepository).save(orderCaptor.capture());
             Order capturedOrder = orderCaptor.getValue();
@@ -180,8 +167,6 @@ class OrderServiceTest {
             assertThat(capturedOrder.getIsGuest()).isFalse();
             assertThat(capturedOrder.getShippingFee()).isEqualByComparingTo(BigDecimal.valueOf(500));
             assertThat(capturedOrder.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(2500));
-
-            // OrderDetailの検証 - subtotalはgetEntityで計算されることを確認
             assertThat(capturedOrder.getOrderDetails()).hasSize(1);
             OrderDetail capturedDetail = capturedOrder.getOrderDetails().get(0);
             assertThat(capturedDetail.getProduct()).isEqualTo(mockProduct);
@@ -194,11 +179,11 @@ class OrderServiceTest {
         @DisplayName("正常系: ゲストユーザーでの注文が正常に確定されるべき")
         void placeOrder_GuestScenario_Success() {
             CustomerInfo guestCustomerInfo = new CustomerInfo(
-                0, // customerId (ゲスト)
-                "ゲスト太郎",
-                "guest@example.com",
-                "ゲスト住所",
-                "09099998888"
+                    0, // customerId (ゲスト)
+                    "ゲスト太郎",
+                    "guest@example.com",
+                    "ゲスト住所",
+                    "09099998888"
             );
 
             OrderRequest guestOrderRequest = new OrderRequest();
@@ -322,7 +307,7 @@ class OrderServiceTest {
         void placeOrder_Over5000Yen_ShippingFeeIsZero() {
             mockCart.getItems().clear();
             CartItemResponse expensiveItem = new CartItemResponse(
-                "p002", 2, "高額商品", BigDecimal.valueOf(6000), "image_url", 1, BigDecimal.valueOf(6000)
+                    "p002", 2, "高額商品", BigDecimal.valueOf(6000), "image_url", 1, BigDecimal.valueOf(6000)
             );
             mockCart.addItem(expensiveItem);
 
@@ -356,96 +341,12 @@ class OrderServiceTest {
             assertThat(responseItem.getUnitPrice()).isEqualByComparingTo(mockProduct.getPrice());
             assertThat(responseItem.getSubtotal()).isEqualByComparingTo(BigDecimal.valueOf(2000));
         }
-    }
-
-    // getOrderDetail method
-
-    @Nested
-    @DisplayName("getOrderDetail method")
-    class GetOrderDetailTests {
-
         @Test
-        @DisplayName("正常系: 注文詳細が取得されるべき")
-        void getOrderDetail_ReturnsDetail() {
-            Integer testOrderId = 100;
-            Order dummyOrder = createDummyOrderWithDetails(testOrderId);
-            when(orderRepository.findByOrderId(eq(testOrderId))).thenReturn(Optional.of(dummyOrder));
-
-            OrderDetailResponse response = orderService.getOrderDetail(testOrderId);
-
-            assertThat(response).isNotNull();
-            assertThat(response.getOrderId()).isEqualTo(testOrderId);
-            assertThat(response.getOrderDate()).isEqualTo(dummyOrder.getOrderDate());
-            assertThat(response.getShippingFee()).isEqualByComparingTo(dummyOrder.getShippingFee());
-            assertThat(response.getTotalAmount()).isEqualByComparingTo(dummyOrder.getTotalPrice());
-            assertThat(response.getPaymentMethod()).isEqualTo(dummyOrder.getPaymentMethod());
-
-            assertThat(response.getItems()).hasSize(1);
-            assertThat(response.getItems().get(0).getProductId()).isEqualTo(1);
-            assertThat(response.getItems().get(0).getProductName()).isEqualTo("テスト商品A");
-            assertThat(response.getItems().get(0).getQuantity()).isEqualTo(2);
-            assertThat(response.getItems().get(0).getUnitPrice()).isEqualByComparingTo(BigDecimal.valueOf(1000));
-            assertThat(response.getItems().get(0).getSubtotal()).isEqualByComparingTo(BigDecimal.valueOf(2000)); // getSubtotalで検証
-
-            assertThat(response.getCustomerInfo()).isNotNull();
-            assertThat(response.getCustomerInfo().getName()).isEqualTo("テスト太郎");
-            assertThat(response.getCustomerInfo().getEmail()).isEqualTo("test@example.com");
-
-            verify(orderRepository, times(1)).findByOrderId(eq(testOrderId));
-        }
-
-        @Test
-        @DisplayName("異常系: 注文が見つからない場合、Nullを返す")
-        void getOrderDetail_OrderNotFound_ReturnsNull() {
-            Integer nonExistentOrderId = 999;
-            when(orderRepository.findByOrderId(eq(nonExistentOrderId))).thenReturn(Optional.empty());
-
-            OrderDetailResponse response = orderService.getOrderDetail(nonExistentOrderId);
-
-            assertThat(response).isNull();
-            verify(orderRepository, times(1)).findByOrderId(eq(nonExistentOrderId));
-        }
-
-        private Order createDummyOrderWithDetails(Integer orderId) {
-            Order order = new Order();
-            order.setOrderId(orderId);
-            order.setOrderDate(LocalDateTime.now());
-            order.setOrderEmail("test@example.com");
-            order.setOrderName("テスト太郎");
-            order.setOrderAddress("テスト県テスト市テスト1-1");
-            order.setOrderPhoneNumber("090-1234-5678");
-            order.setPaymentMethod("クレジットカード");
-            order.setStatus("PROCESSING");
-            order.setShippingFee(BigDecimal.valueOf(500));
-            order.setTotalPrice(BigDecimal.valueOf(2500));
-
-            Product productA = new Product();
-            productA.setProductId(1);
-            productA.setName("テスト商品A");
-            productA.setPrice(BigDecimal.valueOf(1000));
-            productA.setImageUrl("http://example.com/itemA.jpg");
-
-            OrderDetail detail1 = new OrderDetail();
-            detail1.setOrderDetailId(201);
-            detail1.setOrder(order);
-            detail1.setProduct(productA);
-            detail1.setUnitPrice(BigDecimal.valueOf(1000));
-            detail1.setQuantity(2);
-            // ★修正点2: OrderDetailのsetSubtotal()呼び出しを削除
-            // detail1.setSubtotal(BigDecimal.valueOf(2000));
-
-            List<OrderDetail> orderDetails = new ArrayList<>();
-            orderDetails.add(detail1);
-            order.setOrderDetails(orderDetails);
-
-            Customer customer = new Customer();
-            customer.setCustomerId(10);
-            customer.setLastName("テスト"); // 姓を設定
-            customer.setFirstName("太郎");  // 名を設定
-            customer.setEmail("test@example.com");
-            order.setCustomer(customer);
-
-            return order;
+        @DisplayName("セッションが渡され、clearCartが適切に呼び出されるべき")
+        void placeOrder_SessionPassedAndCartCleared() {
+        orderService.placeOrder(mockCart, validOrderRequest, session);
+        verify(cartService, times(1)).clearCart(session);
         }
     }
+  
 }

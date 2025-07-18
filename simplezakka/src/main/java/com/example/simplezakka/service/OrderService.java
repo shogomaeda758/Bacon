@@ -6,8 +6,6 @@ import com.example.simplezakka.dto.order.CustomerInfo;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
 import com.example.simplezakka.dto.order.OrderItemDetailResponse;
-import com.example.simplezakka.dto.order.OrderDetailResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -161,42 +158,5 @@ public class OrderService {
     }
 
 
-    public OrderDetailResponse getOrderDetail(Integer orderId) {
-        System.out.println("getOrderDetail called for order ID: " + orderId);
-
-        List<OrderItemDetailResponse> dummyItems = new ArrayList<>();
-        dummyItems.add(new OrderItemDetailResponse(
-            101,
-            "ダミー商品A",
-            "http://example.com/dummyA.jpg",
-            2,
-            BigDecimal.valueOf(1500),
-            BigDecimal.valueOf(3000)
-        ));
-        dummyItems.add(new OrderItemDetailResponse(
-            102,
-            "ダミー商品B",
-            "http://example.com/dummyB.jpg",
-            1,
-            BigDecimal.valueOf(2500),
-            BigDecimal.valueOf(2500)
-        ));
-
-        CustomerInfo dummyCustomerInfo = new CustomerInfo();
-        dummyCustomerInfo.setCustomerId(null);
-        dummyCustomerInfo.setName("ダミーゲスト太郎");
-        dummyCustomerInfo.setEmail("guest@example.com");
-        dummyCustomerInfo.setAddress("東京都港区ダミー1-2-3");
-        dummyCustomerInfo.setPhoneNumber("090-1234-5678");
-
-        return new OrderDetailResponse(
-            orderId,
-            LocalDateTime.now().minusDays(5),
-            BigDecimal.valueOf(5500), // ここも商品合計として設定すべきか、それとも合計金額か検討が必要
-            BigDecimal.ZERO,
-            "銀行振込",
-            dummyItems,
-            dummyCustomerInfo
-        );
-    }
+    
 }
