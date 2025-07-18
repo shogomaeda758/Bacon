@@ -17,11 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.LinkedHashMap;
 
 @WebMvcTest(CartController.class)
 public class CartControllerTest {
@@ -57,23 +60,22 @@ public class CartControllerTest {
                 .sessionAttr(CART_SESSION_KEY, cartResponse))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                // JSON構造に応じて検証。例:
+                // JSON構造に応じて検証。
                 .andExpect(jsonPath("$.items", is(notNullValue())));
     }
+@Test
+@DisplayName("getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk")
+void getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk() throws Exception {
+    CartRespons emptyCart = new CartRespons();
+    // 空のカートを想定
 
-    @Test
-    @DisplayName("getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk")
-    void getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk() throws Exception {
-        CartRespons emptyCart = new CartRespons();
-        // 空のカートを想定
+    when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(emptyCart);
 
-        when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(emptyCart);
-
-        mockMvc.perform(get("/api/cart"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items", hasSize(0)));
-    }
+    mockMvc.perform(get("/api/cart"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.items", anEmptyMap())); 
+}
 
     @Test
     @DisplayName("getCart_WhenServiceThrowsException_ShouldReturnInternalServerError")
@@ -84,19 +86,18 @@ public class CartControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
-    @Test
-    @DisplayName("addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
-    void addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
-        CartRespons updatedCart = new CartRespons();
-        // updatedCartの必要情報セット（省略）
+@Test
+@DisplayName("addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
+void addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
+    CartRespons updatedCart = new CartRespons();
 
-        when(cartService.addItemToCart( anyLong(), anyInt(),any(HttpSession.class))).thenReturn(updatedCart);
+    when(cartService.addItemToCart(anyLong(), anyInt(), any(HttpSession.class))).thenReturn(updatedCart);
 
-        mockMvc.perform(post("/api/cart/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"productId\":1,\"quantity\":2}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items", is(notNullValue())));
+    mockMvc.perform(post("/api/cart")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"productId\":1,\"quantity\":2}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items", is(notNullValue())));
     }
 
     @Test
@@ -110,41 +111,42 @@ public class CartControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    @DisplayName("addItem_WithNullProductId_ShouldReturnBadRequest")
-    void addItem_WithNullProductId_ShouldReturnBadRequest() throws Exception {
-        String requestBody = "{\"quantity\":2}";
+  @Test
+@DisplayName("addItem_WithNullProductId_ShouldReturnBadRequest")
+void addItem_WithNullProductId_ShouldReturnBadRequest() throws Exception {
+    String requestBody = "{\"quantity\":2}";
 
-        mockMvc.perform(post("/api/cart/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-                .andExpect(status().isBadRequest());
-    }
+    mockMvc.perform(post("/api/cart")  
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+            .andExpect(status().isBadRequest());
+}
 
-    @Test
-    @DisplayName("addItem_WithZeroQuantity_ShouldReturnBadRequest")
-    void addItem_WithZeroQuantity_ShouldReturnBadRequest() throws Exception {
-        String requestBody = "{\"productId\":1,\"quantity\":0}";
+   @Test
+@DisplayName("addItem_WithZeroQuantity_ShouldReturnBadRequest")
+void addItem_WithZeroQuantity_ShouldReturnBadRequest() throws Exception {
+    String requestBody = "{\"productId\":1,\"quantity\":0}";
 
-        mockMvc.perform(post("/api/cart/items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-                .andExpect(status().isBadRequest());
-    }
+    mockMvc.perform(post("/api/cart")  
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+            .andExpect(status().isBadRequest());
+}
 
-    @Test
-    @DisplayName("updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
-    void updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
-        CartRespons updatedCart = new CartRespons();
+   @Test
+@DisplayName("updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
+void updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
+    CartRespons updatedCart = new CartRespons();
+    updatedCart.setItems(new LinkedHashMap<>()); 
 
-        when(cartService.addItemToCart(any(Long.class), any(Integer.class), any(HttpSession.class))).thenReturn(updatedCart);
+    when(cartService.updateItemQuantity(eq("1"), eq(3), any(HttpSession.class))).thenReturn(updatedCart);
 
-        mockMvc.perform(put("/api/cart/items/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"quantity\":3}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items", is(notNullValue())));
-    }
+    mockMvc.perform(put("/api/cart/items/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"quantity\":3}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items", is(notNullValue())));
+}
 
     @Test
     @DisplayName("updateItem_WithZeroQuantity_ShouldReturnBadRequest")
