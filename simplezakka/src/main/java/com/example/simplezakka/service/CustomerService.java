@@ -3,7 +3,6 @@ package com.example.simplezakka.service;
 import com.example.simplezakka.dto.customer.*;
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // BCryptPasswordEncoderをインポート
 

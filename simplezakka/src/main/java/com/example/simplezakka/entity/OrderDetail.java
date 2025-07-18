@@ -34,6 +34,7 @@ public class OrderDetail {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
     
+    
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
