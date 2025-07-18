@@ -13,7 +13,6 @@ import com.example.simplezakka.entity.OrderDetail;
 import com.example.simplezakka.entity.Product;
 
 import com.example.simplezakka.repository.CustomerRepository;
-import com.example.simplezakka.repository.OrderDetailRepository;
 import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
@@ -29,19 +28,16 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final CartService cartService;
 
     public OrderService(
             OrderRepository orderRepository,
-            OrderDetailRepository orderDetailRepository,
             ProductRepository productRepository,
             CustomerRepository customerRepository,
             CartService cartService) {
         this.orderRepository = orderRepository;
-        this.orderDetailRepository = orderDetailRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.cartService = cartService;
