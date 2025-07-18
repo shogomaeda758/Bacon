@@ -16,13 +16,11 @@ import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.dto.order.OrderDetailResponse;
 import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderSummaryResponse;
 import com.example.simplezakka.service.CartService;
 import com.example.simplezakka.service.OrderService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.stream.Collectors; 
 
 @RestController
