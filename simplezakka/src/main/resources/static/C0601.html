@@ -15,15 +15,13 @@
             padding: 2em;
         }
 
-
         .container {
             background: #ffffff;
             padding: 2em;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            width: 300px;
+            width: 300px; /* この幅は維持 */
         }
-
 
         h1 {
             font-size: 1.5em;
@@ -31,46 +29,96 @@
             text-align: center;
         }
 
-
         form {
             display: flex;
             flex-direction: column;
+            /* ここでのgapは、labelとinputのペア（またはinput単体）のdiv要素に適用されます */
+            /* gap: 1em; /* 今回は個別のマージンで調整するため削除またはコメントアウト */
+        }
+
+        /* 各入力フィールドグループに適用するマージン */
+        .form-group {
+            margin-bottom: 1em; /* 各入力フィールドの下に適切な余白を追加 */
+        }
+
+        /* 最後のform-groupの下のマージンは不要な場合があるため調整 */
+        #registerForm .form-group:last-of-type {
+            margin-bottom: 0; /* 最後のグループの下の余白を削除 */
         }
 
 
+        /* パスワード入力とボタンをまとめるコンテナ */
+        .password-container {
+            position: relative; /* ボタンの絶対配置のために必要 */
+            display: flex; /* Flexboxを使って内部要素を配置 */
+            align-items: center; /* 垂直方向中央揃え */
+            /* form-groupでマージンが設定されるので、ここでの個別のmargin-bottomは不要 */
+        }
+
+        /* 全てのinput要素の共通スタイル */
         input {
-            margin-bottom: 1em;
             padding: 0.8em;
-            border: 1px solid #c8e6c9;
+            border: 1px solid #383028;
             border-radius: 5px;
             font-size: 1em;
             background-color: #f9fdf9;
+            flex-grow: 1; /* 親の幅に合わせて伸びる */
+            width: 100%; /* 親要素の幅いっぱいに広げる */
+            box-sizing: border-box; /* paddingとborderをwidthに含める */
+            margin-bottom: 0; /* form-groupにマージンを持たせるためリセット */
         }
 
+        /* パスワード入力フィールドのスタイル調整 */
+        .password-container input {
+            padding-right: 40px; /* ボタンが重ならないように右側に余白 */
+            /* widthは既に100%なので、calcは不要になる可能性が高い */
+        }
 
-        button, input[type="submit"] {
-            padding: 0.8em;
-            background-color: rgb(191, 232, 191);
-            color: #383028;
-            border: #383028;
-            border-radius: 5px;
-            font-size: 1em;
+        /* パスワード表示切り替えボタンのスタイル */
+        .toggle-password {
+            position: absolute; /* 親要素 .password-container に対して絶対配置 */
+            right: 10px; /* 右端からの距離 */
+            background: none;
+            border: none;
+            color: #897765; /* ボタンの色 */
             cursor: pointer;
-            width: 100%;
-            border: 1px solid #383028;
-}
+            font-size: 0.8em;
+            padding: 0.5em;
+            min-width: unset;
+            width: auto;
+            height: auto;
+            margin: 0;
+            white-space: nowrap;
+        }
 
+        .toggle-password:hover {
+            color: #383028; /* ホバー時の色 */
+        }
 
+        /* ボタンとSubmitボタンの共通スタイル */
+        button, input[type="submit"] {
+            background-color: #897765;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            font-size: 15px;
+            padding: 10px 20px;
+            min-width: 300px;
+            width: auto;
+            white-space: nowrap;
+            height: 50px;
+            margin: auto; /* 中央揃え用 */
+        }
 
         button:hover, input[type="submit"]:hover {
-            background-color: #57a05a;
+            background-color: #383028;
+            border: 1px solid #ffffff;
         }
-
 
         button:active, input[type="submit"]:active {
-            background-color: #57a05a; /* hoverと同じ色にして黒くならないように */
+            background-color: #383028;
+            border: 1px solid #ffffff;
         }
-
 
         .message {
             margin-top: 1em;
@@ -79,7 +127,6 @@
             text-align: center;
         }
 
-
         #register-container {
             display: none;
         }
@@ -87,78 +134,187 @@
 </head>
 <body>
 
-
 <div class="container" id="login-container">
     <h1>会員のお客様</h1>
     <form id="loginForm">
         <label for="email">会員ID</label>
         <input type="email" id="email" placeholder="メールアドレス" required />
 
-
         <label for="password">パスワード</label>
-        <input type="password" id="password" required />
-
+        <div class="password-container form-group"> <input type="password" id="password" required />
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password')">表示</button>
+        </div>
 
         <input type="submit" value="ログイン" />
     </form>
-
 
     <h1>はじめてご利用のお客様</h1>
     <button id="show-register-btn">新規会員登録へ</button>
 </div>
 
-
 <div class="container" id="register-container">
     <h1>会員登録</h1>
     <form id="registerForm">
-        <input type="text" name="name" placeholder="名前" required />
-        <input type="email" name="email" placeholder="メールアドレス" required />
-        <input type="text" name="address" placeholder="住所" required />
-        <input type="tel" name="phoneNumber" placeholder="電話番号" required />
-        <input type="password" name="password" placeholder="パスワード" required />
+        <div class="form-group">
+            <input type="text" name="name" placeholder="名前" required />
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder="メールアドレス" required />
+        </div>
+        <div class="form-group">
+            <input type="text" name="address" placeholder="住所" required />
+        </div>
+        <div class="form-group">
+            <input type="tel" name="phoneNumber" placeholder="電話番号" required />
+        </div>
+        <div class="password-container form-group"> <input type="password" name="password" id="registerPassword" placeholder="パスワード" required />
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('registerPassword')">表示</button>
+        </div>
         <button type="submit">登録する</button>
     </form>
     <div id="registerMessage" class="message"></div>
 </div>
 
-
 <script>
+    // パスワードの表示・非表示を切り替える関数
+    function togglePasswordVisibility(id) {
+        const passwordField = document.getElementById(id);
+        const toggleButton = passwordField.nextElementSibling; // 次の要素（ボタン）を取得
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleButton.textContent = '隠す';
+        } else {
+            passwordField.type = 'password';
+            toggleButton.textContent = '表示';
+        }
+    }
+
     // 最初の読み込み時にログイン済みならログイン後画面に遷移
-    window.addEventListener("load", function(){
-        if (sessionStorage.getItem("userName")) {
-            window.location.href = "index_logged_in.html";
+    window.addEventListener("load", async function(){
+        try {
+            // サーバーサイドのログイン状態確認APIを呼び出す
+            const response = await fetch('/api/customers/status');
+            const data = await response.json();
+
+            if (response.ok && data.loggedIn) {
+                // ログイン中の場合、ユーザー名をsessionStorageに設定し、トップページへ遷移
+                sessionStorage.setItem("userName", data.customerName + "さん");
+                window.location.href = "index.html";
+            }
+            // ログインしていない場合は何もしない（ログイン画面表示のまま）
+        } catch (error) {
+            console.error('ログイン状態確認エラー:', error);
+            // エラーが発生してもログイン画面を表示する
         }
     });
-
 
     document.getElementById("show-register-btn").addEventListener("click", function() {
         document.getElementById("login-container").style.display = "none";
         document.getElementById("register-container").style.display = "block";
     });
 
-
-    // 会員登録
-    document.getElementById("registerForm").addEventListener("submit", function(e) {
+    // 会員登録処理
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
         e.preventDefault();
+
         const name = e.target.name.value;
-        sessionStorage.setItem("userName", name + "さん");
-        document.getElementById("registerMessage").textContent = "会員登録が完了しました！";
-        setTimeout(() => {
-            window.location.href = "index_logged_in.html";
-        }, 2000);
+        const email = e.target.email.value;
+        const address = e.target.address.value;
+        const phoneNumber = e.target.phoneNumber.value;
+        const password = e.target.password.value;
+
+        const requestBody = {
+            customerInfo: {
+                name: name,
+                email: email,
+                address: address,
+                phoneNumber: phoneNumber
+            },
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/customers/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            const registerMessageElement = document.getElementById("registerMessage");
+
+            if (response.ok) {
+                sessionStorage.setItem("userName", data.name + "さん");
+                registerMessageElement.textContent = "会員登録が完了しました！";
+                registerMessageElement.style.color = "#388e3c";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+            } else {
+                registerMessageElement.textContent = "登録失敗: " + (data.message || "不明なエラー");
+                registerMessageElement.style.color = "red";
+            }
+        } catch (error) {
+            console.error('登録エラー:', error);
+            document.getElementById("registerMessage").textContent = "ネットワークエラーが発生しました。";
+            document.getElementById("registerMessage").style.color = "red";
+        }
     });
 
-
-    // ログイン
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
+    // ログイン処理
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
         e.preventDefault();
+
         const email = document.getElementById("email").value;
-        const localPart = email.split('@')[0];
-        sessionStorage.setItem("userName", localPart + "さん");
-        window.location.href = "index_logged_in.html"; // 商品画面（ログイン後）に遷移
+        const password = document.getElementById("password").value;
+
+        const requestBody = {
+            email: email,
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/customers/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            let loginErrorElement = document.querySelector('#login-container .message');
+
+            if (response.ok) {
+                sessionStorage.setItem("userName", data.name + "さん");
+                window.location.href = "index.html";
+            } else {
+                if (!loginErrorElement) {
+                    const newErrorElement = document.createElement('div');
+                    newErrorElement.className = 'message';
+                    newErrorElement.style.color = 'red';
+                    document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
+                    loginErrorElement = newErrorElement;
+                }
+                loginErrorElement.textContent = data.message || "ログイン失敗: メールアドレスまたはパスワードが正しくありません。";
+            }
+        } catch (error) {
+            console.error('ログインエラー:', error);
+            let loginErrorElement = document.querySelector('#login-container .message');
+            if (!loginErrorElement) {
+                const newErrorElement = document.createElement('div');
+                newErrorElement.className = 'message';
+                newErrorElement.style.color = 'red';
+                document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
+                loginErrorElement = newErrorElement;
+            }
+            loginErrorElement.textContent = "ネットワークエラーが発生しました。";
+        }
     });
 </script>
-
 
 </body>
 </html>

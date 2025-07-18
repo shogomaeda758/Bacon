@@ -9,23 +9,44 @@
 }
 
 .cart-badge {
-    position: relative;
-    top: -8px;
-    right: 5px;
+    /* 既存のプロパティ */
+    position: absolute; /* 親要素に対する絶対位置指定（Bootstrapのクラスと連携） */
+    top: 0;             /* 親要素の上端に配置 */
+    right: 0;           /* 親要素の右端に配置 */
+    transform: translate(50%, -50%); /* 右上角に完全に配置するための調整 */
+
+    /* 新しいプロパティまたは調整 */
+    background-color: #dc3545; /* Bootstrapの赤（必要に応じて変更） */
+    color: #ffffff;      /* 白い文字 */
+    font-size: 0.75em;   /* 文字を少し小さく */
+    padding: 0.2em 0.5em; /* 上下左右のパディング */
+    border-radius: 999px; /* 円形にするための大きな値 */
+    min-width: 1.5em;    /* 1桁でも潰れない最小幅 */
+    text-align: center;  /* 数字を中央寄せ */
+    line-height: 1;      /* 文字の行高を調整 */
+    white-space: nowrap; /* テキストが改行されないように */
+    display: flex;       /* Flexboxコンテナにする */
+    align-items: center; /* 縦方向の中央揃え */
+    justify-content: center; /* 横方向の中央揃え */
 }
+
 footer {
     font-family: Arial, sans-serif; /* フォントを指定 */
-    background-color: hsl(57, 40%, 90%); /* 背景色を白に設定 */
+    background-color: #f1eeeb; /* 背景色を白に設定 */
     color: #383028; /* 文字色を濃い茶色に設定 */
     text-align: center; /* 全体の文字を中央揃え */
 
 }
 header {
-    font-family: 'Nunito', sans-serif; /* フォントを指定 */
-    background-color: hsl(57, 40%, 90%); /* 背景色を白に設定 */
-    color: #383028; /* 文字色を濃い茶色に設定 */
+    font-family: Arial, sans-serif; /* フォントを指定 */
+
+    background-color: #ffffff; /* 背景色を白に設定 */
+    color: #ffffff; /* 文字色を白に設定 */
+
     text-align: center; /* 全体の文字を中央揃え */
-    
+}
+.navbar-text {
+    color: #383028 !important; /* !important を使うと他のルールよりも優先されますが、通常は推奨されません */
 }
 body {
     justify-content: center;
@@ -36,41 +57,45 @@ body {
 }
 /* ボタン */
 button.btn {
-    background-color: rgb(191, 232, 191);
-    color: #383028;
-    border: 1px solid #383028;
+    background-color:  #897765;
+    color: #ffffff;
+    border: 1px solid #ffffff;
     font-size: 15px;     /* 文字サイズ */
     padding: 10px 20px;  /* 内側の余白 */
     min-width: 150px;     /* 最小幅は150px */
-    width: auto;         
-    white-space: nowrap;  
+    width: auto;
+    white-space: nowrap;
     height: 50px;        /* 高さ */
     margin-right: 10px;
 
 }
 /* ホバー時 */
-.category-btn:hover {
+button.btn:hover {
     background-color: #383028;  /* 背景色が茶に変わる */
-    color: white;               /* 文字色を白に変える */
+    border: 1px solid #ffffff;
 }
 /* 通常リンク */
 a {
     color:  #000000;           /* リンクの文字色 */
-    text-decoration: none;  
+    text-decoration: none;
 }
 
 /* ホバー時のリンク */
 a:hover {
-    color:    #ffffff;       /* マウスオーバー時の色 */
-
+    color:    #e9e3dd;       /* マウスオーバー時の色 */
 }
+/*検索バーのリンク*/
 #searchInput {
             margin-bottom: 1em;
             padding: 0.8em;
-            border: 1px solid #c8e6c9;
+            border: 1px solid #ffffff40;
             border-radius: 5px;
             font-size: 1em;
-            background-color: #f9fdf9;
-        }
+            background-color:#f1eeeb;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
 
-
+/* エラーメッセージ */
+.custom-modal .error-message {
+    font-size: 0.9em;
+}
