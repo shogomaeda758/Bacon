@@ -15,7 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,7 +48,7 @@ public class CartControllerTest {
     @Test
     @DisplayName("getCart_WhenCartExists_ShouldReturnCartWithStatusOk")
     void getCart_WhenCartExists_ShouldReturnCartWithStatusOk() throws Exception {
-        CartRespons cartResponse = new CartResponse();
+        CartRespons cartResponse = new CartRespons();
         // 適宜cartResponseのフィールドに値セット（省略）
 
         when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(cartResponse);
@@ -62,7 +64,7 @@ public class CartControllerTest {
     @Test
     @DisplayName("getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk")
     void getCart_WhenCartNotExists_ShouldReturnEmptyCartWithStatusOk() throws Exception {
-        CartRespons emptyCart = new CartResponse();
+        CartRespons emptyCart = new CartRespons();
         // 空のカートを想定
 
         when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(emptyCart);
@@ -85,10 +87,10 @@ public class CartControllerTest {
     @Test
     @DisplayName("addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
     void addItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
-        CartRespons updatedCart = new CartResponse();
+        CartRespons updatedCart = new CartRespons();
         // updatedCartの必要情報セット（省略）
 
-        when(cartService.addItemToCart(any(HttpSession.class), anyLong(), anyInt())).thenReturn(updatedCart);
+        when(cartService.addItemToCart( anyLong(), anyInt(),any(HttpSession.class))).thenReturn(updatedCart);
 
         mockMvc.perform(post("/api/cart/items")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +102,7 @@ public class CartControllerTest {
     @Test
     @DisplayName("addItem_WhenServiceReturnsNull_ShouldReturnNotFound")
     void addItem_WhenServiceReturnsNull_ShouldReturnNotFound() throws Exception {
-        when(cartService.addItemToCart(any(HttpSession.class), anyLong(), anyInt())).thenReturn(null);
+        when(cartService.addItemToCart(anyLong(), anyInt(),any(HttpSession.class))).thenReturn(null);
 
         mockMvc.perform(post("/api/cart/items")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,9 +135,9 @@ public class CartControllerTest {
     @Test
     @DisplayName("updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk")
     void updateItem_WithValidData_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
-        CartRespons updatedCart = new CartResponse();
+        CartRespons updatedCart = new CartRespons();
 
-        when(cartService.updateItemQuantity(any(HttpSession.class), anyLong(), anyInt())).thenReturn(updatedCart);
+        when(cartService.addItemToCart(any(Long.class), any(Integer.class), any(HttpSession.class))).thenReturn(updatedCart);
 
         mockMvc.perform(put("/api/cart/items/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -156,9 +158,9 @@ public class CartControllerTest {
     @Test
     @DisplayName("removeItem_WhenItemExists_ShouldReturnUpdatedCartWithStatusOk")
     void removeItem_WhenItemExists_ShouldReturnUpdatedCartWithStatusOk() throws Exception {
-        CartRespons updatedCart = new CartResponse();
+        CartRespons updatedCart = new CartRespons();
 
-        when(cartService.removeItemFromCart(any(HttpSession.class), anyLong())).thenReturn(updatedCart);
+        when(cartService.removeItemFromCart(any(String.class), any(HttpSession.class))).thenReturn(updatedCart);
 
         mockMvc.perform(delete("/api/cart/items/1"))
                 .andExpect(status().isOk())
@@ -168,9 +170,9 @@ public class CartControllerTest {
     @Test
     @DisplayName("removeItem_WhenItemNotExists_ShouldReturnCartFromServiceWithStatusOk")
     void removeItem_WhenItemNotExists_ShouldReturnCartFromServiceWithStatusOk() throws Exception {
-        CartRespons currentCart = new CartResponse();
+        CartRespons currentCart = new CartRespons();
 
-        when(cartService.removeItemFromCart(any(HttpSession.class), anyLong())).thenReturn(currentCart);
+        when(cartService.removeItemFromCart(any(String.class), any(HttpSession.class))).thenReturn(currentCart);
 
         mockMvc.perform(delete("/api/cart/items/999"))
                 .andExpect(status().isOk())
