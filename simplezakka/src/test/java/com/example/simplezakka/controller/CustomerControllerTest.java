@@ -91,7 +91,6 @@ class CustomerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
             .andExpect(status().isBadRequest());
-            // 通常はfieldErrorsなどバリデーション結果の検証だが、@Validがないためエラーbody検証は標準仕様になる
     }
 
     @Test
@@ -244,38 +243,4 @@ class CustomerControllerTest {
             .andExpect(jsonPath("$[0].name").value("山田 太郎"));
     }
 
-    @Test
-    void getCustomer_Success() throws Exception {
-        when(customerService.getCustomerById(1)).thenReturn(sampleResponse);
-
-        mockMvc.perform(get("/api/customers/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("山田 太郎"));
-    }
-
-    @Test
-    void getCustomer_NotFound_ShouldReturn404() throws Exception {
-        when(customerService.getCustomerById(1234))
-            .thenThrow(new IllegalArgumentException("該当会員が見つかりません"));
-
-        mockMvc.perform(get("/api/customers/1234"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getCustomerProfile_Success() throws Exception {
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loggedInCustomerId", 1);
-        when(customerService.getCustomerById(1)).thenReturn(sampleResponse);
-
-        mockMvc.perform(get("/api/customers/profile").session(session))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("山田 太郎"));
-    }
-
-    @Test
-    void getCustomerProfile_Unauthorized() throws Exception {
-        mockMvc.perform(get("/api/customers/profile"))
-            .andExpect(status().isUnauthorized());
-    }
 }

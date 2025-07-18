@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,8 @@ public class CustomerController {
     public static final String SESSION_CUSTOMER_ID = "loggedInCustomerId";
     public static final String SESSION_CUSTOMER_NAME = "loggedInCustomerName";
 
-
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody CustomerRegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody CustomerRegisterRequest request) {
         try {
             CustomerResponse saved = customerService.createCustomer(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -35,7 +35,7 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody CustomerLoginRequest request, HttpSession session) {
+    public ResponseEntity<?> login(@Valid @RequestBody CustomerLoginRequest request, HttpSession session) {
         try {
             CustomerResponse customer = customerService.login(request.getEmail(), request.getPassword());
 
@@ -76,7 +76,7 @@ public class CustomerController {
 
     @PutMapping("/{customerId}")
     public ResponseEntity<?> update(@PathVariable Integer customerId,
-                                    @RequestBody CustomerUpdateRequest request) {
+                                    @Valid @RequestBody CustomerUpdateRequest request) {
         try {
             CustomerResponse updated = customerService.updateCustomer(customerId, request);
             return ResponseEntity.ok(updated);
@@ -100,22 +100,20 @@ public class CustomerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
+
     @GetMapping("/profile")
     public ResponseEntity<CustomerResponse> getCustomerProfile(HttpSession session) {
         Integer customerId = (Integer) session.getAttribute(SESSION_CUSTOMER_ID);
         if (customerId == null) {
-            // ログインしていない場合は401 Unauthorizedを返す
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "認証が必要です。");
         }
         try {
             CustomerResponse customer = customerService.getCustomerById(customerId);
             return ResponseEntity.ok(customer);
         } catch (IllegalArgumentException e) {
-            // セッションに顧客IDはあるが、DBに存在しないなど（通常はありえないが念のため）
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "顧客情報が見つかりません。");
         }
     }
-
 
     private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String code, String message) {
         Map<String, Object> error = new HashMap<>();
