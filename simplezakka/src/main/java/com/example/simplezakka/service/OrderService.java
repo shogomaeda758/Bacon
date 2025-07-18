@@ -7,6 +7,7 @@ import com.example.simplezakka.dto.order.OrderRequest;
 import com.example.simplezakka.dto.order.OrderResponse;
 import com.example.simplezakka.dto.order.OrderItemDetailResponse;
 import com.example.simplezakka.dto.order.OrderDetailResponse;
+import com.example.simplezakka.dto.order.OrderSummaryResponse;
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final CartService cartService;
@@ -42,6 +44,7 @@ public class OrderService {
             CustomerRepository customerRepository,
             CartService cartService) {
         this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.cartService = cartService;
@@ -156,7 +159,6 @@ public class OrderService {
             return BigDecimal.valueOf(500);
         }
     }
-
 
 
     public OrderDetailResponse getOrderDetail(Integer orderId) {
