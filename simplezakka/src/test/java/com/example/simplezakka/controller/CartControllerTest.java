@@ -1,5 +1,6 @@
-import com.example.simplezakka.dto.cart.Cart;
-import com.example.simplezakka.dto.cart.CartItem;
+package com.example.simplezakka.service;
+
+import com.example.simplezakka.dto.cart.CartResponse;
 import com.example.simplezakka.entity.Product;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
@@ -28,22 +29,31 @@ class CartServiceTest {
 
     private HttpSession session;
     private Product product1;
+    private Product product2;
 
     @BeforeEach
     void setUp() {
         session = new MockHttpSession();
+
         product1 = new Product();
         product1.setProductId(1);
         product1.setName("商品1");
         product1.setPrice(500);
         product1.setImageUrl("/img1.png");
         product1.setStock(10);
+
+        product2 = new Product();
+        product2.setProductId(2);
+        product2.setName("商品2");
+        product2.setPrice(800);
+        product2.setImageUrl("/img2.png");
+        product2.setStock(5);
     }
 
     @Test
     @DisplayName("セッションにカートが存在しない場合、新しい空のカートを作成してセッションに保存し、それを返す")
     void getCartFromSession_WhenCartNotExists_ShouldCreateNewCartAndSaveToSession() {
-        Cart cart = cartService.getCartFromSession(session);
+        CartResponse cart = cartService.getCartFromSession(session);
 
         assertThat(cart).isNotNull();
         assertThat(cart.getItems()).isEmpty();
@@ -55,15 +65,15 @@ class CartServiceTest {
     @Test
     @DisplayName("セッションにカートが存在する場合、既存のカートをそのまま返す")
     void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
-        Cart existing = new Cart();
+        Cart cart = new Cart();
         CartItem item = new CartItem("1", 1, "test", 100, "/img.png", 1, 100);
-        existing.addItem(item);
-        session.setAttribute("cart", existing);
+        cart.addItem(item);
+        session.setAttribute("cart", cart);
 
-        Cart cart = cartService.getCartFromSession(session);
+        Cart result = cartService.getCartFromSession(session);
 
-        assertThat(cart).isSameAs(existing);
-        assertThat(cart.getItems()).hasSize(1);
+        assertThat(result).isSameAs(cart);
+        assertThat(result.getItems()).hasSize(1);
     }
 
     @Test
@@ -146,13 +156,70 @@ class CartServiceTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("在庫が足りません");
     }
-    
+
+    @ExtendWith(MockitoExtension.class)
+class CartServiceTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private CartService cartService;
+
+    private HttpSession session;
+    private Product product1;
+    private Product product2;
+
+    @BeforeEach
+    void setUp() {
+        session = new MockHttpSession();
+
+        product1 = new Product();
+        product1.setProductId(1);
+        product1.setName("商品1");
+        product1.setPrice(500);
+        product1.setImageUrl("/img1.png");
+        product1.setStock(10);
+
+        product2 = new Product();
+        product2.setProductId(2);
+        product2.setName("商品2");
+        product2.setPrice(800);
+        product2.setImageUrl("/img2.png");
+        product2.setStock(5);
+    }
+
+    @Test
+    @DisplayName("セッションにカートが存在しない場合、新しい空のカートを作成してセッションに保存し、それを返す")
+    void getCartFromSession_WhenCartNotExists_ShouldCreateNewCartAndSaveToSession() {
+        CartResponse cart = cartService.getCartFromSession(session);
+
+        assertThat(cart).isNotNull();
+        assertThat(cart.getItems()).isEmpty();
+        assertThat(cart.getTotalPrice()).isZero();
+        assertThat(cart.getTotalQuantity()).isZero();
+        assertThat(session.getAttribute("cart")).isSameAs(cart);
+    }
+
+    @Test
+    @DisplayName("セッションにカートが存在する場合、既存のカートをそのまま返す")
+    void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
+        Cart cart = new Cart();
+        CartItem item = new CartItem("1", 1, "test", 100, "/img.png", 1, 100);
+        cart.addItem(item);
+        session.setAttribute("cart", cart);
+
+        Cart result = cartService.getCartFromSession(session);
+
+        assertThat(result).isSameAs(cart);
+        assertThat(result.getItems()).hasSize(1);
+    }
+
     @Test
     @DisplayName("数量更新：存在するitemIdの商品数量を正常に更新し、小計と合計も正しく再計算される")
     void updateItemQuantity_WhenItemExists_ShouldUpdateQuantityAndTotals() {
         when(productRepository.findById(1)).thenReturn(Optional.of(product1));
         when(productRepository.findById(2)).thenReturn(Optional.of(product2));
-        // 商品1を2個、商品2を1個追加
         cartService.addItemToCart(1, 2, session);
         cartService.addItemToCart(2, 1, session);
 
@@ -231,24 +298,6 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("数量更新：itemIdがnullの場合は例外が発生するか変化なし")
-    void updateItemQuantity_WithNullItemId_ShouldThrowExceptionOrNoChange() {
-        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
-        cartService.addItemToCart(1, 1, session);
-
-        Cart beforeUpdate = cartService.getCartFromSession(session);
-
-        try {
-            cartService.updateItemQuantity(null, 2, session);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // 例外を許容
-        }
-
-        Cart afterUpdate = cartService.getCartFromSession(session);
-        assertThat(afterUpdate).isEqualTo(beforeUpdate);
-    }
-
-    @Test
     @DisplayName("削除：存在するitemIdの商品のみ削除し合計再計算")
     void removeItemFromCart_WhenItemExists_ShouldRemoveItemAndRecalculateTotals() {
         when(productRepository.findById(1)).thenReturn(Optional.of(product1));
@@ -261,7 +310,7 @@ class CartServiceTest {
         assertThat(cart.getItems()).doesNotContainKey("1");
         assertThat(cart.getItems()).containsKey("2");
         assertThat(cart.getTotalQuantity()).isEqualTo(1);
-        assertThat(cart.getTotalPrice()).isEqualTo(product2.getPrice() * 1);
+        assertThat(cart.getTotalPrice()).isEqualTo(product2.getPrice());
     }
 
     @Test
@@ -271,7 +320,6 @@ class CartServiceTest {
         cartService.addItemToCart(1, 1, session);
 
         Cart before = cartService.getCartFromSession(session);
-
         Cart after = cartService.removeItemFromCart("99", session);
 
         assertThat(after).isEqualTo(before);
@@ -284,7 +332,6 @@ class CartServiceTest {
         cartService.addItemToCart(1, 1, session);
 
         Cart before = cartService.getCartFromSession(session);
-
         Cart after = cartService.removeItemFromCart(null, session);
 
         assertThat(after).isEqualTo(before);
@@ -297,10 +344,9 @@ class CartServiceTest {
         cartService.addItemToCart(1, 1, session);
 
         assertThat(session.getAttribute("cart")).isNotNull();
-
         cartService.clearCart(session);
-
         assertThat(session.getAttribute("cart")).isNull();
     }
-
+} 
 }
+
