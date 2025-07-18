@@ -29,22 +29,6 @@ public class DataLoader implements CommandLineRunner {
         loadSampleData(); // メソッド名を汎用的に変更
     }
 
-    private void loadSampleCategories() {
-        if (categoryRepository.count() > 0) {
-            return; // すでにデータが存在する場合はスキップ
-        }
-
-        List<Category> categories = Arrays.asList(
-            createCategory("インテリア"),
-            createCategory("キッチン用品"),
-            createCategory("バッグ・アクセサリー"),
-            createCategory("生活雑貨"),
-            createCategory("文房具・オフィス用品")
-        );
-        
-        categoryRepository.saveAll(categories);
-    }
-
     private void loadSampleData() {
         // データがすでに存在する場合はスキップ
         if (productRepository.count() > 0 || categoryRepository.count() > 0) {
