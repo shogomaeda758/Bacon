@@ -1,11 +1,14 @@
 package com.example.simplezakka.dto.order;
 
 import lombok.Data;
+import lombok.NoArgsConstructor; 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor 
+
 public class OrderResponse {
     private Integer orderId;
     private LocalDateTime orderDate;
