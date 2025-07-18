@@ -702,6 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
             itemsHtml += `<tr><td colspan="4" class="text-center">カートに商品がありません。</td></tr>`;
         }
 
+      
          itemsHtml += `
                     </tbody>
                     <tfoot>
