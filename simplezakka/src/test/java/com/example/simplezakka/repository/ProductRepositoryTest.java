@@ -129,7 +129,7 @@ public class ProductRepositoryTest {
         // THEN:
         assertThat(updatedRows).isEqualTo(1); // 1件更新されたことを確認
 
-        // 実際に在庫が減っていることを確認
+        entityManager.clear(); // ここで永続化コンテキストをクリアし、DBから最新をロードさせる
         Optional<Product> updatedProduct = productRepository.findById(productA.getProductId());
         assertThat(updatedProduct).isPresent();
         assertThat(updatedProduct.get().getStock()).isEqualTo(5); // 10 - 5 = 5
@@ -221,6 +221,7 @@ public class ProductRepositoryTest {
 
         // THEN:
         assertThat(updatedRows).isEqualTo(1); // 1件更新されたことを確認
+        entityManager.clear();
 
         // 実際に在庫が更新されていることを確認
         Optional<Product> updatedProduct = productRepository.findById(productA.getProductId());
