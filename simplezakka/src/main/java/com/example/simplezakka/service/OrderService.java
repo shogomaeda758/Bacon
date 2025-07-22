@@ -13,7 +13,6 @@ import com.example.simplezakka.entity.OrderDetail;
 import com.example.simplezakka.entity.Product;
 
 import com.example.simplezakka.repository.CustomerRepository;
-import com.example.simplezakka.repository.OrderDetailRepository;
 import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
@@ -22,26 +21,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap; // 追加
 import java.util.List;
+import java.util.Map;     // 追加
 import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final CartService cartService;
 
     public OrderService(
             OrderRepository orderRepository,
-            OrderDetailRepository orderDetailRepository,
             ProductRepository productRepository,
             CustomerRepository customerRepository,
             CartService cartService) {
         this.orderRepository = orderRepository;
-        this.orderDetailRepository = orderDetailRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.cartService = cartService;
@@ -57,6 +55,10 @@ public class OrderService {
             throw new IllegalArgumentException("顧客情報が不足しています。");
         }
 
+        // 商品IDとProductオブジェクトをマッピングするためのMap
+        // これにより、findByIdの呼び出しが各商品につき1回になる
+        Map<Integer, Product> productsInCart = new HashMap<>();
+
         for (CartItemResponse cartItem : cart.getItems().values()) {
             Product product = productRepository.findById(cartItem.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("商品が見つかりません: " + cartItem.getName()));
@@ -65,6 +67,8 @@ public class OrderService {
                 throw new IllegalStateException(
                     "申し訳ございません、" + product.getName() + "の在庫が不足しています。現在の在庫: " + product.getStock());
             }
+            // 取得したProductをMapに保存
+            productsInCart.put(product.getProductId(), product);
         }
 
         Order order = new Order();
@@ -85,22 +89,25 @@ public class OrderService {
         order.setOrderAddress(customerInfo.getAddress());
         order.setOrderPhoneNumber(customerInfo.getPhoneNumber());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
-
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        // 商品合計はCartResponsから取得
+
         BigDecimal productSubtotal = cart.getTotalPrice();
         BigDecimal shippingFee = calculateShippingFee(productSubtotal);
         BigDecimal orderGrandTotal = productSubtotal.add(shippingFee);
 
         order.setShippingFee(shippingFee);
-        order.setTotalPrice(orderGrandTotal); // OrderエンティティのtotalPriceは最終合計
+        order.setTotalPrice(orderGrandTotal);
 
+        // 2回目のループでは、MapからProductを取得する
         for (CartItemResponse cartItem : cart.getItems().values()) {
-            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow(
-                () -> new IllegalArgumentException("在庫確認後に商品が見つかりません: " + cartItem.getName())
-            );
+            // ここでfindByIdを再度呼び出す代わりに、Mapから取得
+            Product product = productsInCart.get(cartItem.getProductId());
+            // Mapに存在しない場合は（通常はありえないが）エラーとする
+            if (product == null) {
+                 throw new IllegalStateException("予期せぬエラー: カート内の商品情報が不足しています。商品ID: " + cartItem.getProductId());
+            }
 
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setProduct(product);
@@ -122,7 +129,7 @@ public class OrderService {
 
         List<OrderItemDetailResponse> responseItems = savedOrder.getOrderDetails().stream()
             .map(detail -> {
-                Product product = detail.getProduct();
+                Product product = detail.getProduct(); // OrderDetailからProductを取得
                 return new OrderItemDetailResponse(
                     product.getProductId(),
                     product.getName(),
@@ -156,7 +163,4 @@ public class OrderService {
             return BigDecimal.valueOf(500);
         }
     }
-
-
-    
 }

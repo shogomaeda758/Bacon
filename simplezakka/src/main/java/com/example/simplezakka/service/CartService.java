@@ -29,14 +29,18 @@ public class CartService {
         return cart;
     }
 
-    public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-        Optional<Product> productOpt = productRepository.findById(productId);
+    public CartRespons addItemToCart(long productId, Integer quantity, HttpSession session) {
+        if (quantity == null) {	
+        throw new NullPointerException("数量はnull不可です");	
+        }
+        Optional<Product> productOpt = productRepository.findById((int) productId);
 
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
             CartRespons cart = getCartFromSession(session);
 
-            String itemId = String.valueOf(productId);
+
+            String itemId = String.valueOf(product.getProductId());
             int currentInCart = 0;
 
             if (cart.getItems() != null && cart.getItems().containsKey(itemId)) {
