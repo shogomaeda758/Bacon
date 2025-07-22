@@ -16,7 +16,7 @@ public class CustomerInfo {
     
     
     
-    private Long customerId;
+    private Integer customerId;
 
     @NotBlank(message = "氏名は必須です。")
     @Size(max = 100, message = "氏名は100文字以内で入力してください。")

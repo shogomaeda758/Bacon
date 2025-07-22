@@ -51,12 +51,6 @@ public class OrderService {
         }
         
         CustomerInfo customerInfoFromRequest = orderRequest.getCustomerInfo();
-        if (customerInfoFromRequest != null) {
-        System.out.println("OrderService received customerId from OrderRequest: " + customerInfoFromRequest.getCustomerId());
-    } else {
-        System.out.println("OrderService received customerInfoFromRequest as null.");
-    }
-    
         if (customerInfoFromRequest == null) {
             throw new IllegalArgumentException("顧客情報が不足しています。");
         }
