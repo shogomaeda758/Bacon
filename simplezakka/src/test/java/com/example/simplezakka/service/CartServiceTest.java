@@ -1,5 +1,5 @@
 package com.example.simplezakka.service;
 
-public class CartService {
+public class CartServiceTest {
     
 }
