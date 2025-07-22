@@ -1,6 +1,3 @@
-// ===============================
-// Customer Entity
-// ===============================
 package com.example.simplezakka.entity;
 
 import jakarta.persistence.*;
@@ -64,7 +61,7 @@ public class Customer {
         updatedAt = LocalDateTime.now();
     }
    
-    // Helper method to add order
+    
     public void addOrder(Order order) {
         orders.add(order);
         order.setCustomer(this);

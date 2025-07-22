@@ -27,7 +27,7 @@ import java.util.Collections;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat; // argThat をインポート
+import static org.mockito.ArgumentMatchers.argThat; 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -58,7 +58,7 @@ class OrderControllerTest {
     @BeforeEach
     void setUp() {
         mockSession = new MockHttpSession();
-        // 会員IDをセッションに設定 (OrderControllerがこれを使用する)
+        
         mockSession.setAttribute("customerId", 1);
 
         cartWithItems = new CartRespons();
@@ -69,36 +69,36 @@ class OrderControllerTest {
 
         emptyCart = new CartRespons();
 
-        // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
-        // リクエストボディにはcustomerIdを含めない（Controllerでセットするため）
-        // テストではControllerがセットするcustomerIdを考慮しないといけない
-        // ここでは、リクエストボディからくるCustomerInfoを表現するため、nullとしておく
+        
+        
+        
+        
         validCustomerInfo = new CustomerInfo(
-                null, // ControllerがセッションからcustomerIdをセットするため、リクエストボディではnull
+                null, 
                 "山田 太郎",
                 "yamada@example.com",
                 "東京都渋谷区1-1-1",
                 "09012345678"
         );
 
-        // ★修正: OrderRequestからcustomerIdフィールドを削除したため、その設定を削除
+        
         validOrderRequest = new OrderRequest();
         validOrderRequest.setCustomerInfo(validCustomerInfo);
         validOrderRequest.setPaymentMethod("クレジットカード");
-        // OrderRequestのitems, totalPrice, shippingFeeも設定が必要（バリデーションを通すため）
+        
         validOrderRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-        validOrderRequest.setTotalPrice(1000); // 適切な値に設定
-        validOrderRequest.setShippingFee(500); // 適切な値に設定
+        validOrderRequest.setTotalPrice(1000); 
+        validOrderRequest.setShippingFee(500); 
 
 
         sampleOrderItemDetailResponse = new OrderItemDetailResponse(
                 1, "商品A", "http://example.com/product_a.jpg", 1, BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)
         );
 
-        // ★修正: OrderResponseのCustomerInfoにもcustomerIdを設定
-        // テストケースの検証のため、mockSession.setAttribute("customerId", 1)に対応する値を設定
+        
+        
         CustomerInfo responseCustomerInfo = new CustomerInfo(
-            1, // OrderServiceが保存した結果としてcustomerIdがセットされる
+            1, 
             "山田 太郎",
             "yamada@example.com",
             "東京都渋谷区1-1-1",
@@ -114,19 +114,19 @@ class OrderControllerTest {
                 "クレジットカード",
                 "PENDING",
                 Collections.singletonList(sampleOrderItemDetailResponse),
-                responseCustomerInfo, // ★修正: customerInfoにもcustomerIdが含まれるように
+                responseCustomerInfo, 
                 "注文が正常に完了しました。"
         );
 
-        // ★修正: orderService.placeOrder のモック設定から HttpSession を削除
+        
         lenient().when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(cartWithItems);
-        // OrderControllerがvalidOrderRequest.getCustomerInfo().setCustomerId(customerId)を実行するので、
-        // placeOrderに渡されるorderRequestはcustomerIdがセットされた状態になっている
+        
+        
         lenient().when(orderService.placeOrder(
             eq(cartWithItems),
-            argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null) // customerIdがセットされていることを検証
-            // any(OrderRequest.class) でも良いが、より厳密に検証する場合
-            // (eq(validOrderRequest)) は使えない。なぜなら Controller で orderRequest の中身が変更されるから
+            argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null) 
+            
+            
            
         )).thenReturn(sampleOrderResponse);
     }
@@ -154,23 +154,23 @@ class OrderControllerTest {
                     .andExpect(jsonPath("$.paymentMethod", is(sampleOrderResponse.getPaymentMethod())))
                     .andExpect(jsonPath("$.status", is(sampleOrderResponse.getStatus())))
                     .andExpect(jsonPath("$.customerInfo.name", is(validCustomerInfo.getName())))
-                    // ★追加: customerInfo.customerId の検証
+                    
                     .andExpect(jsonPath("$.customerInfo.customerId", is(sampleOrderResponse.getCustomerInfo().getCustomerId())))
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].productId", is(sampleOrderItemDetailResponse.getProductId())));
 
             verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
 
-            // ★修正: OrderRequestの中身がControllerで変更されるため、any(OrderRequest.class)を使うか、
-            // より厳密に検証する場合は argThat() を使う
-            // ここでは OrderController の修正で placeOrder の引数から HttpSession が削除されていない前提で、
-            // any(HttpSession.class) を残します。
+            
+            
+            
+            
             verify(orderService, times(1)).placeOrder(
                 eq(cartWithItems),
                 argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
                
             );
-            verify(cartService, times(1)).clearCart(any(HttpSession.class)); // Controllerでカートクリアを呼び出すため
+            verify(cartService, times(1)).clearCart(any(HttpSession.class)); 
             verifyNoMoreInteractions(cartService, orderService);
         }
 
@@ -223,7 +223,7 @@ class OrderControllerTest {
                 OrderRequest invalidRequest = new OrderRequest();
                 invalidRequest.setCustomerInfo(null);
                 invalidRequest.setPaymentMethod("クレジットカード");
-                // バリデーションのために他の必須フィールドも設定（もしあれば）
+                
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
                 invalidRequest.setTotalPrice(1000);
                 invalidRequest.setShippingFee(500);
@@ -241,7 +241,7 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】氏名が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankName_ShouldReturnBadRequest() throws Exception {
-                // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
+                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "", "test@example.com", "東京都", "09012345678"
                 );
@@ -265,7 +265,7 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】メールアドレスの形式が不正な場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithInvalidEmailFormat_ShouldReturnBadRequest() throws Exception {
-                // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
+                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "invalid-email", "東京都", "09012345678"
                 );
@@ -289,7 +289,7 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】住所が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankAddress_ShouldReturnBadRequest() throws Exception {
-                // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
+                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "test@example.com", "", "09012345678"
                 );
@@ -313,7 +313,7 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】電話番号が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankPhoneNumber_ShouldReturnBadRequest() throws Exception {
-                // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
+                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "test@example.com", "東京都", ""
                 );
@@ -341,9 +341,9 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】複数のバリデーションエラーが発生した場合、400 Bad Requestと連結されたエラーメッセージを返す")
             void placeOrder_WithMultipleValidationErrors_ReturnsBadRequest() throws Exception {
-                // ★修正: CustomerInfoのコンストラクタにcustomerIdを追加
+                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
-                        null, // customerId は Controller でセットされるためここでは null
+                        null, 
                         "",
                         "invalid-email",
                         "",
@@ -352,10 +352,10 @@ class OrderControllerTest {
                 OrderRequest invalidRequest = new OrderRequest();
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("");
-                // バリデーションエラーのために他の必須フィールドも設定
-                invalidRequest.setItems(Collections.emptyList()); // min = 1 に引っかかる
-                invalidRequest.setTotalPrice(null); // NotNull に引っかかる
-                invalidRequest.setShippingFee(null); // NotNull に引っかかる
+                
+                invalidRequest.setItems(Collections.emptyList()); 
+                invalidRequest.setTotalPrice(null); 
+                invalidRequest.setShippingFee(null); 
 
 
                 mockMvc.perform(post("/api/order/confirm")
@@ -403,7 +403,7 @@ class OrderControllerTest {
             @DisplayName("【異常系】OrderServiceがIllegalArgumentExceptionをスローした場合、400 Bad Requestと例外メッセージを返す")
             void placeOrder_WhenOrderServiceThrowsIllegalArgumentException_ShouldReturnBadRequest() throws Exception {
                 String errorMessage = "商品が見つかりません。";
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 when(orderService.placeOrder(
                     any(CartRespons.class),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
@@ -418,7 +418,7 @@ class OrderControllerTest {
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
@@ -430,7 +430,7 @@ class OrderControllerTest {
             @DisplayName("【異常系】OrderServiceがIllegalStateExceptionをスローした場合、409 Conflictと例外メッセージを返す")
             void placeOrder_WhenOrderServiceThrowsIllegalStateException_ShouldReturnConflict() throws Exception {
                 String errorMessage = "在庫が不足しています。";
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 when(orderService.placeOrder(
                     any(CartRespons.class),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
@@ -445,7 +445,7 @@ class OrderControllerTest {
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
@@ -456,7 +456,7 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】OrderServiceがその他のExceptionをスローした場合、500 Internal Server Errorと汎用エラーメッセージを返す")
             void placeOrder_WhenOrderServiceThrowsGenericException_ShouldReturnInternalServerError() throws Exception {
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 when(orderService.placeOrder(
                     any(CartRespons.class),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
@@ -471,7 +471,7 @@ class OrderControllerTest {
                         .andExpect(jsonPath("$.message", is("注文確定中に予期せぬエラーが発生しました。")));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                // ★修正: orderService.placeOrder の引数から HttpSession を削除
+                
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
                     argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)

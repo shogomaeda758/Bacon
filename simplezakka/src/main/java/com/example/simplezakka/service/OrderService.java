@@ -2,14 +2,14 @@ package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.dto.order.CustomerInfo; // OrderRequest 内の CustomerInfo を使用
-import com.example.simplezakka.dto.order.OrderRequest; // 修正した OrderRequest を使用
+import com.example.simplezakka.dto.order.CustomerInfo; 
+import com.example.simplezakka.dto.order.OrderRequest; 
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderItemDetailResponse; // OrderResponse の内部クラスをインポート
+import com.example.simplezakka.dto.order.OrderItemDetailResponse; 
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
-import com.example.simplezakka.entity.OrderDetail; // OrderDetailエンティティを使用
+import com.example.simplezakka.entity.OrderDetail; 
 import com.example.simplezakka.entity.Product;
 
 import com.example.simplezakka.repository.CustomerRepository;
@@ -70,20 +70,20 @@ public class OrderService {
 
         Order order = new Order();
 
-        // --- isGuest の判断と Customer / customer_id の設定ロジック ---
-        // ★修正: customerId を OrderRequest ではなく CustomerInfo から取得する
+        
+        
         Integer customerId = customerInfoFromRequest.getCustomerId(); 
-        if (customerId != null) { // customerId が null でない場合 (会員の注文)
+        if (customerId != null) { 
             Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員情報が見つかりません。ID: " + customerId));
-            order.setCustomer(customer); // OrderエンティティにCustomerエンティティを関連付け
-            order.setIsGuest(false); // 会員フラグをfalseに設定
-        } else { // customerId が null の場合 (非会員の注文)
-            order.setCustomer(null); // 会員情報はnull
-            order.setIsGuest(true); // ゲストフラグをtrueに設定
+            order.setCustomer(customer); 
+            order.setIsGuest(false); 
+        } else { 
+            order.setCustomer(null); 
+            order.setIsGuest(true); 
         }
 
-        // --- 注文者情報のマッピング (OrderRequestのcustomerInfoから取得) ---
+        
         order.setOrderName(customerInfoFromRequest.getName());
         order.setOrderEmail(customerInfoFromRequest.getEmail());
         order.setOrderAddress(customerInfoFromRequest.getAddress());
@@ -93,19 +93,19 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        // --- 金額計算 ---
-        BigDecimal productSubtotal = cart.getTotalPrice(); // カートから商品小計を取得
+        
+        BigDecimal productSubtotal = cart.getTotalPrice(); 
         BigDecimal shippingFee = calculateShippingFee(productSubtotal);
-        BigDecimal orderGrandTotal = productSubtotal.add(shippingFee); // 送料込みの最終合計
+        BigDecimal orderGrandTotal = productSubtotal.add(shippingFee); 
 
         order.setShippingFee(shippingFee);
-        order.setTotalPrice(productSubtotal); // OrderエンティティのtotalPriceには商品合計を設定
-        // Orderエンティティに grandTotal フィールドがあれば設定
-        // private BigDecimal grandTotal; をエンティティに追加した場合
-        // order.setGrandTotal(orderGrandTotal); 
+        order.setTotalPrice(productSubtotal); 
+        
+        
+        
 
 
-        // 注文詳細の生成と在庫の更新
+        
         for (CartItemResponse cartItem : cart.getItems().values()) {
             Product product = productsInCart.get(cartItem.getProductId());
             if (product == null) {
@@ -127,7 +127,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // --- OrderResponse の作成 ---
+        
         List<OrderItemDetailResponse> responseItems = savedOrder.getOrderDetails().stream()
             .map(detail -> {
                 Product product = detail.getProduct(); 
@@ -142,9 +142,9 @@ public class OrderService {
             })
             .collect(Collectors.toList());
 
-        // OrderResponse の customerInfo に customerId を含める
+        
         CustomerInfo responseCustomerInfo = new CustomerInfo(
-            savedOrder.getCustomer() != null ? savedOrder.getCustomer().getCustomerId() : null, // 会員IDがあればセット、なければnull
+            savedOrder.getCustomer() != null ? savedOrder.getCustomer().getCustomerId() : null, 
             savedOrder.getOrderName(),
             savedOrder.getOrderEmail(),
             savedOrder.getOrderAddress(),
@@ -155,11 +155,11 @@ public class OrderService {
         return new OrderResponse(
             savedOrder.getOrderId(),
             savedOrder.getOrderDate(),
-            savedOrder.getTotalPrice(), // 商品合計
+            savedOrder.getTotalPrice(), 
             savedOrder.getShippingFee(),
-            // savedOrder.getGrandTotal(), // Orderエンティティに grandTotal フィールドがあれば使用
-            // ない場合は計算値を使用
-            savedOrder.getTotalPrice().add(savedOrder.getShippingFee()), // totalPrice と shippingFee から計算
+            
+            
+            savedOrder.getTotalPrice().add(savedOrder.getShippingFee()), 
             savedOrder.getPaymentMethod(),
             savedOrder.getStatus(),
             responseItems,
