@@ -2,7 +2,6 @@ package com.example.simplezakka.controller;
 
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.service.CartService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +31,6 @@ public class CartControllerTest {
 
     @MockBean
     private CartService cartService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private HttpSession session;
 
     private static final String CART_SESSION_KEY = "CART";
 
