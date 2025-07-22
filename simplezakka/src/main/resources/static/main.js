@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok && data.loggedIn) {
                 updateHeaderButtons(true, data.customerName);
-                currentOrderData.customerId = data.customerId || null;
-                console.log("Logged in customer ID set:", currentOrderData.customerId);
+                currentOrderData.customerInfo.customerId = data.customerId || null; 
+                console.log("Logged in customer ID set:", currentOrderData.customerInfo.customerId);
             } else {
                 updateHeaderButtons(false);
                 currentOrderData.customerInfo.customerId = null;
@@ -755,8 +755,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const emailInput = document.getElementById('email');
         const addressInput = document.getElementById('address');
         const phoneInput = document.getElementById('phone');
-
+        const existingCustomerId = currentOrderData.customerInfo.customerId;
         currentOrderData.customerInfo = {
+            customerId: existingCustomerId ,
             name: nameInput ? nameInput.value : '',
             email: emailInput ? emailInput.value : '',
             address: addressInput ? addressInput.value : '',
@@ -920,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function confirmOrder() {
         try {
-            
+            console.log("Sending currentOrderData to backend:", JSON.stringify(currentOrderData, null, 2));
             
             const response = await fetch(`${API_BASE}/order/confirm`, {
                 method: 'POST',
