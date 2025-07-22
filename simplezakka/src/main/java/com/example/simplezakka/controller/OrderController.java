@@ -22,10 +22,8 @@ import com.example.simplezakka.service.OrderService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.Collections; // Collections.singletonMap のために追加
 import java.util.stream.Collectors;
-import java.util.Map; // Mapを使うなら必要
-import java.util.HashMap; // HashMapを使うなら必要
+
 
 @RestController
 @RequestMapping("/api")
