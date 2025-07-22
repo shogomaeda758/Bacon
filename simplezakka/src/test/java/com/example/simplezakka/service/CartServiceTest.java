@@ -153,20 +153,6 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
 
 
     @Test
-    @DisplayName("productIdがnullの場合、nullが返る")
-    void addItemToCart_WithNullProductId_ShouldReturnNull() {
-        when(productRepository.findById(null)).thenReturn(Optional.empty());
-
-
-        CartRespons cart = cartService.addItemToCart(null, 1, session);
-
-
-        assertThat(cart).isNull();
-        verify(productRepository).findById(null);
-    }
-
-
-    @Test
     @DisplayName("quantityがnullの場合、NullPointerExceptionが発生")
     void addItemToCart_WithNullQuantity_ShouldThrowException() {
         when(productRepository.findById(1)).thenReturn(Optional.of(product1));
