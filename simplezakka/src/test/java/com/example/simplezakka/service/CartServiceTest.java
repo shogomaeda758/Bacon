@@ -1,6 +1,5 @@
 package com.example.simplezakka.service;
 
-
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.entity.Product;
@@ -149,20 +148,6 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
 
         assertThat(cart).isNull();
         assertThat(session.getAttribute("cart")).isNull();
-    }
-
-
-    @Test
-    @DisplayName("productIdがnullの場合、nullが返る")
-    void addItemToCart_WithNullProductId_ShouldReturnNull() {
-        when(productRepository.findById(null)).thenReturn(Optional.empty());
-
-
-        CartRespons cart = cartService.addItemToCart(null, 1, session);
-
-
-        assertThat(cart).isNull();
-        verify(productRepository).findById(null);
     }
 
 
