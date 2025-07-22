@@ -331,19 +331,18 @@ void placeOrder_WithBlankPhoneNumber_ShouldReturnBadRequest() throws Exception {
             }
 
             @Test
-@DisplayName("【異常系】JSON構文が不正な場合、500 Internal Server Errorと汎用エラーメッセージを返す") 
-void placeOrder_WithInvalidJsonSyntax_ReturnsInternalServerError() throws Exception { 
-    String invalidJson = "{\"customerInfo\": \"invalid\","; 
+@DisplayName("【異常系】JSON構文が不正な場合、400 Bad RequestとJSONパースエラーメッセージを返す")
+void placeOrder_WithInvalidJsonSyntax_ReturnsBadRequestWithParseError() throws Exception {
+    String invalidJson = "{ \"customerInfo\": { \"name\": \"Test User\", \"email\": \"test@example.com\" }, \"paymentMethod\": \"クレジットカード\"";
 
     mockMvc.perform(post("/api/order/confirm")
                     .session(mockSession)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invalidJson))
-            
-            .andExpect(status().isInternalServerError())
+            .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            
-            .andExpect(jsonPath("$.message", is("注文確定中に予期せぬエラーが発生しました。"))); 
+            // .andExpect(jsonPath("$.message", containsString("JSON parse error"))); // この行を修正
+            .andExpect(jsonPath("$.message", is("リクエストボディのJSON形式が不正です。"))); // 修正後
 
     verifyNoInteractions(cartService, orderService);
 }
