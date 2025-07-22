@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             address: '',
             phoneNumber: ''
         },
+        customerId: null, 
         paymentMethod: '',
         items: [],
         totalPrice: 0
@@ -104,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
+                            currentOrderData.customerId = null;
                             window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
@@ -128,12 +130,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok && data.loggedIn) {
                 updateHeaderButtons(true, data.customerName);
+                currentOrderData.customerId = data.customerId || null; 
+            console.log("Logged in customer ID set:", currentOrderData.customerId);
             } else {
                 updateHeaderButtons(false);
+                currentOrderData.customerId = null;
             }
         } catch (error) {
             console.error('ログイン状態確認エラー:', error);
             updateHeaderButtons(false);
+            currentOrderData.customerId = null; 
         }
     }
 

@@ -10,11 +10,13 @@ import jakarta.validation.constraints.Size;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor 
+@AllArgsConstructor
 public class CustomerInfo {
 
-    /** 顧客ID (会員の場合に設定、ゲストの場合は0) */
-    private Integer customerId; 
+    // ★追加: customerId フィールド
+    // OrderControllerがセッションから取得したcustomerIdをセットするために必要
+    // 非会員の場合はnullが設定されることを想定
+    private Integer customerId;
 
     @NotBlank(message = "氏名は必須です。")
     @Size(max = 100, message = "氏名は100文字以内で入力してください。")

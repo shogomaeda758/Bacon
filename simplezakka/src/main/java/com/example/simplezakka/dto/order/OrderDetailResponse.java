@@ -34,6 +34,5 @@ public class OrderDetailResponse {
     /** 注文されsた個々の商品アイテムのリスト */
     private List<OrderItemDetailResponse> items;
 
-      /** 顧客情報 */
-    private CustomerInfo customerInfo;
+
 }
