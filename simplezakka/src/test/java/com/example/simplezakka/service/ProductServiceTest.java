@@ -301,4 +301,5 @@ class ProductServiceTest {
         verify(productRepository, times(1)).updateStock(1, 99);
         verifyNoMoreInteractions(productRepository);
     }
+
 }

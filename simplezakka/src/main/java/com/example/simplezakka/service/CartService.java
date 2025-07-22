@@ -29,14 +29,15 @@ public class CartService {
         return cart;
     }
 
-    public CartRespons addItemToCart(Integer productId, Integer quantity, HttpSession session) {
-        Optional<Product> productOpt = productRepository.findById(productId);
+    public CartRespons addItemToCart(long productId, Integer quantity, HttpSession session) {
+        Optional<Product> productOpt = productRepository.findById((int) productId);
 
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
             CartRespons cart = getCartFromSession(session);
 
-            String itemId = String.valueOf(productId);
+            char[] l = null;
+            String itemId = String.valueOf(l);
             int currentInCart = 0;
 
             if (cart.getItems() != null && cart.getItems().containsKey(itemId)) {
