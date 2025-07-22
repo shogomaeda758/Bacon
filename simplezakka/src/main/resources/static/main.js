@@ -1,3 +1,60 @@
+// ① API_BASEはグローバルに定義
+const API_BASE = 'http://localhost:8080/api';
+
+// ② 商品取得関数をグローバルに出す
+async function fetchAndDisplayProducts(categoryId = 'all') {
+    try {
+        const url = (categoryId === 'all') 
+            ? `${API_BASE}/products` 
+            : `${API_BASE}/products/category/${categoryId}`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('商品の取得に失敗しました');
+
+        const products = await response.json();
+        displayFilteredProducts(products);
+
+    } catch (error) {
+        console.error(error.message);
+        const container = document.getElementById('products-container');
+        container.innerHTML = '<p class="text-center text-danger">商品を取得できませんでした。</p>';
+    }
+}
+
+// ③ 商品表示関数もグローバル
+function displayFilteredProducts(products) {
+    const container = document.getElementById('products-container');
+    if (!container) {
+        console.error("Product container not found!");
+        return;
+    }
+
+    if (!products || products.length === 0) {
+        container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';
+        return;
+    }
+
+    container.innerHTML = products.map(product => `
+        <div class="col">
+            <div class="card product-card">
+                <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+                <div class="card-body">
+                    <h5 class="card-title">${product.name}</h5>
+                    <p class="card-text">¥${product.price.toLocaleString()}</p>
+                    <p class="card-text" style="color: gray;">${product.categoryName}</p>
+                    <button class="btn btn-outline-primary view-product" data-id="${product.productId}">詳細を見る</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.view-product').forEach(button => {
+        button.addEventListener('click', function() {
+            fetchProductDetail(this.dataset.id);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const productModal = new bootstrap.Modal(document.getElementById('productModal'));
     const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
@@ -140,58 +197,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeHeader();
 
 
-    async function fetchAndDisplayProducts() {
-        try {
-            const response = await fetch(`${API_BASE}/products`);
-            if (!response.ok) {
-                await handleError(response, '商品の取得に失敗しました');
-            }
-            allProducts = await response.json(); 
-            displayFilteredProducts(); 
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
+// ④ DOMContentLoaded内では関数を呼び出すだけ
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAndDisplayProducts();  // 初回全商品取得
 
-    function displayFilteredProducts() {
-        const container = document.getElementById('products-container');
-        if (!container) {
-            console.error("Product container not found!");
-            return;
-        }
-
-        const filteredProducts = allProducts.filter(product => {
-            const matchesCategory = currentSelectedCategory === 'all' || product.categoryName === currentSelectedCategory;
-            const matchesSearchTerm = product.name.toLowerCase().includes(currentSearchTerm) ||
-                                      (product.description && product.description.toLowerCase().includes(currentSearchTerm));
-            return matchesCategory && matchesSearchTerm;
+    document.querySelectorAll('.category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            console.log("カテゴリボタンがクリックされました:", this.dataset.category);
+            fetchAndDisplayProducts(this.dataset.category);  // カテゴリ別取得
         });
+    });
+});
 
-        if (filteredProducts.length === 0) {
-            container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';
-            return;
-        }
-
-        container.innerHTML = filteredProducts.map(product => `
-            <div class="col">
-                <div class="card product-card" data-category="${product.categoryName}">
-                    <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${product.name}</h5>
-                        <p class="card-text">¥${product.price.toLocaleString()}</p>
-                        <p class="card-text" style="color: gray;">${product.categoryName}</p>
-                        <button class="btn btn-outline-primary view-product" data-id="${product.productId}">詳細を見る</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        container.querySelectorAll('.view-product').forEach(button => {
-            button.addEventListener('click', function() {
-                fetchProductDetail(this.dataset.id);
-            });
-        });
-    }
 
     document.getElementById('searchInput').addEventListener('input', function() {
         currentSearchTerm = this.value.toLowerCase();
@@ -881,13 +898,18 @@ window.addEventListener("load", async function(){
 });
 
 
-    document.getElementById("show-register-btn").addEventListener("click", function() {
+const btn = document.getElementById("show-register-btn");
+if (btn) {
+    btn.addEventListener("click", function() {
         document.getElementById("login-container").style.display = "none";
         document.getElementById("register-container").style.display = "block";
     });
+}
 
     // 会員登録処理
-    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+   const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+    registerForm.addEventListener("submit", async function(e) {
         e.preventDefault();
 
         const name = e.target.name.value;
@@ -931,13 +953,18 @@ window.addEventListener("load", async function(){
             }
         } catch (error) {
             console.error('登録エラー:', error);
-            document.getElementById("registerMessage").textContent = "ネットワークエラーが発生しました。";
-            document.getElementById("registerMessage").style.color = "red";
+            const registerMessageElement = document.getElementById("registerMessage");
+            if (registerMessageElement) {
+                registerMessageElement.textContent = "ネットワークエラーが発生しました。";
+                registerMessageElement.style.color = "red";
+            }
         }
     });
+}
 
-    // ログイン処理
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+    loginForm.addEventListener("submit", async function(e) {
         e.preventDefault();
 
         const email = document.getElementById("email").value;
@@ -986,3 +1013,4 @@ window.addEventListener("load", async function(){
             loginErrorElement.textContent = "ネットワークエラーが発生しました。";
         }
     });
+}
