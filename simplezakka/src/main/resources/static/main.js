@@ -355,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("Fetched logged-in customer data:", customer);
                 return customer;
             } else if (response.status === 401) {
-                console.log("User is not logged in or session expired (401 Unauthorized).");
                 return null;
             } else {
                 
@@ -939,9 +938,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const orderResult = await response.json();
 
             
-            await fetch(`${API_BASE}/cart`, { method: 'DELETE' });
-            updateCartBadge(0);
+            try {
+            // カートをクリアするAPIリクエスト
+            const cartClearResponse = await fetch(`${API_BASE}/cart`, {
+                method: 'DELETE', // DELETE メソッドを使用
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' // セッションクッキーを送信
+            });
 
+            if (!cartClearResponse.ok) {
+                // カートのクリアは注文本体とは独立してエラーハンドリング
+                const errorData = await cartClearResponse.json().catch(() => ({ message: '不明なエラー' }));
+                console.error(`Failed to clear cart: ${cartClearResponse.status} - ${errorData.message}`);
+                // ユーザーには注文が完了したことを伝えつつ、カートクリアの問題を軽く伝える
+                alert('注文は正常に完了しましたが、カートのクリア中に問題が発生しました。');
+            } else {
+                console.log('カートをクリアしました。');
+                updateCartBadge(0); // カートバッジを0に更新
+            }
+        } catch (cartClearError) {
+            // カートクリア処理でのネットワークエラーなど
+            console.error('カートクリア中のネットワークエラー:', cartClearError);
+            alert('注文は正常に完了しましたが、カートのクリア中にネットワークエラーが発生しました。');
+        }
             
             const orderForm = document.getElementById('order-form');
             if (orderForm) {
