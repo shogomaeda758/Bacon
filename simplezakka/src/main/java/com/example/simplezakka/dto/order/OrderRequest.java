@@ -25,11 +25,6 @@ public class OrderRequest {
     @NotBlank(message = "支払い方法は必須です。")
     private String paymentMethod;
 
-    
-
-    
-    
-
     @NotNull(message = "注文商品は必須です。")
     @Size(min = 1, message = "注文商品は1つ以上選択してください。")
     @Valid 
@@ -43,9 +38,6 @@ public class OrderRequest {
     
     private Integer shippingFee; 
 
-    
-
-    
     
     @Data
     @NoArgsConstructor
