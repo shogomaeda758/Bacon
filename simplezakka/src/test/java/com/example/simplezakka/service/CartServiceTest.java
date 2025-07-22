@@ -1,10 +1,5 @@
 package com.example.simplezakka.service;
 
-<<<<<<< HEAD
-public class CartServiceTest {
-    
-=======
-
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.entity.Product;
@@ -191,5 +186,4 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("在庫が足りません");
     }
->>>>>>> origin/NewDevelop
 }

@@ -20,8 +20,8 @@ import com.example.simplezakka.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.stream.Collectors; 
-import java.util.Map; // 追加
-import java.util.HashMap; // 追加
+import java.util.Map; 
+import java.util.HashMap; 
 
 @RestController
 @RequestMapping("/api")
