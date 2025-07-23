@@ -160,4 +160,112 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findById(productId);
         verifyNoMoreInteractions(productRepository);
     }
+    
+    // === findProductsByCategory ===
+    @Test
+    @DisplayName("findProductsByCategory: 指定したカテゴリの商品を返す")
+    void findProductsByCategory_ShouldReturnMatchingProducts() {
+        Integer categoryId = 1;
+        when(productRepository.findByCategoryId(categoryId)).thenReturn(Arrays.asList(product1, product2));
+
+        List<ProductListItem> result = productService.findProductsByCategory(categoryId);
+
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(ProductListItem::getName, ProductListItem::getCategoryName)
+                .containsExactlyInAnyOrder(
+                        tuple(product1.getName(), category.getCategoryName()),
+                        tuple(product2.getName(), category.getCategoryName())
+                );
+
+        verify(productRepository, times(1)).findByCategoryId(categoryId);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    // === searchProducts ===
+
+    @Test
+    @DisplayName("searchProducts: 商品名にキーワードを含む商品を返す")
+    void searchProducts_ShouldReturnMatchingProducts() {
+        String keyword = "商品";
+        when(productRepository.findByNameContaining(keyword)).thenReturn(List.of(product1));
+
+        List<ProductListItem> result = productService.searchProducts(keyword);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).contains(keyword);
+
+        verify(productRepository, times(1)).findByNameContaining(keyword);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    // === findProductsInStock ===
+
+    @Test
+    @DisplayName("findProductsInStock: 指定在庫数以上の商品のみを返す")
+    void findProductsInStock_ShouldReturnFilteredProducts() {
+        int minStock = 5;
+        when(productRepository.findByStockGreaterThan(minStock)).thenReturn(List.of(product1));
+
+        List<ProductListItem> result = productService.findProductsInStock(minStock);
+
+        assertThat(result).hasSize(1);
+        // ProductListItemにstockフィールドはないため、DTOのstockではなく、Productのstockをassertするためにリポジトリの戻り値確認で代用可
+
+        verify(productRepository, times(1)).findByStockGreaterThan(minStock);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    // === decreaseStock ===
+
+    @Test
+    @DisplayName("decreaseStock: 更新件数が1以上ならtrueを返す")
+    void decreaseStock_ShouldReturnTrueWhenUpdateSuccessful() {
+        when(productRepository.decreaseStock(1, 2)).thenReturn(1);
+
+        boolean result = productService.decreaseStock(1, 2);
+
+        assertThat(result).isTrue();
+        verify(productRepository, times(1)).decreaseStock(1, 2);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    @Test
+    @DisplayName("decreaseStock: 更新件数が0ならfalseを返す")
+    void decreaseStock_ShouldReturnFalseWhenUpdateFails() {
+        when(productRepository.decreaseStock(1, 2)).thenReturn(0);
+
+        boolean result = productService.decreaseStock(1, 2);
+
+        assertThat(result).isFalse();
+        verify(productRepository, times(1)).decreaseStock(1, 2);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    // === updateStock ===
+
+    @Test
+    @DisplayName("updateStock: 更新件数が1以上ならtrueを返す")
+    void updateStock_ShouldReturnTrueWhenUpdateSuccessful() {
+        when(productRepository.updateStock(1, 99)).thenReturn(1);
+
+        boolean result = productService.updateStock(1, 99);
+
+        assertThat(result).isTrue();
+        verify(productRepository, times(1)).updateStock(1, 99);
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    @Test
+    @DisplayName("updateStock: 更新件数が0ならfalseを返す")
+    void updateStock_ShouldReturnFalseWhenUpdateFails() {
+        when(productRepository.updateStock(1, 99)).thenReturn(0);
+
+        boolean result = productService.updateStock(1, 99);
+
+        assertThat(result).isFalse();
+        verify(productRepository, times(1)).updateStock(1, 99);
+        verifyNoMoreInteractions(productRepository);
+    }
+
 }

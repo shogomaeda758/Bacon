@@ -138,6 +138,33 @@ public class DataLoader implements CommandLineRunner {
                 "/images/glass-container.png",
                 false,
                 kitchen 
+            ),
+            createProduct(
+                "テスト商品A",
+                "テスト用の商品Aです。",
+                4999,
+                10,
+                "/images/glass-container.png",
+                false,
+                kitchen
+            ),
+            createProduct(
+                "テスト商品B",
+                "テスト用の商品Bです。",
+                3000,
+                10,
+                "/images/glass-container.png",
+                false,
+                kitchen
+            ),
+            createProduct(
+                "テスト商品D",
+                "テスト用の商品です。",
+                5000,
+                10,
+                "/images/glass-container.png",
+                false,
+                kitchen
             )
         );
 

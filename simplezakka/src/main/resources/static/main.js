@@ -1,14 +1,24 @@
+const API_BASE = 'http://localhost:8080/api';
+
 document.addEventListener('DOMContentLoaded', function() {
-    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
-    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-    const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
-    const orderCompleteModal = new bootstrap.Modal(document.getElementById('orderCompleteModal'));
+    
+    
+    const productModalElement = document.getElementById('productModal');
+    const productModal = productModalElement ? new bootstrap.Modal(productModalElement) : null;
 
-    const API_BASE = 'http://localhost:8080/api';
+    const cartModalElement = document.getElementById('cartModal');
+    const cartModal = cartModalElement ? new bootstrap.Modal(cartModalElement) : null;
 
-    // 注文処理全体で共有するデータ構造
+    const orderConfirmationModalElement = document.getElementById('orderConfirmationModal');
+    const orderConfirmationModal = orderConfirmationModalElement ? new bootstrap.Modal(orderConfirmationModalElement) : null;
+
+    const orderCompleteModalElement = document.getElementById('orderCompleteModal');
+    const orderCompleteModal = orderCompleteModalElement ? new bootstrap.Modal(orderCompleteModalElement) : null;
+
+    
     let currentOrderData = {
         customerInfo: {
+            customerId: null,
             name: '',
             email: '',
             address: '',
@@ -19,30 +29,37 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPrice: 0
     };
 
-    // 商品表示・フィルタリング関連の変数
+    
     let currentSelectedCategory = 'all';
     let currentSearchTerm = '';
-    let allProducts = []; 
+    let allProducts = [];
 
-    // 共通のエラーハンドリング関数
+    
     async function handleError(response, defaultMessage) {
         let errorMessage = defaultMessage;
         try {
             const errorData = await response.json();
             errorMessage = errorData.message || defaultMessage;
         } catch (e) {
+            
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
         throw new Error(errorMessage);
     }
 
-    // 汎用的なモーダル表示/非表示関数
+    
     function toggleModal(modalInstance, show) {
-        if (show) {
-            modalInstance.show();
+        
+        if (modalInstance) {
+            if (show) {
+                modalInstance.show();
+            } else {
+                modalInstance.hide();
+            }
         } else {
-            modalInstance.hide();
+            
+            
         }
     }
 
@@ -54,13 +71,15 @@ document.addEventListener('DOMContentLoaded', function() {
     async function updateHeaderButtons(loggedIn, userName = '') {
         const headerRightButtons = document.getElementById("header-right-buttons");
         if (!headerRightButtons) {
-            console.error("Header right buttons container not found!");
+            
+            
+            console.warn("Header right buttons container not found!"); 
             return;
         }
 
         let buttonsHtml = '';
         if (loggedIn) {
-            // ログイン中の場合
+            
             buttonsHtml = `
                 <span class="navbar-text me-2">${userName}さん</span>
                 <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
@@ -72,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="btn btn-outline-dark" id="logoutBtn">ログアウト</button>
             `;
         } else {
-            // ログインしていない場合
+            
             buttonsHtml = `
                 <button id="cart-btn" class="btn btn-outline-dark position-relative me-2">
                     <i class="bi bi-cart"></i> カート
@@ -88,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         headerRightButtons.innerHTML = buttonsHtml;
 
         const cartBtn = document.getElementById("cart-btn");
-        if (cartBtn) {
+        if (cartBtn && cartModal) { 
             cartBtn.addEventListener("click", showCartModal);
         }
 
@@ -104,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
+                            currentOrderData.customerId = null;
                             window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
@@ -117,8 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }
-        // カートバッジの初期更新
-        updateCartDisplay();
+        
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            updateCartDisplay();
+        }
     }
 
     async function initializeHeader() {
@@ -128,44 +151,81 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok && data.loggedIn) {
                 updateHeaderButtons(true, data.customerName);
+                currentOrderData.customerInfo.customerId = data.customerId || null; 
+                console.log("Logged in customer ID set:", currentOrderData.customerInfo.customerId);
             } else {
                 updateHeaderButtons(false);
+                currentOrderData.customerInfo.customerId = null;
             }
         } catch (error) {
             console.error('ログイン状態確認エラー:', error);
             updateHeaderButtons(false);
+            currentOrderData.customerInfo.customerId = null;
         }
     }
 
     initializeHeader();
 
+    
+    const productsContainer = document.getElementById('products-container');
+    const searchInput = document.getElementById('searchInput');
+    const categoryButtons = document.querySelectorAll('.category-btn'); 
+
+    if (productsContainer && searchInput && categoryButtons.length > 0) {
+        fetchAndDisplayProducts();
+
+        searchInput.addEventListener('input', function() {
+            currentSearchTerm = this.value.toLowerCase();
+            displayFilteredProducts(); 
+        });
+
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                currentSelectedCategory = this.dataset.category;
+                categoryButtons.forEach(btn => btn.classList.remove('active')); 
+                this.classList.add('active');
+                displayFilteredProducts();
+            });
+        });
+    }
 
     async function fetchAndDisplayProducts() {
+        
+        
+        const container = document.getElementById('products-container');
+        if (!container) {
+            console.error("Product container not found! (This should not happen if called correctly)");
+            return;
+        }
+
         try {
             const response = await fetch(`${API_BASE}/products`);
             if (!response.ok) {
                 await handleError(response, '商品の取得に失敗しました');
             }
-            allProducts = await response.json(); 
-            displayFilteredProducts(); 
+            allProducts = await response.json();
+            displayFilteredProducts();
         } catch (error) {
             console.error(error.message);
         }
     }
 
     function displayFilteredProducts() {
+        
+        
         const container = document.getElementById('products-container');
         if (!container) {
-            console.error("Product container not found!");
+            console.error("Product container not found! (This should not happen if called correctly)");
             return;
         }
 
         const filteredProducts = allProducts.filter(product => {
-            const matchesCategory = currentSelectedCategory === 'all' || product.categoryName === currentSelectedCategory;
+            const matchesCategory = currentSelectedCategory === 'all' || product.categoryId.toString() === currentSelectedCategory;
             const matchesSearchTerm = product.name.toLowerCase().includes(currentSearchTerm) ||
-                                      (product.description && product.description.toLowerCase().includes(currentSearchTerm));
+                                    (product.description && product.description.toLowerCase().includes(currentSearchTerm));
             return matchesCategory && matchesSearchTerm;
         });
+
 
         if (filteredProducts.length === 0) {
             container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';
@@ -193,24 +253,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.getElementById('searchInput').addEventListener('input', function() {
-        currentSearchTerm = this.value.toLowerCase();
-        displayFilteredProducts(); // 検索条件が変わったら商品を再表示
-    });
-
- 
-    document.querySelectorAll('.category-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            currentSelectedCategory = this.dataset.category;
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            displayFilteredProducts(); 
-        });
-    });
-
-
-    fetchAndDisplayProducts();
-
 
     async function fetchProductDetail(productId) {
         try {
@@ -226,9 +268,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayProductDetail(product) {
-        document.getElementById('productModalTitle').textContent = product.name;
-        const modalBody = document.getElementById('productModalBody');
-        modalBody.innerHTML = `
+        
+        const productModalTitle = document.getElementById('productModalTitle');
+        const productModalBody = document.getElementById('productModalBody');
+        if (!productModalTitle || !productModalBody) {
+            console.warn("Product detail modal elements not found.");
+            return; 
+        }
+
+        productModalTitle.textContent = product.name;
+        productModalBody.innerHTML = `
             <div class="row">
                 <div class="col-md-6">
                     <img src="${product.imageUrl || 'https://via.placeholder.com/400x300'}" class="img-fluid" alt="${product.name}">
@@ -246,24 +295,27 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        modalBody.querySelector('.add-to-cart').addEventListener('click', function() {
-            const quantityInput = document.getElementById('quantity');
-            const quantity = parseInt(quantityInput.value);
-            const stock = parseInt(document.getElementById('product-stock').textContent);
+        const addToCartButton = productModalBody.querySelector('.add-to-cart');
+        if (addToCartButton) { 
+            addToCartButton.addEventListener('click', function() {
+                const quantityInput = document.getElementById('quantity');
+                const quantity = parseInt(quantityInput.value);
+                const stock = parseInt(document.getElementById('product-stock').textContent);
 
-            // 在庫数と入力数量のバリデーション
-            if (quantity <= 0 || isNaN(quantity)) {
-                alert('数量は1以上で入力してください。');
-                quantityInput.value = 1;
-                return;
-            }
-            if (quantity > stock) {
-                alert(`数量は在庫数(${stock})以下で入力してください。`);
-                quantityInput.value = stock;
-                return;
-            }
-            addToCart(product.productId, quantity);
-        });
+                
+                if (quantity <= 0 || isNaN(quantity)) {
+                    alert('数量は1以上で入力してください。');
+                    quantityInput.value = 1;
+                    return;
+                }
+                if (quantity > stock) {
+                    alert(`数量は在庫数(${stock})以下で入力してください。`);
+                    quantityInput.value = stock;
+                    return;
+                }
+                addToCart(product.productId, quantity);
+            });
+        }
 
         toggleModal(productModal, true);
     }
@@ -304,10 +356,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("Fetched logged-in customer data:", customer);
                 return customer;
             } else if (response.status === 401) {
-                console.log("User is not logged in or session expired (401 Unauthorized).");
                 return null;
             } else {
-                // その他のエラー (例: 500 Internal Server Error, 404 Not Found)
+                
                 const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
                 console.error(`Failed to fetch customer info: ${response.status} - ${errorData.message}`);
                 return null;
@@ -340,15 +391,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    
+    
+    
     async function showCartModal() {
-        await updateCartModalContent();
-        toggleModal(cartModal, true);
+        if (cartModal) { 
+            await updateCartModalContent();
+            toggleModal(cartModal, true);
+        } else {
+            console.warn("Attempted to show cart modal, but cartModal instance is not available.");
+        }
     }
 
     async function updateCartModalContent(showCheckoutForm = false) {
         const modalTitle = document.getElementById('cartModalTitle');
         const modalBody = document.getElementById('cartModalBody');
         const modalFooter = document.getElementById('cartModalFooter');
+
+        
+        if (!modalTitle || !modalBody || !modalFooter) {
+            console.warn("Cart modal content elements not found.");
+            return;
+        }
 
         if (!showCheckoutForm) {
             modalTitle.textContent = 'ショッピングカート';
@@ -384,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <td>¥${item.price.toLocaleString()}</td>
                                     <td>
                                         <input type="number" class="form-control form-control-sm update-quantity"
-                                                    data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
+                                                 data-id="${item.id}" value="${item.quantity}" min="1" max="${item.stock}" style="width: 70px">
                                     </td>
                                     <td>¥${item.subtotal.toLocaleString()}</td>
                                     <td>
@@ -418,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     modalBody.innerHTML = html;
 
-                    // 数量更新イベントの設定
+                    
                     document.querySelectorAll('.update-quantity').forEach(input => {
                         input.addEventListener('change', function() {
                             const newQuantity = parseInt(this.value);
@@ -450,18 +514,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn btn-secondary" id="login-to-purchase-btn">ログインして購入</button>
                         <button type="button" class="btn btn-primary" id="proceed-to-checkout-form">注文手続きへ</button>
                     `;
-                    document.getElementById('proceed-to-checkout-form').addEventListener('click', () => updateCartModalContent(true));
+                    const proceedToCheckoutFormBtn = document.getElementById('proceed-to-checkout-form');
+                    if (proceedToCheckoutFormBtn) { 
+                        proceedToCheckoutFormBtn.addEventListener('click', () => updateCartModalContent(true));
+                    }
+
                     const loginToPurchaseBtn = document.getElementById('login-to-purchase-btn');
-                    if (loginToPurchaseBtn) {
+                    if (loginToPurchaseBtn) { 
                         loginToPurchaseBtn.addEventListener('click', async () => {
                             try {
                                 const statusResponse = await fetch('/api/customers/status');
                                 const statusData = await statusResponse.json();
                                 if (statusResponse.ok && statusData.loggedIn) {
                                     alert('すでにログインしています。注文手続きへ進みます。');
-                                    updateCartModalContent(true); // ログイン済みなら直接注文フォームへ
+                                    updateCartModalContent(true); 
                                 } else {
-                                    window.location.href = 'C0601.html'; // 未ログインならログインページへ
+                                    window.location.href = 'C0601.html'; 
                                 }
                             } catch (error) {
                                 console.error('ログイン状態確認エラー:', error);
@@ -481,6 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>`;
             }
         } else {
+            
             modalTitle.textContent = 'お客様情報入力';
             modalBody.innerHTML = `
                 <form id="order-form" class="needs-validation" novalidate>
@@ -529,77 +598,102 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="button" class="btn btn-secondary" id="back-to-cart">カートに戻る</button>
                 <button type="button" class="btn btn-primary" id="submit-order-form-and-show-confirmation">注文内容を確認する</button>
             `;
-            document.getElementById('back-to-cart').addEventListener('click', () => updateCartModalContent(false));
-            document.getElementById('submit-order-form-and-show-confirmation').addEventListener('click', submitOrderFormAndShowConfirmation);
+            
+            const backToCartBtn = document.getElementById('back-to-cart');
+            if (backToCartBtn) {
+                backToCartBtn.addEventListener('click', () => updateCartModalContent(false));
+            }
+            const submitOrderFormAndShowConfirmationBtn = document.getElementById('submit-order-form-and-show-confirmation');
+            if (submitOrderFormAndShowConfirmationBtn) {
+                submitOrderFormAndShowConfirmationBtn.addEventListener('click', submitOrderFormAndShowConfirmation);
+            }
+            
             const customer = await fetchLoggedInCustomerInfo();
             if (customer) {
-                document.getElementById('name').value = customer.name || '';
-                document.getElementById('email').value = customer.email || '';
-                document.getElementById('address').value = customer.address || '';
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const addressInput = document.getElementById('address');
+                const phoneInput = document.getElementById('phone');
 
-                document.getElementById('phone').value = customer.phoneNumber || customer.phone || '';
+                if (nameInput) nameInput.value = customer.name || '';
+                if (emailInput) emailInput.value = customer.email || '';
+                if (addressInput) addressInput.value = customer.address || '';
+                if (phoneInput) phoneInput.value = customer.phoneNumber || '';
             } else {
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const addressInput = document.getElementById('address');
+                const phoneInput = document.getElementById('phone');
 
-                document.getElementById('name').value = currentOrderData.customerInfo.name || '';
-                document.getElementById('email').value = currentOrderData.customerInfo.email || '';
-                document.getElementById('address').value = currentOrderData.customerInfo.address || '';
-                document.getElementById('phone').value = currentOrderData.customerInfo.phoneNumber || '';
+                if (nameInput) nameInput.value = currentOrderData.customerInfo.name || '';
+                if (emailInput) emailInput.value = currentOrderData.customerInfo.email || '';
+                if (addressInput) addressInput.value = currentOrderData.customerInfo.address || '';
+                if (phoneInput) phoneInput.value = currentOrderData.customerInfo.phoneNumber || '';
             }
             if (currentOrderData.paymentMethod) {
                 const radio = document.querySelector(`input[name="paymentMethod"][value="${currentOrderData.paymentMethod}"]`);
                 if (radio) radio.checked = true;
             }
             const form = document.getElementById('order-form');
-            form.querySelectorAll('input, select').forEach(input => {
-                const validateInput = () => {
-                    if (input.checkValidity()) {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
-                    } else {
-                        input.classList.remove('is-valid');
-                        input.classList.add('is-invalid');
-                    }
-                };
-                input.addEventListener('input', validateInput);
-                input.addEventListener('blur', validateInput);
-            });
+            if (form) { 
+                form.querySelectorAll('input, select').forEach(input => {
+                    const validateInput = () => {
+                        if (input.checkValidity()) {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        } else {
+                            input.classList.remove('is-valid');
+                            input.classList.add('is-invalid');
+                        }
+                    };
+                    input.addEventListener('input', validateInput);
+                    input.addEventListener('blur', validateInput);
+                });
+            }
             const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
             const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
-            paymentRadios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    if (document.querySelector('input[name="paymentMethod"]:checked')) {
-                        paymentMethodFeedback.style.display = 'none';
-                    } else {
-                        paymentMethodFeedback.style.display = 'block';
-                    }
+            if (paymentRadios.length > 0 && paymentMethodFeedback) { 
+                paymentRadios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        if (document.querySelector('input[name="paymentMethod"]:checked')) {
+                            paymentMethodFeedback.style.display = 'none';
+                        } else {
+                            paymentMethodFeedback.style.display = 'block';
+                        }
+                    });
                 });
-            });
-            if (document.querySelector('input[name="paymentMethod"]:checked')) {
-                paymentMethodFeedback.style.display = 'none';
-            } else {
-                paymentMethodFeedback.style.display = 'block';
+                
+                if (document.querySelector('input[name="paymentMethod"]:checked')) {
+                    paymentMethodFeedback.style.display = 'none';
+                } else {
+                    paymentMethodFeedback.style.display = 'block';
+                }
             }
         }
     }
-
     async function updateItemQuantity(itemId, quantity) {
         try {
             const response = await fetch(`${API_BASE}/cart/items/${itemId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ quantity: parseInt(quantity) })
+                body: JSON.stringify({ quantity: parseInt(quantity, 10) }) 
             });
 
             if (!response.ok) {
-                await handleError(response, '数量の更新に失敗しました');
+                await handleError(response, '数量の更新に失敗しました。');
+                return; 
             }
 
             const cart = await response.json();
             updateCartModalContent();
             updateCartBadge(cart.totalQuantity);
+            
+            
         } catch (error) {
-            console.error(error.message);
-            updateCartModalContent();
+            console.error('商品数量更新エラー:', error);
+            
+            
+            updateCartModalContent(); 
         }
     }
 
@@ -610,20 +704,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
-                await handleError(response, '商品の削除に失敗しました');
+                await handleError(response, '商品の削除に失敗しました。');
+                return; 
             }
 
             const cart = await response.json();
             updateCartModalContent();
             updateCartBadge(cart.totalQuantity);
+            
+            
         } catch (error) {
-            console.error(error.message);
+            console.error('商品削除エラー:', error);
+            
         }
     }
 
     async function submitOrderFormAndShowConfirmation() {
         const form = document.getElementById('order-form');
+        if (!form) {
+            console.error('注文フォームが見つかりません。');
+            alert('システムエラー: 注文フォームが見つかりません。');
+            return;
+        }
 
+        
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
             form.querySelector(':invalid')?.focus();
@@ -632,47 +736,76 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
         const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
-        if (!paymentMethodElement) {
-            paymentMethodFeedback.style.display = 'block';
-            alert('決済方法を選択してください。');
-            return;
+
+        if (paymentMethodFeedback) { 
+            if (!paymentMethodElement) {
+                paymentMethodFeedback.style.display = 'block';
+                alert('決済方法を選択してください。');
+                return;
+            } else {
+                paymentMethodFeedback.style.display = 'none';
+            }
         } else {
-            paymentMethodFeedback.style.display = 'none';
+            
+            console.warn('paymentMethodFeedback 要素が見つかりません。');
         }
 
+
+        
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const addressInput = document.getElementById('address');
+        const phoneInput = document.getElementById('phone');
+        const existingCustomerId = currentOrderData.customerInfo.customerId;
         currentOrderData.customerInfo = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            address: document.getElementById('address').value,
-            phoneNumber: document.getElementById('phone').value
+            customerId: existingCustomerId ,
+            name: nameInput ? nameInput.value : '',
+            email: emailInput ? emailInput.value : '',
+            address: addressInput ? addressInput.value : '',
+            phoneNumber: phoneInput ? phoneInput.value : ''
         };
 
-        currentOrderData.paymentMethod = paymentMethodElement.value;
+        currentOrderData.paymentMethod = paymentMethodElement ? paymentMethodElement.value : '';
 
         try {
             const cartResponse = await fetch(`${API_BASE}/cart`);
             if (!cartResponse.ok) {
-                const errorData = await cartResponse.json();
-                throw new Error(errorData.message || 'カート情報の取得に失敗しました');
+                await handleError(cartResponse, 'カート情報の取得に失敗しました。');
+                return; 
             }
             const cart = await cartResponse.json();
+
+            
+            if (!cart.items || Object.values(cart.items).length === 0) {
+                alert('カートに商品がありません。商品を追加してから注文してください。');
+                return;
+            }
 
             currentOrderData.items = Object.values(cart.items);
             currentOrderData.totalPrice = cart.totalPrice;
             currentOrderData.shippingFee = cart.shippingFee;
+            currentOrderData.grandTotal = cart.totalPrice + cart.shippingFee; 
 
-            toggleModal(cartModal, false);
+            if (cartModal) toggleModal(cartModal, false); 
             showOrderConfirmation();
         } catch (error) {
-            console.error('Error preparing order confirmation:', error);
-            alert(`注文情報の準備中にエラーが発生しました: ${error.message}`);
+            console.error('注文確認準備エラー:', error);
+            alert(`注文情報の準備中にエラーが発生しました。もう一度お試しください: ${error.message}`);
         }
     }
 
     function showOrderConfirmation() {
-        document.getElementById('orderConfirmationModalTitle').textContent = '注文内容の確認';
+        const orderConfirmationModalTitle = document.getElementById('orderConfirmationModalTitle');
         const modalBody = document.getElementById('orderConfirmationModalBody');
         const modalFooter = document.getElementById('orderConfirmationModalFooter');
+
+        if (!orderConfirmationModalTitle || !modalBody || !modalFooter) {
+            console.error('注文確認モーダルの要素が見つかりません。');
+            alert('システムエラー: 注文確認画面を表示できません。');
+            return;
+        }
+
+        orderConfirmationModalTitle.textContent = '注文内容の確認';
 
         let itemsHtml = `
             <div class="confirmation-box">
@@ -688,7 +821,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </thead>
                     <tbody>
         `;
-        if (currentOrderData.items.length > 0) {
+        if (currentOrderData.items && currentOrderData.items.length > 0) {
             currentOrderData.items.forEach(item => {
                 itemsHtml += `
                     <tr>
@@ -703,52 +836,59 @@ document.addEventListener('DOMContentLoaded', function() {
             itemsHtml += `<tr><td colspan="4" class="text-center">カートに商品がありません。</td></tr>`;
         }
 
-      
-         itemsHtml += `
+        itemsHtml += `
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="3" class="text-end">商品合計:</th>
-                            <th>¥${currentOrderData.totalPrice.toLocaleString()}</th>
+                            <th>¥${(currentOrderData.totalPrice || 0).toLocaleString()}</th>
                         </tr>
                         <tr>
                             <th colspan="3" class="text-end">送料:</th>
-                            <th>¥${currentOrderData.shippingFee.toLocaleString()}</th> </tr>
+                            <th>¥${(currentOrderData.shippingFee || 0).toLocaleString()}</th>
+                        </tr>
                         <tr>
                             <th colspan="3" class="text-end fs-5">最終合計:</th>
-                            <th class="fs-5">¥${(currentOrderData.totalPrice + currentOrderData.shippingFee).toLocaleString()}</th>
+                            <th class="fs-5">¥${(currentOrderData.totalPrice + currentOrderData.shippingFee || 0).toLocaleString()}</th>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         `;
 
-        const customerInfo = currentOrderData.customerInfo;
+        const customerInfo = currentOrderData.customerInfo || {};
         let customerHtml = `
             <div class="confirmation-box">
                 <div class="section-title">お届け先</div>
                 <dl class="row">
                     <dt class="col-sm-4">お名前</dt>
-                    <dd class="col-sm-8">${customerInfo.name || ''}</dd>
+                    <dd class="col-sm-8">${customerInfo.name || '未入力'}</dd>
 
                     <dt class="col-sm-4">メールアドレス</dt>
-                    <dd class="col-sm-8">${customerInfo.email || ''}</dd>
+                    <dd class="col-sm-8">${customerInfo.email || '未入力'}</dd>
 
                     <dt class="col-sm-4">住所</dt>
-                    <dd class="col-sm-8">${customerInfo.address || ''}</dd>
+                    <dd class="col-sm-8">${customerInfo.address || '未入力'}</dd>
 
                     <dt class="col-sm-4">電話番号</dt>
-                    <dd class="col-sm-8">${customerInfo.phoneNumber || ''}</dd>
+                    <dd class="col-sm-8">${customerInfo.phoneNumber || '未入力'}</dd>
                 </dl>
             </div>
         `;
 
+        const displayPaymentMethod = (() => {
+            switch (currentOrderData.paymentMethod) {
+                case 'bank_transfer': return '銀行振込';
+                case 'cash_on_delivery': return '代金引換';
+                case 'credit_card': return 'クレジットカード'; 
+                default: return '未選択';
+            }
+        })();
+
         let paymentHtml = `
             <div class="confirmation-box">
                 <div class="section-title">お支払い方法</div>
-                <p>${currentOrderData.paymentMethod === 'bank_transfer' ? '銀行振込' :
-                      currentOrderData.paymentMethod === 'cash_on_delivery' ? '代金引換' :
-                      currentOrderData.paymentMethod || ''}</p>
+                <p>${displayPaymentMethod}</p>
             </div>
         `;
 
@@ -759,19 +899,31 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="btn btn-primary" id="final-confirm-order-btn">注文を確定する</button>
         `;
 
-        document.getElementById('back-to-customer-form').addEventListener('click', function() {
-            toggleModal(orderConfirmationModal, false);
-            toggleModal(cartModal, true);
-            updateCartModalContent(true);
-        });
+        
+        const backButton = document.getElementById('back-to-customer-form');
+        const confirmButton = document.getElementById('final-confirm-order-btn');
 
-        document.getElementById('final-confirm-order-btn').addEventListener('click', confirmOrder);
+        if (backButton) {
+            backButton.onclick = null; 
+            backButton.addEventListener('click', function() {
+                if (orderConfirmationModal) toggleModal(orderConfirmationModal, false);
+                if (cartModal) toggleModal(cartModal, true);
+                updateCartModalContent(true);
+            });
+        }
 
-        toggleModal(orderConfirmationModal, true);
+        if (confirmButton) {
+            confirmButton.onclick = null; 
+            confirmButton.addEventListener('click', confirmOrder);
+        }
+
+        if (orderConfirmationModal) toggleModal(orderConfirmationModal, true);
     }
 
     async function confirmOrder() {
         try {
+            console.log("Sending currentOrderData to backend:", JSON.stringify(currentOrderData, null, 2));
+            
             const response = await fetch(`${API_BASE}/order/confirm`, {
                 method: 'POST',
                 headers: {
@@ -781,14 +933,39 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
-                await handleError(response, '注文の確定に失敗しました');
+                await handleError(response, '注文の確定に失敗しました。');
+                return;
             }
 
             const orderResult = await response.json();
 
-            await fetch(`${API_BASE}/cart`, { method: 'DELETE' });
-            updateCartBadge(0);
+            
+            try {
+            // カートをクリアするAPIリクエスト
+            const cartClearResponse = await fetch(`${API_BASE}/cart`, {
+                method: 'DELETE', // DELETE メソッドを使用
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' // セッションクッキーを送信
+            });
 
+            if (!cartClearResponse.ok) {
+                // カートのクリアは注文本体とは独立してエラーハンドリング
+                const errorData = await cartClearResponse.json().catch(() => ({ message: '不明なエラー' }));
+                console.error(`Failed to clear cart: ${cartClearResponse.status} - ${errorData.message}`);
+                // ユーザーには注文が完了したことを伝えつつ、カートクリアの問題を軽く伝える
+                alert('注文は正常に完了しましたが、カートのクリア中に問題が発生しました。');
+            } else {
+                console.log('カートをクリアしました。');
+                updateCartBadge(0); // カートバッジを0に更新
+            }
+        } catch (cartClearError) {
+            // カートクリア処理でのネットワークエラーなど
+            console.error('カートクリア中のネットワークエラー:', cartClearError);
+            alert('注文は正常に完了しましたが、カートのクリア中にネットワークエラーが発生しました。');
+        }
+            
             const orderForm = document.getElementById('order-form');
             if (orderForm) {
                 orderForm.reset();
@@ -798,60 +975,259 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 const paymentMethodFeedback = document.getElementById('paymentMethodFeedback');
                 if (paymentMethodFeedback) {
-                    paymentMethodFeedback.style.display = 'block';
+                    paymentMethodFeedback.style.display = 'block'; 
                 }
             }
+
+            
             currentOrderData = {
                 customerInfo: {
+                    customerId: currentOrderData.customerId || null, 
                     name: '', email: '', address: '', phoneNumber: ''
                 },
                 paymentMethod: '',
                 items: [],
-                totalPrice: 0
+                totalPrice: 0,
+                shippingFee: 0,
+                grandTotal: 0
             };
 
-            toggleModal(orderConfirmationModal, false);
+            if (orderConfirmationModal) toggleModal(orderConfirmationModal, false);
             displayOrderComplete(orderResult);
-            toggleModal(orderCompleteModal, true);
+            if (orderCompleteModal) toggleModal(orderCompleteModal, true);
+            
+            
 
         } catch (error) {
-            console.error('Error confirming order:', error);
+            console.error('注文確定エラー:', error);
             alert(`注文確定中にエラーが発生しました。もう一度お試しください: ${error.message}`);
         }
     }
 
     function displayOrderComplete(order) {
-        document.getElementById('orderCompleteModalTitle').textContent = 'ご注文完了';
+        const orderCompleteModalTitle = document.getElementById('orderCompleteModalTitle');
         const modalBody = document.getElementById('orderCompleteModalBody');
-
-        const displayPaymentMethod = (order.paymentMethod === 'bank_transfer') ? '銀行振込' :
-                                     (order.paymentMethod === 'cash_on_delivery') ? '代金引換' :
-                                     order.paymentMethod || '';
-        modalBody.innerHTML = `
-            <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId}</strong> です。</p>
-            <p>ご注文日時: ${new Date(order.orderDate).toLocaleString()}</p>
-            <p>決済方法: ${displayPaymentMethod}</p>
-            <p>商品合計: ¥${order.totalPrice.toLocaleString()}</p>
-            <p>送料: ¥${order.shippingFee.toLocaleString()}</p>
-            <p class="fs-5">最終お支払い金額: ¥${order.grandTotal.toLocaleString()}</p>
-        `;
         const modalFooter = document.getElementById('orderCompleteModalFooter');
+
+        if (!orderCompleteModalTitle || !modalBody || !modalFooter) {
+            console.error('注文完了モーダルの要素が見つかりません。');
+            alert('システムエラー: 注文完了画面を表示できません。');
+            return;
+        }
+
+        orderCompleteModalTitle.textContent = 'ご注文完了';
+
+        const displayPaymentMethod = (() => {
+            switch (order.paymentMethod) {
+                case 'bank_transfer': return '銀行振込';
+                case 'cash_on_delivery': return '代金引換';
+                case 'credit_card': return 'クレジットカード';
+                default: return order.paymentMethod || '';
+            }
+        })();
+
+        modalBody.innerHTML = `
+            <p>ご注文ありがとうございます。注文番号は <strong>${order.orderId || 'N/A'}</strong> です。</p>
+            <p>ご注文日時: ${order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A'}</p>
+            <p>決済方法: ${displayPaymentMethod}</p>
+            <p>商品合計: ¥${(order.totalPrice || 0).toLocaleString()}</p>
+            <p>送料: ¥${(order.shippingFee || 0).toLocaleString()}</p>
+            <p class="fs-5">最終お支払い金額: ¥${(order.grandTotal || 0).toLocaleString()}</p>
+        `;
         modalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>`;
     }
 
+    
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('showCart') === 'true' && urlParams.get('showCheckoutForm') === 'true') {
-        cartModal.show();
-        updateCartModalContent(true);
-        history.replaceState({}, document.title, window.location.pathname);
+        
+        
+        if (cartModal) { 
+            cartModal.show();
+            updateCartModalContent(true);
+            history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            console.warn('cartModal インスタンスが初期化されていません。');
+        }
+    }
+    if (window.location.pathname.includes('C0601.html')) {
+        initializeAuthPageFeatures();
+    }
+});
+
+function initializeAuthPageFeatures() {
+    const showRegisterBtn = document.getElementById("show-register-btn");
+    const loginContainer = document.getElementById("login-container");
+    const registerContainer = document.getElementById("register-container");
+    if (showRegisterBtn && loginContainer && registerContainer) {
+        showRegisterBtn.addEventListener("click", function() {
+            loginContainer.style.display = "none";
+            registerContainer.style.display = "block";
+        });
+    } else {
+        console.warn('認証関連のDOM要素が一部見つかりません。');
     }
 
-});
- // パスワードの表示・非表示を切り替える関数
-    function togglePasswordVisibility(id) {
-        const passwordField = document.getElementById(id);
-        const toggleButton = passwordField.nextElementSibling; // 次の要素（ボタン）を取得
+    const registerForm = document.getElementById("registerForm");
+    if (registerForm) {
+        registerForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
 
+            const name = e.target.name?.value || ''; 
+            const email = e.target.email?.value || '';
+            const address = e.target.address?.value || '';
+            const phoneNumber = e.target.phoneNumber?.value || '';
+            const password = e.target.password?.value || '';
+
+            const requestBody = {
+                customerInfo: { name, email, address, phoneNumber },
+                password: password
+            };
+
+            const registerMessageElement = document.getElementById("registerMessage");
+
+            try {
+                const response = await fetch(`${API_BASE}/customers/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem("userName", data.name + "さん");
+                    if (registerMessageElement) {
+                        registerMessageElement.textContent = "会員登録が完了しました！";
+                        registerMessageElement.style.color = "#388e3c"; 
+                    }
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 2000);
+                } else {
+                    if (registerMessageElement) {
+                        registerMessageElement.textContent = "登録失敗: " + (data.message || "不明なエラーが発生しました。");
+                        registerMessageElement.style.color = "red";
+                    }
+                }
+            } catch (error) {
+                console.error('会員登録エラー:', error);
+                if (registerMessageElement) {
+                    registerMessageElement.textContent = "ネットワークエラーが発生しました。インターネット接続を確認してください。";
+                    registerMessageElement.style.color = "red";
+                }
+            }
+        });
+    }
+
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) {
+        loginForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            
+            const emailInput = loginForm.querySelector("#email");
+            const passwordInput = loginForm.querySelector("#password");
+
+            const email = emailInput ? emailInput.value : '';
+            const password = passwordInput ? passwordInput.value : '';
+
+            const requestBody = { email, password };
+            let loginErrorElement = loginForm.querySelector('.message'); 
+
+            try {
+                const response = await fetch(`${API_BASE}/customers/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem("userName", data.name + "さん");
+                    window.location.href = "index.html";
+                } else {
+                    if (!loginErrorElement) { 
+                        loginErrorElement = document.createElement('div');
+                        loginErrorElement.className = 'message';
+                        loginErrorElement.style.color = 'red';
+                        loginForm.prepend(loginErrorElement); 
+                    }
+                    loginErrorElement.textContent = data.message || "ログイン失敗: メールアドレスまたはパスワードが正しくありません。";
+                }
+            } catch (error) {
+                console.error('ログインエラー:', error);
+                if (!loginErrorElement) { 
+                    loginErrorElement = document.createElement('div');
+                    loginErrorElement.className = 'message';
+                    loginErrorElement.style.color = 'red';
+                    loginForm.prepend(loginErrorElement); 
+                }
+                loginErrorElement.textContent = "ネットワークエラーが発生しました。インターネット接続を確認してください。";
+            }
+        });
+    }
+
+    const registerPasswordField = document.getElementById("registerPassword");
+    if (registerPasswordField) {
+        const toggleButton = registerPasswordField.nextElementSibling;
+        if (toggleButton && toggleButton.classList.contains('password-toggle-btn')) {
+            toggleButton.addEventListener('click', () => togglePasswordVisibility('registerPassword'));
+        }
+    }
+
+    const loginPasswordField = document.getElementById("password"); 
+    if (loginPasswordField) {
+        const toggleButton = loginPasswordField.nextElementSibling;
+        if (toggleButton && toggleButton.classList.contains('password-toggle-btn')) {
+            toggleButton.addEventListener('click', () => togglePasswordVisibility('password'));
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", async function(){
+    try {
+        const response = await fetch('/api/customers/status');
+        const data = await response.json();
+
+        if (response.ok && data.loggedIn) {
+            
+            if (!window.location.pathname.includes("C0601.html") && !window.location.pathname.includes("index.html")) {
+                sessionStorage.setItem("userName", data.customerName + "さん");
+                window.location.href = "index.html";
+            } else if (window.location.pathname.includes("C0601.html")) {
+                
+                alert("すでにログインしています。トップページへ移動します。");
+                window.location.href = "index.html";
+            }
+        }
+    } catch (error) {
+        console.error('ログイン状態確認エラー:', error);
+        
+    }
+});
+
+
+
+
+function togglePasswordVisibility(id) {
+    const passwordField = document.getElementById(id);
+    if (!passwordField) {
+        console.warn(`パスワードフィールドID "${id}" が見つかりません。`);
+        return;
+    }
+    const toggleButton = passwordField.nextElementSibling;
+
+    if (toggleButton && toggleButton.classList.contains('password-toggle-btn')) {
         if (passwordField.type === 'password') {
             passwordField.type = 'text';
             toggleButton.textContent = '隠す';
@@ -859,130 +1235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordField.type = 'password';
             toggleButton.textContent = '表示';
         }
+    } else {
+        console.warn(`パスワードフィールド "${id}" の切り替えボタンが見つからないか、クラスが正しくありません。`);
     }
-
-// 最初の読み込み時にログイン済みならログイン後画面に遷移
-window.addEventListener("load", async function(){
-    try {
-        // サーバーサイドのログイン状態確認APIを呼び出す
-        const response = await fetch('/api/customers/status');
-        const data = await response.json();
-
-        if (response.ok && data.loggedIn) {
-            // index.html以外の画面でのみリダイレクトする
-            if (!window.location.pathname.includes("index.html")) {
-                sessionStorage.setItem("userName", data.customerName + "さん");
-                window.location.href = "index.html";
-            }
-        }
-    } catch (error) {
-        console.error('ログイン状態確認エラー:', error);
-    }
-});
-
-
-    document.getElementById("show-register-btn").addEventListener("click", function() {
-        document.getElementById("login-container").style.display = "none";
-        document.getElementById("register-container").style.display = "block";
-    });
-
-    // 会員登録処理
-    document.getElementById("registerForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
-
-        const name = e.target.name.value;
-        const email = e.target.email.value;
-        const address = e.target.address.value;
-        const phoneNumber = e.target.phoneNumber.value;
-        const password = e.target.password.value;
-
-        const requestBody = {
-            customerInfo: {
-                name: name,
-                email: email,
-                address: address,
-                phoneNumber: phoneNumber
-            },
-            password: password
-        };
-
-        try {
-            const response = await fetch('/api/customers/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            const data = await response.json();
-            const registerMessageElement = document.getElementById("registerMessage");
-
-            if (response.ok) {
-                sessionStorage.setItem("userName", data.name + "さん");
-                registerMessageElement.textContent = "会員登録が完了しました！";
-                registerMessageElement.style.color = "#388e3c";
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 2000);
-            } else {
-                registerMessageElement.textContent = "登録失敗: " + (data.message || "不明なエラー");
-                registerMessageElement.style.color = "red";
-            }
-        } catch (error) {
-            console.error('登録エラー:', error);
-            document.getElementById("registerMessage").textContent = "ネットワークエラーが発生しました。";
-            document.getElementById("registerMessage").style.color = "red";
-        }
-    });
-
-    // ログイン処理
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        const requestBody = {
-            email: email,
-            password: password
-        };
-
-        try {
-            const response = await fetch('/api/customers/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            const data = await response.json();
-            let loginErrorElement = document.querySelector('#login-container .message');
-
-            if (response.ok) {
-                sessionStorage.setItem("userName", data.name + "さん");
-                window.location.href = "index.html";
-            } else {
-                if (!loginErrorElement) {
-                    const newErrorElement = document.createElement('div');
-                    newErrorElement.className = 'message';
-                    newErrorElement.style.color = 'red';
-                    document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
-                    loginErrorElement = newErrorElement;
-                }
-                loginErrorElement.textContent = data.message || "ログイン失敗: メールアドレスまたはパスワードが正しくありません。";
-            }
-        } catch (error) {
-            console.error('ログインエラー:', error);
-            let loginErrorElement = document.querySelector('#login-container .message');
-            if (!loginErrorElement) {
-                const newErrorElement = document.createElement('div');
-                newErrorElement.className = 'message';
-                newErrorElement.style.color = 'red';
-                document.getElementById('login-container').insertBefore(newErrorElement, document.querySelector('#login-container h1:nth-of-type(2)'));
-                loginErrorElement = newErrorElement;
-            }
-            loginErrorElement.textContent = "ネットワークエラーが発生しました。";
-        }
-    });
+}

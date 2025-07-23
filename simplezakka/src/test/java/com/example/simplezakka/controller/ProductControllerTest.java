@@ -37,9 +37,10 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        // categoryNameも含めてモックデータ作成
-        productListItem1 = new ProductListItem(1, "リスト商品1", 100, "/list1.png", "カテゴリA");
-        productListItem2 = new ProductListItem(2, "リスト商品2", 200, "/list2.png", "カテゴリB");
+
+        productListItem1 = new ProductListItem(1, "リスト商品1", 100, "/list1.png", "カテゴリA", 10);
+        productListItem2 = new ProductListItem(2, "リスト商品2", 200, "/list2.png", "カテゴリB", 20);
+
 
         productDetail1 = new ProductDetail(1, "詳細商品1", 100, "詳細説明1", 10, "/detail1.png");
         productDetailWithNulls = new ProductDetail(3, "詳細商品3", 300, null, 5, null);
