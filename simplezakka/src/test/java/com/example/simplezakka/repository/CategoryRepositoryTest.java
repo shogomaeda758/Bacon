@@ -30,16 +30,35 @@ public class CategoryRepositoryTest {
         category3 = new Category(null, "fashion", null, null);
         category4 = new Category(null,"kitchen", null, null);
 
+        // 各カテゴリを保存する際に、各保存の間に時間差を設ける
         categoryRepository.save(category1);
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         categoryRepository.save(category2);
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         categoryRepository.save(category3);
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         categoryRepository.save(category4);
     }
 
     @Test
     @DisplayName("カテゴリ名検索: DBに該当Categoryが存在する → Optional<Category>が該当データで返る (正常)")
     void findByCategoryName_Exist_ReturnsCategory() {
-        String existingCategoryName = "Electronics";
+        String existingCategoryName = "kitchen";
 
         Optional<Category> foundCategoryOptional = categoryRepository.findByCategoryName(existingCategoryName);
 
@@ -75,7 +94,7 @@ public class CategoryRepositoryTest {
 
         // 結果の検証
         assertThat(categories).isNotNull();
-        assertThat(categories).hasSize(3);
+        assertThat(categories).hasSize(4);
 
         // 取得したリストの順序が、savedCategories (createdAtでソート済み) と同じであることを確認
         // これにより、DBから取得された実際のcreatedAtに基づいて順序が正しいかを確認できます。
@@ -103,7 +122,7 @@ public class CategoryRepositoryTest {
     @Test
     @DisplayName("カテゴリ重複チェック（存在）: 該当カテゴリ名がDBに存在 → trueが返る (正常)")
     void existsByCategoryName_Exists_ReturnsTrue() {
-        String existingCategoryName = "Books";
+        String existingCategoryName = "kitchen";
 
         boolean exists = categoryRepository.existsByCategoryName(existingCategoryName);
 
