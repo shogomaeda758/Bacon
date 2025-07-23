@@ -160,7 +160,7 @@ a:hover {
 }
 
 /* 表示ボタン（右上に小さく配置） */
-.password-container .toggle-password {
+.password-container .password-toggle-btn {
     position: absolute;
     top: 4px;              /* 上端からの距離（微調整可） */
     right: 8px;            /* 右端からの距離（微調整可） */
@@ -173,7 +173,7 @@ a:hover {
     z-index: 1;
 }
 
-.password-container .toggle-password:hover {
+.password-container .password-toggle-btn:hover {
     color: #383028;
 }
 
@@ -197,7 +197,7 @@ a:hover {
         }
 
         /* パスワード表示切り替えボタンのスタイル */
-        .toggle-password {
+        .password-toggle-btn {
             position: absolute; 
             right: 10px; 
             background: none;
@@ -213,7 +213,7 @@ a:hover {
             white-space: nowrap;
         }
 
-        .toggle-password:hover {
+        .password-toggle-btn:hover {
             color: #383028; /* ホバー時の色 */
         }
 
