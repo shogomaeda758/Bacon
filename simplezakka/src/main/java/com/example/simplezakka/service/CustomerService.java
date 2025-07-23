@@ -69,14 +69,14 @@ public class CustomerService {
     }
 
     /**会員情報取得 */
-    public CustomerResponse getCustomerById(Integer customerId) {
+    public CustomerResponse getCustomerById(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
         return toResponse(customer);
     }
 
     /** 会員情報更新*/
-    public CustomerResponse updateCustomer(Integer customerId, CustomerUpdateRequest request) {
+    public CustomerResponse updateCustomer(Long customerId, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員が見つかりません"));
 
