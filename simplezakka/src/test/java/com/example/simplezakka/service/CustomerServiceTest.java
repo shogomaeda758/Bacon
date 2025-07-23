@@ -30,7 +30,7 @@ class CustomerServiceTest {
     void setUp() {
         encoder = new BCryptPasswordEncoder();
         customerEntity = new Customer();
-        customerEntity.setCustomerId(1);
+        customerEntity.setCustomerId(1L);
         customerEntity.setLastName("Harada");
         customerEntity.setFirstName("Taro");
         customerEntity.setEmail("test@example.com");
@@ -51,7 +51,7 @@ class CustomerServiceTest {
         when(customerRepository.existsByEmail("test@example.com")).thenReturn(false);
         when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> {
             Customer arg = inv.getArgument(0, Customer.class);
-            arg.setCustomerId(1);
+            arg.setCustomerId(1L);
             return arg;
         });
 
@@ -77,7 +77,7 @@ class CustomerServiceTest {
     @Test
     void login_CorrectCredentials_ShouldReturnDTO() {
         Customer localCustomer = new Customer();
-        localCustomer.setCustomerId(1);
+        localCustomer.setCustomerId(1L);
         localCustomer.setLastName("Harada");
         localCustomer.setFirstName("Taro");
         localCustomer.setEmail("test@example.com");
@@ -103,7 +103,7 @@ class CustomerServiceTest {
     @Test
     void login_InvalidPassword_ShouldThrow() {
         Customer localCustomer = new Customer();
-        localCustomer.setCustomerId(1);
+        localCustomer.setCustomerId(1L);
         localCustomer.setLastName("Harada");
         localCustomer.setFirstName("Taro");
         localCustomer.setEmail("test@example.com");
@@ -138,16 +138,16 @@ class CustomerServiceTest {
     // 顧客取得成功
     @Test
     void getCustomerById_ExistingId_ShouldReturnData() {
-        when(customerRepository.findById(1)).thenReturn(Optional.of(customerEntity));
-        CustomerResponse res = customerService.getCustomerById(1);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customerEntity));
+        CustomerResponse res = customerService.getCustomerById(1L);
         assertThat(res.getEmail()).isEqualTo("test@example.com");
     }
 
     // 顧客取得失敗
     @Test
     void getCustomerById_NotFound_ShouldThrow() {
-        when(customerRepository.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> customerService.getCustomerById(999))
+        when(customerRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> customerService.getCustomerById(999L))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -161,7 +161,7 @@ class CustomerServiceTest {
         CustomerRegisterRequest req = new CustomerRegisterRequest();
         req.setCustomerInfo(info); req.setPassword("testpw2");
         Customer ent = new Customer();
-        ent.setCustomerId(2); ent.setLastName("Harada"); ent.setFirstName("Taro"); ent.setEmail("test2@example.com");
+        ent.setCustomerId(2L); ent.setLastName("Harada"); ent.setFirstName("Taro"); ent.setEmail("test2@example.com");
         ent.setAddress("Kyoto"); ent.setPassword(encoder.encode("testpw2"));
         ent.setPhoneNumber("09032111222");
         ent.setCreatedAt(java.time.LocalDateTime.now());

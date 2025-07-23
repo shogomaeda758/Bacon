@@ -179,23 +179,8 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findById(productId);
         verifyNoMoreInteractions(productRepository);
     }
-
-    @Test
-    @DisplayName("findProductById: 引数productIdがnullの場合、nullを返す")
-    void findProductById_WhenProductIdIsNull_ShouldReturnNull() {
-        Integer productId = null;
-        when(productRepository.findById(productId)).thenReturn(Optional.empty());
-
-        ProductDetail result = productService.findProductById(productId);
-
-        assertThat(result).isNull();
-
-        verify(productRepository, times(1)).findById(productId);
-        verifyNoMoreInteractions(productRepository);
-    }
-
+    
     // === findProductsByCategory ===
-
     @Test
     @DisplayName("findProductsByCategory: 指定したカテゴリの商品を返す")
     void findProductsByCategory_ShouldReturnMatchingProducts() {

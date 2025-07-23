@@ -1,6 +1,5 @@
 package com.example.simplezakka.service;
 
-
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
 import com.example.simplezakka.entity.Product;
@@ -108,7 +107,6 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
     void addItemToCart_WhenProductExistsAndCartIsEmpty_ShouldAddToCartAndUpdateSession() {
         when(productRepository.findById(1)).thenReturn(Optional.of(product1));
 
-
         CartRespons cart = cartService.addItemToCart(1, 2, session);
 
 
@@ -152,15 +150,14 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
     }
 
 
+
     @Test
     @DisplayName("quantityがnullの場合、NullPointerExceptionが発生")
     void addItemToCart_WithNullQuantity_ShouldThrowException() {
-        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
-
-
         assertThatThrownBy(() -> cartService.addItemToCart(1, null, session))
             .isInstanceOf(NullPointerException.class);
     }
+
 
 
     @Test

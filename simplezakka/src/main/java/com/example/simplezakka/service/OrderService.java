@@ -2,26 +2,27 @@ package com.example.simplezakka.service;
 
 import com.example.simplezakka.dto.cart.CartItemResponse;
 import com.example.simplezakka.dto.cart.CartRespons;
-import com.example.simplezakka.dto.order.CustomerInfo;
-import com.example.simplezakka.dto.order.OrderRequest;
+import com.example.simplezakka.dto.order.CustomerInfo; 
+import com.example.simplezakka.dto.order.OrderRequest; 
 import com.example.simplezakka.dto.order.OrderResponse;
-import com.example.simplezakka.dto.order.OrderItemDetailResponse;
+import com.example.simplezakka.dto.order.OrderItemDetailResponse; 
 
 import com.example.simplezakka.entity.Customer;
 import com.example.simplezakka.entity.Order;
-import com.example.simplezakka.entity.OrderDetail;
+import com.example.simplezakka.entity.OrderDetail; 
 import com.example.simplezakka.entity.Product;
 
 import com.example.simplezakka.repository.CustomerRepository;
 import com.example.simplezakka.repository.OrderRepository;
 import com.example.simplezakka.repository.ProductRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,14 +45,17 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse placeOrder(CartRespons cart, OrderRequest orderRequest, HttpSession session) {
+    public OrderResponse placeOrder(CartRespons cart, OrderRequest orderRequest) {
         if (cart == null || cart.getItems().isEmpty()) {
             throw new IllegalArgumentException("カートに商品がありません。");
         }
-        CustomerInfo customerInfo = orderRequest.getCustomerInfo();
-        if (customerInfo == null) {
+        
+        CustomerInfo customerInfoFromRequest = orderRequest.getCustomerInfo();
+        if (customerInfoFromRequest == null) {
             throw new IllegalArgumentException("顧客情報が不足しています。");
         }
+
+        Map<Integer, Product> productsInCart = new HashMap<>();
 
         for (CartItemResponse cartItem : cart.getItems().values()) {
             Product product = productRepository.findById(cartItem.getProductId())
@@ -61,52 +65,60 @@ public class OrderService {
                 throw new IllegalStateException(
                     "申し訳ございません、" + product.getName() + "の在庫が不足しています。現在の在庫: " + product.getStock());
             }
+            productsInCart.put(product.getProductId(), product);
         }
 
         Order order = new Order();
 
-        Integer customerId = customerInfo.getCustomerId();
-        if (customerId != null && customerId != 0) {
+        
+        
+        Long customerId = customerInfoFromRequest.getCustomerId(); 
+        if (customerId != null) { 
             Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員情報が見つかりません。ID: " + customerId));
-            order.setCustomer(customer);
-            order.setIsGuest(false);
-        } else {
-            order.setCustomer(null);
-            order.setIsGuest(true);
+            order.setCustomer(customer); 
+            order.setIsGuest(false); 
+        } else { 
+            order.setCustomer(null); 
+            order.setIsGuest(true); 
         }
 
-        order.setOrderEmail(customerInfo.getEmail());
-        order.setOrderName(customerInfo.getName());
-        order.setOrderAddress(customerInfo.getAddress());
-        order.setOrderPhoneNumber(customerInfo.getPhoneNumber());
-        order.setPaymentMethod(orderRequest.getPaymentMethod());
+        
+        order.setOrderName(customerInfoFromRequest.getName());
+        order.setOrderEmail(customerInfoFromRequest.getEmail());
+        order.setOrderAddress(customerInfoFromRequest.getAddress());
+        order.setOrderPhoneNumber(customerInfoFromRequest.getPhoneNumber());
 
+        order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        // 商品合計はCartResponsから取得
-        BigDecimal productSubtotal = cart.getTotalPrice();
+        
+        BigDecimal productSubtotal = cart.getTotalPrice(); 
         BigDecimal shippingFee = calculateShippingFee(productSubtotal);
-        BigDecimal orderGrandTotal = productSubtotal.add(shippingFee);
+        BigDecimal orderGrandTotal = productSubtotal.add(shippingFee); 
 
         order.setShippingFee(shippingFee);
-        order.setTotalPrice(orderGrandTotal); // OrderエンティティのtotalPriceは最終合計
+        order.setTotalPrice(productSubtotal); 
+        
+        
+        
 
+
+        
         for (CartItemResponse cartItem : cart.getItems().values()) {
-            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow(
-                () -> new IllegalArgumentException("在庫確認後に商品が見つかりません: " + cartItem.getName())
-            );
+            Product product = productsInCart.get(cartItem.getProductId());
+            if (product == null) {
+                throw new IllegalStateException("予期せぬエラー: カート内の商品情報が不足しています。商品ID: " + cartItem.getProductId());
+            }
 
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setProduct(product);
             orderDetail.setUnitPrice(product.getPrice());
             orderDetail.setQuantity(cartItem.getQuantity());
-
             order.addOrderDetail(orderDetail);
 
             int updatedRows = productRepository.decreaseStock(product.getProductId(), cartItem.getQuantity());
-
             if (updatedRows != 1) {
                 throw new IllegalStateException(
                     "商品 " + product.getName() + " の在庫更新に失敗しました。時間をおいて再度お試しください。");
@@ -115,10 +127,10 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-
+        
         List<OrderItemDetailResponse> responseItems = savedOrder.getOrderDetails().stream()
             .map(detail -> {
-                Product product = detail.getProduct();
+                Product product = detail.getProduct(); 
                 return new OrderItemDetailResponse(
                     product.getProductId(),
                     product.getName(),
@@ -130,17 +142,28 @@ public class OrderService {
             })
             .collect(Collectors.toList());
 
-        cartService.clearCart(session); 
+        
+        CustomerInfo responseCustomerInfo = new CustomerInfo(
+            savedOrder.getCustomer() != null ? savedOrder.getCustomer().getCustomerId() : null, 
+            savedOrder.getOrderName(),
+            savedOrder.getOrderEmail(),
+            savedOrder.getOrderAddress(),
+            savedOrder.getOrderPhoneNumber()
+        );
+
+
         return new OrderResponse(
             savedOrder.getOrderId(),
             savedOrder.getOrderDate(),
-            productSubtotal,          // OrderResponseのtotalPriceには「商品合計」を渡す
-            savedOrder.getShippingFee(), // OrderResponseのshippingFeeには「送料」を渡す
-            savedOrder.getTotalPrice(),  // OrderResponseのgrandTotalには「最終合計金額」を渡す
+            savedOrder.getTotalPrice(), 
+            savedOrder.getShippingFee(),
+            
+            
+            savedOrder.getTotalPrice().add(savedOrder.getShippingFee()), 
             savedOrder.getPaymentMethod(),
             savedOrder.getStatus(),
             responseItems,
-            customerInfo,
+            responseCustomerInfo,
             "注文が正常に完了しました。"
         );
     }
@@ -152,7 +175,4 @@ public class OrderService {
             return BigDecimal.valueOf(500);
         }
     }
-
-
-    
 }

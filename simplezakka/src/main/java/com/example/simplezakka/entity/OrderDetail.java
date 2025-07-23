@@ -1,6 +1,6 @@
-// ===============================
-// OrderDetail Entity
-// ===============================
+
+
+
 package com.example.simplezakka.entity;
 
 import jakarta.persistence.*;
