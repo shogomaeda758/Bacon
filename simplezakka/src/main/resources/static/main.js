@@ -865,7 +865,10 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addEventListener("load", async function(){
     try {
         // サーバーサイドのログイン状態確認APIを呼び出す
-        const response = await fetch('/api/customers/status');
+        const response = await fetch('http://localhost:8080/api/customers/status', {
+            method: 'GET',
+            credentials: 'include'
+        });
         const data = await response.json();
 
         if (response.ok && data.loggedIn) {
@@ -949,13 +952,23 @@ window.addEventListener("load", async function(){
         };
 
         try {
-            const response = await fetch('/api/customers/login', {
+            const response = await fetch('http://localhost:8080/api/customers/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({ email, password })
             });
+
+            if (response.status === 400) {
+            const errorData = await response.json();
+            const messages = errorData.messages;
+            // メッセージ表示処理（例：コンソールまたは画面に）
+            console.log("Validation Errors:", messages);
+            alert(Object.values(messages).join("\n")); // ユーザーにも表示
+            return;
+            }
 
             const data = await response.json();
             let loginErrorElement = document.querySelector('#login-container .message');
