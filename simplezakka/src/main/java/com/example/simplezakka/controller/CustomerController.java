@@ -50,7 +50,7 @@ public class CustomerController {
 
     @GetMapping("/status")
     public ResponseEntity<?> getLoginStatus(HttpSession session) {
-        Integer customerId = (Integer) session.getAttribute(SESSION_CUSTOMER_ID);
+        Long customerId = (Long) session.getAttribute(SESSION_CUSTOMER_ID);
         String customerName = (String) session.getAttribute(SESSION_CUSTOMER_NAME);
 
         if (customerId != null) {
@@ -75,7 +75,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{customerId}")
-    public ResponseEntity<?> update(@PathVariable Integer customerId,
+    public ResponseEntity<?> update(@PathVariable Long customerId,
                                     @Valid @RequestBody CustomerUpdateRequest request) {
         try {
             CustomerResponse updated = customerService.updateCustomer(customerId, request);
@@ -92,7 +92,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Integer customerId) {
+    public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Long customerId) {
         try {
             CustomerResponse customer = customerService.getCustomerById(customerId);
             return ResponseEntity.ok(customer);
@@ -103,7 +103,7 @@ public class CustomerController {
 
     @GetMapping("/profile")
     public ResponseEntity<CustomerResponse> getCustomerProfile(HttpSession session) {
-        Integer customerId = (Integer) session.getAttribute(SESSION_CUSTOMER_ID);
+        Long customerId = (Long) session.getAttribute(SESSION_CUSTOMER_ID);
         if (customerId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "認証が必要です。");
         }
