@@ -20,6 +20,7 @@ public class CategoryRepositoryTest {
     private Category category1;
     private Category category2;
     private Category category3;
+    private Category category4;
 
     @BeforeEach
     void setUp() {
