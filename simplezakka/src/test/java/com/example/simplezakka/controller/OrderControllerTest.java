@@ -60,7 +60,7 @@ class OrderControllerTest {
     void setUp() {
         mockSession = new MockHttpSession();
         
-        mockSession.setAttribute("customerId", 1L);
+        mockSession.setAttribute("loggedInCustomerId", 1L);
 
         cartWithItems = new CartRespons();
         CartItemResponse item = new CartItemResponse(
@@ -75,7 +75,7 @@ class OrderControllerTest {
         
         
         validCustomerInfo = new CustomerInfo(
-                null, 
+                1L, 
                 "山田 太郎",
                 "yamada@example.com",
                 "東京都渋谷区1-1-1",
@@ -124,11 +124,12 @@ class OrderControllerTest {
         
         
         lenient().when(orderService.placeOrder(
-            eq(cartWithItems),
-            argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null) 
-            
-            
-           
+            any(CartRespons.class),    
+            argThat(req -> 
+                req.getCustomerInfo() != null && 
+                req.getCustomerInfo().getCustomerId() != null && 
+                req.getCustomerInfo().getCustomerId().equals(1L) 
+            )
         )).thenReturn(sampleOrderResponse);
     }
 
@@ -159,16 +160,15 @@ class OrderControllerTest {
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].productId", is(sampleOrderItemDetailResponse.getProductId())));
 
-            verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-
-            
-            
-            
+            verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));     
             
             verify(orderService, times(1)).placeOrder(
                 eq(cartWithItems),
-                argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
-               
+                argThat(req -> 
+                req.getCustomerInfo() != null && 
+                req.getCustomerInfo().getCustomerId() != null && 
+                req.getCustomerInfo().getCustomerId().equals(1L) 
+                )
             );
             verify(cartService, times(1)).clearCart(any(HttpSession.class)); 
             verifyNoMoreInteractions(cartService, orderService);
@@ -404,24 +404,34 @@ class OrderControllerTest {
             void placeOrder_WhenOrderServiceThrowsIllegalArgumentException_ShouldReturnBadRequest() throws Exception {
                 String errorMessage = "商品が見つかりません。";
                 
+               
                 when(orderService.placeOrder(
                     any(CartRespons.class),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null && 
+                        req.getCustomerInfo().getCustomerId().equals(1L)
+                    )
                 )).thenThrow(new IllegalArgumentException(errorMessage));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                         .session(mockSession)
+                                         .contentType(MediaType.APPLICATION_JSON)
+                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
                 
+                // 【ここが修正点3】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null &&
+                        req.getCustomerInfo().getCustomerId().equals(1L) 
+                    )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
@@ -431,24 +441,34 @@ class OrderControllerTest {
             void placeOrder_WhenOrderServiceThrowsIllegalStateException_ShouldReturnConflict() throws Exception {
                 String errorMessage = "在庫が不足しています。";
                 
+                // 【ここが修正点4】when の argThat を修正
                 when(orderService.placeOrder(
                     any(CartRespons.class),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null && 
+                        req.getCustomerInfo().getCustomerId().equals(1L)
+                    )
                 )).thenThrow(new IllegalStateException(errorMessage));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                         .session(mockSession)
+                                         .contentType(MediaType.APPLICATION_JSON)
+                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isConflict())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
                 
+                // 【ここが修正点5】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null &&
+                        req.getCustomerInfo().getCustomerId().equals(1L) // 1L であることを明示
+                    )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
@@ -457,24 +477,34 @@ class OrderControllerTest {
             @DisplayName("【異常系】OrderServiceがその他のExceptionをスローした場合、500 Internal Server Errorと汎用エラーメッセージを返す")
             void placeOrder_WhenOrderServiceThrowsGenericException_ShouldReturnInternalServerError() throws Exception {
                 
+                // 【ここが修正点6】when の argThat を修正
                 when(orderService.placeOrder(
                     any(CartRespons.class),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null && 
+                        req.getCustomerInfo().getCustomerId().equals(1L)
+                    )
                 )).thenThrow(new RuntimeException("DB接続エラーが発生しました。"));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                         .session(mockSession)
+                                         .contentType(MediaType.APPLICATION_JSON)
+                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isInternalServerError())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is("注文確定中に予期せぬエラーが発生しました。")));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
                 
+                // 【ここが修正点7】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
                     eq(cartWithItems),
-                    argThat(req -> req.getCustomerInfo() != null && req.getCustomerInfo().getCustomerId() != null)
+                    argThat(req -> 
+                        req.getCustomerInfo() != null && 
+                        req.getCustomerInfo().getCustomerId() != null &&
+                        req.getCustomerInfo().getCustomerId().equals(1L) // 1L であることを明示
+                    )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
