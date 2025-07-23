@@ -137,22 +137,31 @@ public class DataLoader implements CommandLineRunner {
                 20,
                 "/images/glass-container.png",
                 false,
-                kitchen
+                kitchen 
             ),
             createProduct(
-                "いい感じのコップ",
-                "電子レンジ・食洗機対応のガラス製保存容器。3サイズセット。",
+                "テスト商品A",
+                "テスト用の商品Aです。",
                 4999,
-                1,
+                10,
                 "/images/glass-container.png",
                 false,
                 kitchen
             ),
             createProduct(
-                "いい感じのコップ2",
-                "電子レンジ・食洗機対応のガラス製保存容器。3サイズセット。",
-                5000,
-                1,
+                "テスト商品B",
+                "テスト用の商品Bです。",
+                3000,
+                10,
+                "/images/glass-container.png",
+                false,
+                kitchen
+            ),
+            createProduct(
+                "テスト商品C",
+                "テスト用の商品Cです。",
+                1999,
+                10,
                 "/images/glass-container.png",
                 false,
                 kitchen
