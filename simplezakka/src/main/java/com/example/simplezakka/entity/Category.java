@@ -7,9 +7,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "categories")
@@ -17,32 +15,32 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Category {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer categoryId;
-   
+
     @Column(nullable = false)
     private String categoryName;
-   
+
     private LocalDateTime createdAt;
-   
+
     private LocalDateTime updatedAt;
-   
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-   
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    public void setName(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setName'");
+    /**
+     * テストコード等で category.setName(...) を呼び出す場合の補助メソッド。
+     */
+    public void setName(String name) {
+        this.categoryName = name;
     }
 }
-

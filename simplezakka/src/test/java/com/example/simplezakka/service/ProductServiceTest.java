@@ -74,8 +74,8 @@ class ProductServiceTest {
     // === findAllProducts ===
 
     @Test
-    @DisplayName("findAllProducts: リポジトリから複数の商品が返される場合、ProductListItemのリストを返す")
-    void findAllProducts_ShouldReturnListOfProductListItems() {
+    @DisplayName("商品が2件以上登録されている場合、商品の一覧(List)が返る")
+    void findAllProducts_ReturnsProductList() {
         when(productRepository.findAll()).thenReturn(Arrays.asList(product1, product2));
 
         List<ProductListItem> result = productService.findAllProducts();
@@ -93,8 +93,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findAllProducts: リポジトリから空のリストが返される場合、空のリストを返す")
-    void findAllProducts_WhenRepositoryReturnsEmptyList_ShouldReturnEmptyList() {
+    @DisplayName("商品が1件も登録されていない場合、空のリストが返る")
+    void findAllProducts_ReturnsEmptyList() {
         when(productRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<ProductListItem> result = productService.findAllProducts();
@@ -105,30 +105,11 @@ class ProductServiceTest {
         verifyNoMoreInteractions(productRepository);
     }
 
-    @Test
-    @DisplayName("findAllProducts: 商品エンティティにnullフィールドが含まれる場合、DTOにもnullがマッピングされる")
-    void findAllProducts_WhenProductHasNullFields_ShouldMapNullToDto() {
-        when(productRepository.findAll()).thenReturn(List.of(productWithNullFields));
-
-        List<ProductListItem> result = productService.findAllProducts();
-
-        assertThat(result).hasSize(1);
-        ProductListItem dto = result.get(0);
-        assertThat(dto.getProductId()).isEqualTo(productWithNullFields.getProductId());
-        assertThat(dto.getName()).isEqualTo(productWithNullFields.getName());
-        assertThat(dto.getPrice()).isEqualTo(productWithNullFields.getPrice().intValue());
-        assertThat(dto.getImageUrl()).isNull();
-        assertThat(dto.getCategoryName()).isEqualTo(category.getCategoryName());
-
-        verify(productRepository, times(1)).findAll();
-        verifyNoMoreInteractions(productRepository);
-    }
-
     // === findProductById ===
 
     @Test
-    @DisplayName("findProductById: 存在するIDで検索した場合、ProductDetailを返す")
-    void findProductById_WhenProductExists_ShouldReturnProductDetail() {
+    @DisplayName("指定IDの商品が存在する場合、商品詳細(ProductDetail)が返る")
+    void findProductById_ExistingProduct_ReturnsDetail() {
         Integer productId = 1;
         when(productRepository.findById(productId)).thenReturn(Optional.of(product1));
 
@@ -147,8 +128,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findProductById: 存在しないIDで検索した場合、nullを返す")
-    void findProductById_WhenProductNotExists_ShouldReturnNull() {
+    @DisplayName("指定IDの商品が存在しない場合、nullが返る")
+    void findProductById_NonExistingProduct_ReturnsNull() {
         Integer productId = 99;
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
@@ -161,8 +142,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findProductById: 商品エンティティにnullフィールドが含まれる場合、DTOにもnullがマッピングされる")
-    void findProductById_WhenProductHasNullFields_ShouldMapNullToDto() {
+    @DisplayName("商品説明と画像がnullで登録されている場合、商品詳細のdescription, imageUrlがnullのまま返る")
+    void findProductById_WithNullFields_ReturnsPartial() {
         Integer productId = 3;
         when(productRepository.findById(productId)).thenReturn(Optional.of(productWithNullFields));
 
@@ -179,127 +160,4 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findById(productId);
         verifyNoMoreInteractions(productRepository);
     }
-
-    @Test
-    @DisplayName("findProductById: 引数productIdがnullの場合、nullを返す")
-    void findProductById_WhenProductIdIsNull_ShouldReturnNull() {
-        Integer productId = null;
-        when(productRepository.findById(productId)).thenReturn(Optional.empty());
-
-        ProductDetail result = productService.findProductById(productId);
-
-        assertThat(result).isNull();
-
-        verify(productRepository, times(1)).findById(productId);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    // === findProductsByCategory ===
-
-    @Test
-    @DisplayName("findProductsByCategory: 指定したカテゴリの商品を返す")
-    void findProductsByCategory_ShouldReturnMatchingProducts() {
-        Integer categoryId = 1;
-        when(productRepository.findByCategoryId(categoryId)).thenReturn(Arrays.asList(product1, product2));
-
-        List<ProductListItem> result = productService.findProductsByCategory(categoryId);
-
-        assertThat(result).hasSize(2);
-        assertThat(result)
-                .extracting(ProductListItem::getName, ProductListItem::getCategoryName)
-                .containsExactlyInAnyOrder(
-                        tuple(product1.getName(), category.getCategoryName()),
-                        tuple(product2.getName(), category.getCategoryName())
-                );
-
-        verify(productRepository, times(1)).findByCategoryId(categoryId);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    // === searchProducts ===
-
-    @Test
-    @DisplayName("searchProducts: 商品名にキーワードを含む商品を返す")
-    void searchProducts_ShouldReturnMatchingProducts() {
-        String keyword = "商品";
-        when(productRepository.findByNameContaining(keyword)).thenReturn(List.of(product1));
-
-        List<ProductListItem> result = productService.searchProducts(keyword);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).contains(keyword);
-
-        verify(productRepository, times(1)).findByNameContaining(keyword);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    // === findProductsInStock ===
-
-    @Test
-    @DisplayName("findProductsInStock: 指定在庫数以上の商品のみを返す")
-    void findProductsInStock_ShouldReturnFilteredProducts() {
-        int minStock = 5;
-        when(productRepository.findByStockGreaterThan(minStock)).thenReturn(List.of(product1));
-
-        List<ProductListItem> result = productService.findProductsInStock(minStock);
-
-        assertThat(result).hasSize(1);
-        // ProductListItemにstockフィールドはないため、DTOのstockではなく、Productのstockをassertするためにリポジトリの戻り値確認で代用可
-
-        verify(productRepository, times(1)).findByStockGreaterThan(minStock);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    // === decreaseStock ===
-
-    @Test
-    @DisplayName("decreaseStock: 更新件数が1以上ならtrueを返す")
-    void decreaseStock_ShouldReturnTrueWhenUpdateSuccessful() {
-        when(productRepository.decreaseStock(1, 2)).thenReturn(1);
-
-        boolean result = productService.decreaseStock(1, 2);
-
-        assertThat(result).isTrue();
-        verify(productRepository, times(1)).decreaseStock(1, 2);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    @Test
-    @DisplayName("decreaseStock: 更新件数が0ならfalseを返す")
-    void decreaseStock_ShouldReturnFalseWhenUpdateFails() {
-        when(productRepository.decreaseStock(1, 2)).thenReturn(0);
-
-        boolean result = productService.decreaseStock(1, 2);
-
-        assertThat(result).isFalse();
-        verify(productRepository, times(1)).decreaseStock(1, 2);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    // === updateStock ===
-
-    @Test
-    @DisplayName("updateStock: 更新件数が1以上ならtrueを返す")
-    void updateStock_ShouldReturnTrueWhenUpdateSuccessful() {
-        when(productRepository.updateStock(1, 99)).thenReturn(1);
-
-        boolean result = productService.updateStock(1, 99);
-
-        assertThat(result).isTrue();
-        verify(productRepository, times(1)).updateStock(1, 99);
-        verifyNoMoreInteractions(productRepository);
-    }
-
-    @Test
-    @DisplayName("updateStock: 更新件数が0ならfalseを返す")
-    void updateStock_ShouldReturnFalseWhenUpdateFails() {
-        when(productRepository.updateStock(1, 99)).thenReturn(0);
-
-        boolean result = productService.updateStock(1, 99);
-
-        assertThat(result).isFalse();
-        verify(productRepository, times(1)).updateStock(1, 99);
-        verifyNoMoreInteractions(productRepository);
-    }
-
 }

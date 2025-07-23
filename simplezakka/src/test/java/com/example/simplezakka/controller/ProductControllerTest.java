@@ -94,5 +94,51 @@ class ProductControllerTest {
         }
     }
 
-    // （以下、以前提示したテストコードのまま変更なし。詳細取得などは影響なし）
+    @Nested
+    @DisplayName("GET /api/products/{id}")
+    class GetProductByIdTests {
+        @Test
+        @DisplayName("商品が存在する場合、200 OK + 商品詳細を返す")
+        void getProductById_WhenProductExists_ReturnsDetail() throws Exception {
+            mockMvc.perform(get("/api/products/1").accept(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isOk())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(jsonPath("$.productId", is(productDetail1.getProductId())))
+                   .andExpect(jsonPath("$.name", is(productDetail1.getName())))
+                   .andExpect(jsonPath("$.price", is(productDetail1.getPrice())))
+                   .andExpect(jsonPath("$.description", is(productDetail1.getDescription())))
+                   .andExpect(jsonPath("$.stock", is(productDetail1.getStock())))
+                   .andExpect(jsonPath("$.imageUrl", is(productDetail1.getImageUrl())));
+
+            verify(productService, times(1)).findProductById(1);
+            verifyNoMoreInteractions(productService);
+        }
+
+        @Test
+        @DisplayName("商品が存在しない場合、404 Not Foundを返す")
+        void getProductById_WhenProductDoesNotExist_ReturnsNotFound() throws Exception {
+            mockMvc.perform(get("/api/products/99").accept(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isNotFound());
+
+            verify(productService, times(1)).findProductById(99);
+            verifyNoMoreInteractions(productService);
+        }
+
+        @Test
+        @DisplayName("商品にnull項目がある場合、200 OK + null項目含むJSONを返す")
+        void getProductById_WhenFieldsNull_ReturnsPartialData() throws Exception {
+            mockMvc.perform(get("/api/products/3").accept(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isOk())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(jsonPath("$.productId", is(productDetailWithNulls.getProductId())))
+                   .andExpect(jsonPath("$.name", is(productDetailWithNulls.getName())))
+                   .andExpect(jsonPath("$.price", is(productDetailWithNulls.getPrice())))
+                   .andExpect(jsonPath("$.description").doesNotExist())
+                   .andExpect(jsonPath("$.stock", is(productDetailWithNulls.getStock())))
+                   .andExpect(jsonPath("$.imageUrl").doesNotExist());
+
+            verify(productService, times(1)).findProductById(3);
+            verifyNoMoreInteractions(productService);
+        }
+    }
 }
