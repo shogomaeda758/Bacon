@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
+import java.math.BigDecimal; // BigDecimal は CartItemResponse や OrderResponse には必要なので残します
 import java.time.LocalDateTime;
 import java.util.Collections;
 
@@ -59,10 +59,11 @@ class OrderControllerTest {
     @BeforeEach
     void setUp() {
         mockSession = new MockHttpSession();
-        
+        // セッションに顧客IDを設定
         mockSession.setAttribute("loggedInCustomerId", 1L);
 
         cartWithItems = new CartRespons();
+        // CartItemResponse の金額は BigDecimal のまま
         CartItemResponse item = new CartItemResponse(
                 "p001", 1, "商品A", BigDecimal.valueOf(1000), "image_url", 1, BigDecimal.valueOf(1000)
         );
@@ -70,42 +71,40 @@ class OrderControllerTest {
 
         emptyCart = new CartRespons();
 
-        
-        
-        
-        
+        // 有効な顧客情報
         validCustomerInfo = new CustomerInfo(
-                1L, 
+                1L,
                 "山田 太郎",
                 "yamada@example.com",
                 "東京都渋谷区1-1-1",
                 "09012345678"
         );
 
-        
+        // 有効な注文リクエスト
         validOrderRequest = new OrderRequest();
         validOrderRequest.setCustomerInfo(validCustomerInfo);
         validOrderRequest.setPaymentMethod("クレジットカード");
-        
-        validOrderRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-        validOrderRequest.setTotalPrice(1000); 
-        validOrderRequest.setShippingFee(500); 
+        // OrderItemRequest の price を Integer に
+        validOrderRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000))); // ここを Integer に変更
+        validOrderRequest.setTotalPrice(1000); // ここを Integer に変更
+        validOrderRequest.setShippingFee(500); // ここを Integer に変更
 
 
+        // OrderItemDetailResponse の金額は BigDecimal のまま
         sampleOrderItemDetailResponse = new OrderItemDetailResponse(
                 1, "商品A", "http://example.com/product_a.jpg", 1, BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)
         );
 
-        
-        
+        // サービス層からの戻り値となるサンプル注文レスポンス
         CustomerInfo responseCustomerInfo = new CustomerInfo(
-            1L, 
-            "山田 太郎",
-            "yamada@example.com",
-            "東京都渋谷区1-1-1",
-            "09012345678"
+                1L,
+                "山田 太郎",
+                "yamada@example.com",
+                "東京都渋谷区1-1-1",
+                "09012345678"
         );
 
+        // OrderResponse の金額は BigDecimal のまま
         sampleOrderResponse = new OrderResponse(
                 123,
                 LocalDateTime.now(),
@@ -115,21 +114,20 @@ class OrderControllerTest {
                 "クレジットカード",
                 "PENDING",
                 Collections.singletonList(sampleOrderItemDetailResponse),
-                responseCustomerInfo, 
+                responseCustomerInfo,
                 "注文が正常に完了しました。"
         );
 
-        
+        // CartServiceのモック設定
         lenient().when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(cartWithItems);
-        
-        
+        // OrderServiceのモック設定（特定のcustomerIdを持つOrderRequestを受け取った場合）
         lenient().when(orderService.placeOrder(
-            any(CartRespons.class),    
-            argThat(req -> 
-                req.getCustomerInfo() != null && 
-                req.getCustomerInfo().getCustomerId() != null && 
-                req.getCustomerInfo().getCustomerId().equals(1L) 
-            )
+                any(CartRespons.class),
+                argThat(req ->
+                        req.getCustomerInfo() != null &&
+                        req.getCustomerInfo().getCustomerId() != null &&
+                        req.getCustomerInfo().getCustomerId().equals(1L)
+                )
         )).thenReturn(sampleOrderResponse);
     }
 
@@ -142,17 +140,17 @@ class OrderControllerTest {
         @DisplayName("【正常系】有効なリクエストとカートで注文確定が成功し、201 Createdを返す")
         void placeOrder_WithValidRequestAndCart_ShouldReturnCreated() throws Exception {
             mockMvc.perform(post("/api/order/confirm")
-                            .session(mockSession)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                    .session(mockSession)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(validOrderRequest)))
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.orderId", is(sampleOrderResponse.getOrderId())))
                     .andExpect(jsonPath("$.orderDate", is(notNullValue())))
                     .andExpect(jsonPath("$.message", is(sampleOrderResponse.getMessage())))
-                    .andExpect(jsonPath("$.totalPrice", is(sampleOrderResponse.getTotalPrice().intValue())))
-                    .andExpect(jsonPath("$.shippingFee", is(sampleOrderResponse.getShippingFee().intValue())))
-                    .andExpect(jsonPath("$.grandTotal", is(sampleOrderResponse.getGrandTotal().intValue())))
+                    .andExpect(jsonPath("$.totalPrice", is(sampleOrderResponse.getTotalPrice().intValue()))) // OrderResponse は BigDecimal のままなので intValue() で比較
+                    .andExpect(jsonPath("$.shippingFee", is(sampleOrderResponse.getShippingFee().intValue()))) // 同上
+                    .andExpect(jsonPath("$.grandTotal", is(sampleOrderResponse.getGrandTotal().intValue()))) // 同上
                     .andExpect(jsonPath("$.paymentMethod", is(sampleOrderResponse.getPaymentMethod())))
                     .andExpect(jsonPath("$.status", is(sampleOrderResponse.getStatus())))
                     .andExpect(jsonPath("$.customerInfo.name", is(validCustomerInfo.getName())))
@@ -160,19 +158,37 @@ class OrderControllerTest {
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].productId", is(sampleOrderItemDetailResponse.getProductId())));
 
-            verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));     
-            
+            verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
             verify(orderService, times(1)).placeOrder(
-                eq(cartWithItems),
-                argThat(req -> 
-                req.getCustomerInfo() != null && 
-                req.getCustomerInfo().getCustomerId() != null && 
-                req.getCustomerInfo().getCustomerId().equals(1L) 
-                )
+                    eq(cartWithItems),
+                    argThat(req ->
+                            req.getCustomerInfo() != null &&
+                            req.getCustomerInfo().getCustomerId() != null &&
+                            req.getCustomerInfo().getCustomerId().equals(1L)
+                    )
             );
-            verify(cartService, times(1)).clearCart(any(HttpSession.class)); 
+            verify(cartService, times(1)).clearCart(any(HttpSession.class));
             verifyNoMoreInteractions(cartService, orderService);
         }
+
+        @Test
+        @DisplayName("【正常系】注文確定後、カートがセッションからクリアされるべき")
+        void placeOrder_AfterOrderSuccess_ShouldClearCartFromSession() throws Exception {
+            when(orderService.placeOrder(any(CartRespons.class), any(OrderRequest.class)))
+                    .thenReturn(sampleOrderResponse);
+
+            mockMvc.perform(post("/api/order/confirm")
+                                    .session(mockSession)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(validOrderRequest)))
+                    .andExpect(status().isCreated());
+
+            verify(cartService, times(1)).clearCart(eq(mockSession));
+            verify(cartService, times(1)).getCartFromSession(eq(mockSession));
+            verify(orderService, times(1)).placeOrder(any(CartRespons.class), any(OrderRequest.class));
+            verifyNoMoreInteractions(cartService, orderService);
+        }
+
 
         @Nested
         @DisplayName("事前条件チェック")
@@ -184,9 +200,9 @@ class OrderControllerTest {
                 when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(emptyCart);
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("カートが空か無効です。注文を確定できません。")));
 
@@ -201,9 +217,9 @@ class OrderControllerTest {
                 when(cartService.getCartFromSession(any(HttpSession.class))).thenReturn(null);
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("カートが空か無効です。注文を確定できません。")));
 
@@ -218,20 +234,33 @@ class OrderControllerTest {
         class InputValidationErrors {
 
             @Test
+            @DisplayName("【異常系】リクエストボディが空または不正なJSON（null）の場合、400 Bad Requestを返す")
+            void placeOrder_WithEmptyOrNullRequestBody_ShouldReturnBadRequest() throws Exception {
+                mockMvc.perform(post("/api/order/confirm")
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(""))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.message", is("リクエストボディのJSON形式が不正です。")));
+
+                verifyNoInteractions(cartService, orderService);
+            }
+
+            @Test
             @DisplayName("【異常系】顧客情報がnullの場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithNullCustomerInfo_ShouldReturnBadRequest() throws Exception {
                 OrderRequest invalidRequest = new OrderRequest();
                 invalidRequest.setCustomerInfo(null);
                 invalidRequest.setPaymentMethod("クレジットカード");
-                
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-                invalidRequest.setTotalPrice(1000);
-                invalidRequest.setShippingFee(500);
+                invalidRequest.setTotalPrice(1000); // Integer に変更
+                invalidRequest.setShippingFee(500); // Integer に変更
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("顧客情報は必須です。")));
 
@@ -241,7 +270,6 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】氏名が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankName_ShouldReturnBadRequest() throws Exception {
-                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "", "test@example.com", "東京都", "09012345678"
                 );
@@ -249,13 +277,13 @@ class OrderControllerTest {
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("クレジットカード");
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-                invalidRequest.setTotalPrice(1000);
-                invalidRequest.setShippingFee(500);
+                invalidRequest.setTotalPrice(1000); // Integer に変更
+                invalidRequest.setShippingFee(500); // Integer に変更
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("氏名は必須です。")));
 
@@ -265,7 +293,6 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】メールアドレスの形式が不正な場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithInvalidEmailFormat_ShouldReturnBadRequest() throws Exception {
-                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "invalid-email", "東京都", "09012345678"
                 );
@@ -273,13 +300,13 @@ class OrderControllerTest {
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("クレジットカード");
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-                invalidRequest.setTotalPrice(1000);
-                invalidRequest.setShippingFee(500);
+                invalidRequest.setTotalPrice(1000); // Integer に変更
+                invalidRequest.setShippingFee(500); // Integer に変更
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("有効なメールアドレス形式で入力してください。")));
 
@@ -289,7 +316,6 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】住所が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankAddress_ShouldReturnBadRequest() throws Exception {
-                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "test@example.com", "", "09012345678"
                 );
@@ -297,13 +323,13 @@ class OrderControllerTest {
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("クレジットカード");
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-                invalidRequest.setTotalPrice(1000);
-                invalidRequest.setShippingFee(500);
+                invalidRequest.setTotalPrice(1000); // Integer に変更
+                invalidRequest.setShippingFee(500); // Integer に変更
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("$.message", is("住所は必須です。")));
 
@@ -313,7 +339,6 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】電話番号が空文字列の場合、400 Bad Requestとエラーメッセージを返す")
             void placeOrder_WithBlankPhoneNumber_ShouldReturnBadRequest() throws Exception {
-                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
                         null, "テスト太郎", "test@example.com", "東京都", ""
                 );
@@ -321,13 +346,13 @@ class OrderControllerTest {
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("クレジットカード");
                 invalidRequest.setItems(Collections.singletonList(new OrderRequest.OrderItemRequest(1L, "商品A", 1, 1000)));
-                invalidRequest.setTotalPrice(1000);
-                invalidRequest.setShippingFee(500);
+                invalidRequest.setTotalPrice(1000); // Integer に変更
+                invalidRequest.setShippingFee(500); // Integer に変更
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", allOf(
@@ -341,9 +366,8 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】複数のバリデーションエラーが発生した場合、400 Bad Requestと連結されたエラーメッセージを返す")
             void placeOrder_WithMultipleValidationErrors_ReturnsBadRequest() throws Exception {
-                
                 CustomerInfo invalidCustomerInfo = new CustomerInfo(
-                        null, 
+                        null,
                         "",
                         "invalid-email",
                         "",
@@ -352,16 +376,15 @@ class OrderControllerTest {
                 OrderRequest invalidRequest = new OrderRequest();
                 invalidRequest.setCustomerInfo(invalidCustomerInfo);
                 invalidRequest.setPaymentMethod("");
-                
-                invalidRequest.setItems(Collections.emptyList()); 
-                invalidRequest.setTotalPrice(null); 
-                invalidRequest.setShippingFee(null); 
+                invalidRequest.setItems(Collections.emptyList());
+                invalidRequest.setTotalPrice(null);
+                invalidRequest.setShippingFee(null);
 
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", allOf(
@@ -381,12 +404,12 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】JSON構文が不正な場合、400 Bad RequestとJSONパースエラーメッセージを返す")
             void placeOrder_WithInvalidJsonSyntax_ReturnsBadRequestWithParseError() throws Exception {
-                String invalidJson = "{ \"customerInfo\": { \"name\": \"Test User\", \"email\": \"test@example.com\" }, \"paymentMethod\": \"クレジットカード\"";
+                String invalidJson = "{ \"customerInfo\": { \"name\": \"Test User\", \"email\": \"test@example.com\" }, \"paymentMethod\": \"クレジットカード\""; // 閉じ括弧が不足
 
                 mockMvc.perform(post("/api/order/confirm")
-                                .session(mockSession)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(invalidJson))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(invalidJson))
                         .andExpect(status().isBadRequest())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is("リクエストボディのJSON形式が不正です。")));
@@ -403,35 +426,32 @@ class OrderControllerTest {
             @DisplayName("【異常系】OrderServiceがIllegalArgumentExceptionをスローした場合、400 Bad Requestと例外メッセージを返す")
             void placeOrder_WhenOrderServiceThrowsIllegalArgumentException_ShouldReturnBadRequest() throws Exception {
                 String errorMessage = "商品が見つかりません。";
-                
-               
+
                 when(orderService.placeOrder(
-                    any(CartRespons.class),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null && 
-                        req.getCustomerInfo().getCustomerId().equals(1L)
-                    )
+                        any(CartRespons.class),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 )).thenThrow(new IllegalArgumentException(errorMessage));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                         .session(mockSession)
-                                         .contentType(MediaType.APPLICATION_JSON)
-                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isBadRequest())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                
-                // 【ここが修正点3】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
-                    eq(cartWithItems),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null &&
-                        req.getCustomerInfo().getCustomerId().equals(1L) 
-                    )
+                        eq(cartWithItems),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
@@ -440,35 +460,32 @@ class OrderControllerTest {
             @DisplayName("【異常系】OrderServiceがIllegalStateExceptionをスローした場合、409 Conflictと例外メッセージを返す")
             void placeOrder_WhenOrderServiceThrowsIllegalStateException_ShouldReturnConflict() throws Exception {
                 String errorMessage = "在庫が不足しています。";
-                
-                // 【ここが修正点4】when の argThat を修正
+
                 when(orderService.placeOrder(
-                    any(CartRespons.class),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null && 
-                        req.getCustomerInfo().getCustomerId().equals(1L)
-                    )
+                        any(CartRespons.class),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 )).thenThrow(new IllegalStateException(errorMessage));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                         .session(mockSession)
-                                         .contentType(MediaType.APPLICATION_JSON)
-                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isConflict())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is(errorMessage)));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                
-                // 【ここが修正点5】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
-                    eq(cartWithItems),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null &&
-                        req.getCustomerInfo().getCustomerId().equals(1L) // 1L であることを明示
-                    )
+                        eq(cartWithItems),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
@@ -476,35 +493,31 @@ class OrderControllerTest {
             @Test
             @DisplayName("【異常系】OrderServiceがその他のExceptionをスローした場合、500 Internal Server Errorと汎用エラーメッセージを返す")
             void placeOrder_WhenOrderServiceThrowsGenericException_ShouldReturnInternalServerError() throws Exception {
-                
-                // 【ここが修正点6】when の argThat を修正
                 when(orderService.placeOrder(
-                    any(CartRespons.class),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null && 
-                        req.getCustomerInfo().getCustomerId().equals(1L)
-                    )
+                        any(CartRespons.class),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 )).thenThrow(new RuntimeException("DB接続エラーが発生しました。"));
 
                 mockMvc.perform(post("/api/order/confirm")
-                                         .session(mockSession)
-                                         .contentType(MediaType.APPLICATION_JSON)
-                                         .content(objectMapper.writeValueAsString(validOrderRequest)))
+                                        .session(mockSession)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validOrderRequest)))
                         .andExpect(status().isInternalServerError())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.message", is("注文確定中に予期せぬエラーが発生しました。")));
 
                 verify(cartService, times(1)).getCartFromSession(any(HttpSession.class));
-                
-                // 【ここが修正点7】verify の argThat を修正
                 verify(orderService, times(1)).placeOrder(
-                    eq(cartWithItems),
-                    argThat(req -> 
-                        req.getCustomerInfo() != null && 
-                        req.getCustomerInfo().getCustomerId() != null &&
-                        req.getCustomerInfo().getCustomerId().equals(1L) // 1L であることを明示
-                    )
+                        eq(cartWithItems),
+                        argThat(req ->
+                                req.getCustomerInfo() != null &&
+                                req.getCustomerInfo().getCustomerId() != null &&
+                                req.getCustomerInfo().getCustomerId().equals(1L)
+                        )
                 );
                 verifyNoMoreInteractions(cartService, orderService);
             }
