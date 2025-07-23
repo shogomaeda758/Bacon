@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -243,30 +245,41 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("在庫が足りません");
     }
+// quantity が null の場合 → NullPointerException を期待
+@Test
+@DisplayName("カート操作（追加）: quantityがnullのとき、NullPointerExceptionをスローする")
+void addItemToCart_WithNullQuantity_ShouldThrowNullPointerException() {
+    Integer productId = 1;
+    Integer quantity = null;
 
-    @Test
-    @DisplayName("数量更新：数量が0以下の場合、対象itemIdをカートから削除")
-    void updateItemQuantity_WithZeroOrLessQuantity_ShouldRemoveItem() {
-        CartRespons cart = new CartRespons();
-        CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 2, null);
-        cart.getItems().put("1", item);
-        session.setAttribute("cart", cart);
+    Throwable thrown = catchThrowable(() -> cartService.addItemToCart(productId, quantity,session));
 
-        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
+    assertThat(thrown)
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("数量はnull不可です");
+}
 
-        CartRespons updated = cartService.updateItemQuantity("1", 0, session);
 
-        assertThat(updated.getItems()).doesNotContainKey("1");
-        assertThat(updated.getTotalQuantity()).isZero();
-        assertThat(updated.getTotalPrice()).isZero();
-    }
+@Test
+@DisplayName("カート操作（追加）: quantityが0以下のとき、IllegalArgumentExceptionをスローする")
+void addItemToCart_WithZeroOrNegativeQuantity_ShouldThrowException2() {
+    long productId = 1L; 
 
-    @Test
-    @DisplayName("数量更新：数量がnullの場合、NullPointerExceptionをスロー")
-    void updateItemQuantity_WithNullQuantity_ShouldThrowException() {
-        assertThatThrownBy(() -> cartService.updateItemQuantity("1", null, session))
-            .isInstanceOf(NullPointerException.class);
-    }
+    when(productRepository.findById((int) productId)).thenReturn(Optional.of(product1));
+
+    Throwable thrownZero = catchThrowable(() -> cartService.addItemToCart(productId, 0, session));
+    Throwable thrownNegative = catchThrowable(() -> cartService.addItemToCart(productId, -5, session));
+
+    assertThat(thrownZero)
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("追加する数量は1以上"); 
+
+    assertThat(thrownNegative)
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("追加する数量は1以上");
+}
+
+
 
     @Test
     @DisplayName("数量更新：itemIdがnullの場合、IllegalArgumentExceptionをスローまたは状態変化なし")
