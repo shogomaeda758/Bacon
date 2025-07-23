@@ -1,3 +1,4 @@
+
 const API_BASE = 'http://localhost:8080/api';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -189,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     async function fetchAndDisplayProducts() {
         
         
@@ -219,38 +221,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const filteredProducts = allProducts.filter(product => {
-            const matchesCategory = currentSelectedCategory === 'all' || product.categoryName === currentSelectedCategory;
-            const matchesSearchTerm = product.name.toLowerCase().includes(currentSearchTerm) ||
-                                      (product.description && product.description.toLowerCase().includes(currentSearchTerm));
-            return matchesCategory && matchesSearchTerm;
+
+    document.querySelectorAll('.category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            console.log("カテゴリボタンがクリックされました:", this.dataset.category);
+            fetchAndDisplayProducts(this.dataset.category);  // カテゴリ別取得
         });
+    });
+});
 
-        if (filteredProducts.length === 0) {
-            container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';
-            return;
-        }
-
-        container.innerHTML = filteredProducts.map(product => `
-            <div class="col">
-                <div class="card product-card" data-category="${product.categoryName}">
-                    <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${product.name}</h5>
-                        <p class="card-text">¥${product.price.toLocaleString()}</p>
-                        <p class="card-text" style="color: gray;">${product.categoryName}</p>
-                        <button class="btn btn-outline-primary view-product" data-id="${product.productId}">詳細を見る</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        container.querySelectorAll('.view-product').forEach(button => {
-            button.addEventListener('click', function() {
-                fetchProductDetail(this.dataset.id);
-            });
-        });
-    }
 
 
     async function fetchProductDetail(productId) {
@@ -1217,7 +1196,6 @@ window.addEventListener("load", async function(){
 
 
 
-
 function togglePasswordVisibility(id) {
     const passwordField = document.getElementById(id);
     if (!passwordField) {
@@ -1225,6 +1203,7 @@ function togglePasswordVisibility(id) {
         return;
     }
     const toggleButton = passwordField.nextElementSibling;
+
 
     if (toggleButton && toggleButton.classList.contains('password-toggle-btn')) {
         if (passwordField.type === 'password') {
@@ -1234,7 +1213,9 @@ function togglePasswordVisibility(id) {
             passwordField.type = 'password';
             toggleButton.textContent = '表示';
         }
+
     } else {
         console.warn(`パスワードフィールド "${id}" の切り替えボタンが見つからないか、クラスが正しくありません。`);
     }
+
 }
