@@ -54,4 +54,10 @@ public class CartController {
         CartRespons cart = cartService.removeItemFromCart(itemId, session);
         return ResponseEntity.ok(cart);
 
-    }}
+    }
+    @DeleteMapping 
+    public ResponseEntity<Void> clearCart(HttpSession session) {
+        cartService.clearCart(session); // CartServiceのclearCartメソッドを呼び出す
+        return ResponseEntity.noContent().build(); // 204 No Content を返すのが一般的
+    }
+}

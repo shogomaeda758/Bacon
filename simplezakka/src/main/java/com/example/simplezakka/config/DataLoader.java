@@ -165,6 +165,7 @@ public class DataLoader implements CommandLineRunner {
                 "/images/glass-container.png",
                 false,
                 kitchen
+
             )
         );
 

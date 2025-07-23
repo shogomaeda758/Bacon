@@ -1,6 +1,3 @@
-// ===============================
-// Category Entity
-// ===============================
 package com.example.simplezakka.entity;
 
 import jakarta.persistence.*;
@@ -42,7 +39,7 @@ public class Category {
     }
 
     public void setName(String string) {
-        // TODO Auto-generated method stub
+        
         throw new UnsupportedOperationException("Unimplemented method 'setName'");
     }
 }

@@ -39,7 +39,7 @@ class CustomerControllerTest {
     @BeforeEach
     void setUp() {
         sampleResponse = new CustomerResponse(
-            1, "山田 太郎", "test@example.com", "東京都", "09011112222",
+            1L, "山田 太郎", "test@example.com", "東京都", "09011112222",
             LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -153,13 +153,13 @@ class CustomerControllerTest {
     @Test
     void status_LoggedIn_ShouldReturnUserInfo() throws Exception {
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loggedInCustomerId", 1);
+        session.setAttribute("loggedInCustomerId", 1L);
         session.setAttribute("loggedInCustomerName", "山田 太郎");
 
         mockMvc.perform(get("/api/customers/status").session(session))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.loggedIn").value(true))
-            .andExpect(jsonPath("$.customerId").value(1))
+            .andExpect(jsonPath("$.customerId").value(1L))
             .andExpect(jsonPath("$.customerName").value("山田 太郎"));
     }
 
@@ -173,11 +173,12 @@ class CustomerControllerTest {
     @Test
     void logout_ShouldInvalidateSession() throws Exception {
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loggedInCustomerId", 1);
+        session.setAttribute("loggedInCustomerId", 1L);
 
         mockMvc.perform(post("/api/customers/logout").session(session))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message", containsString("ログアウトしました")));
+            .andExpect(jsonPath("$.message",
+             containsString("ログアウトしました")));
     }
 
     @Test
@@ -191,9 +192,9 @@ class CustomerControllerTest {
         req.setCustomerInfo(info); req.setCurrentPassword("oldpw"); req.setNewPassword("newpw");
 
         CustomerResponse updated = new CustomerResponse(
-            2, "佐藤 花子", "hanako@sato.com", "神奈川県", "08023456789", LocalDateTime.now(), LocalDateTime.now()
+            2L, "佐藤 花子", "hanako@sato.com", "神奈川県", "08023456789", LocalDateTime.now(), LocalDateTime.now()
         );
-        when(customerService.updateCustomer(eq(2), (CustomerUpdateRequest)any())).thenReturn(updated);
+        when(customerService.updateCustomer(eq(2L), (CustomerUpdateRequest)any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/customers/2")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -212,7 +213,7 @@ class CustomerControllerTest {
         info.setPhoneNumber("08023456789");
         req.setCustomerInfo(info); req.setCurrentPassword("wrongpw"); req.setNewPassword("newpw");
 
-        when(customerService.updateCustomer(eq(2), (CustomerUpdateRequest)any()))
+        when(customerService.updateCustomer(eq(2L), (CustomerUpdateRequest)any()))
             .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
 
         mockMvc.perform(put("/api/customers/2")

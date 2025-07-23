@@ -24,6 +24,7 @@ public class CategoryRepositoryTest {
 
     @BeforeEach
     void setUp() {
+
         categoryRepository.deleteAll();
         category1 = new Category(null, "interior", null, null);
         category2 = new Category(null, "homeGoods", null, null);
@@ -58,6 +59,7 @@ public class CategoryRepositoryTest {
     @Test
     @DisplayName("カテゴリ名検索: DBに該当Categoryが存在する → Optional<Category>が該当データで返る (正常)")
     void findByCategoryName_Exist_ReturnsCategory() {
+
         String existingCategoryName = "kitchen";
 
         Optional<Category> foundCategoryOptional = categoryRepository.findByCategoryName(existingCategoryName);
@@ -82,6 +84,7 @@ public class CategoryRepositoryTest {
     @Test
     @DisplayName("作成日時順取得: 複数のCategoryが異なるcreatedAtでDBに存在 → createdAtの昇順でList<Category>が返る (正常)")
     void findAllByOrderByCreatedAtAsc_ReturnsOrdered() {
+
         // @PrePersist で自動設定される createdAt の値を考慮するため、
         // 保存後にDBから全てのカテゴリを改めて取得し、その createdAt を基に比較します。
         List<Category> savedCategories = categoryRepository.findAll();
