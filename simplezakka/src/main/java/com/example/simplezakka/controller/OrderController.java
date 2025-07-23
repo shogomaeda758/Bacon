@@ -39,13 +39,6 @@ public class OrderController {
             @Valid @RequestBody OrderRequest orderRequest,
             HttpSession session) {
 
-        Long customerId = (Long) session.getAttribute("customerId");
-        if (orderRequest.getCustomerInfo() == null) {
-            return ResponseEntity.badRequest().body(new OrderResponse("顧客情報は必須です。"));
-        }
-        
-        orderRequest.getCustomerInfo().setCustomerId(customerId);
-
         CartRespons cart = cartService.getCartFromSession(session);
         if (cart == null || cart.getItems().isEmpty()) {
             return ResponseEntity.badRequest().body(new OrderResponse("カートが空か無効です。注文を確定できません。"));
