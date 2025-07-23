@@ -184,4 +184,142 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("在庫が足りません");
     }
+    
+    @Test
+    @DisplayName("数量更新：itemIdが存在する場合、数量と小計を更新しセッションに保存")
+    void updateItemQuantity_WhenItemExists_ShouldUpdateQuantityAndTotals() {
+        CartRespons cart = new CartRespons();
+        CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 1, null);
+        cart.getItems().put("1", item);
+        session.setAttribute("cart", cart);
+
+        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
+
+        CartRespons updated = cartService.updateItemQuantity("1", 3, session);
+
+        CartItemResponse updatedItem = updated.getItems().get("1");
+        assertThat(updatedItem.getQuantity()).isEqualTo(3);
+        assertThat(updatedItem.getSubtotal()).isEqualByComparingTo(BigDecimal.valueOf(1500));
+    }
+
+    @Test
+    @DisplayName("数量更新：itemIdがカートに存在しない場合、例外をスロー")
+    void updateItemQuantity_WhenItemIdNotExists_ShouldThrowException() {
+        CartRespons cart = new CartRespons();
+        session.setAttribute("cart", cart);
+
+        assertThatThrownBy(() -> cartService.updateItemQuantity("999", 2, session))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("カートに商品が見つかりません");
+    }
+
+    @Test
+    @DisplayName("数量更新：productIdに対応する商品が存在しない場合、例外をスロー")
+    void updateItemQuantity_WhenProductNotExists_ShouldThrowException() {
+        CartRespons cart = new CartRespons();
+        CartItemResponse item = new CartItemResponse("1", 99, "不明商品", BigDecimal.ZERO, "/none.png", 1, null);
+        cart.getItems().put("1", item);
+        session.setAttribute("cart", cart);
+
+        when(productRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cartService.updateItemQuantity("1", 2, session))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("商品が見つかりません");
+    }
+
+    @Test
+    @DisplayName("数量更新：更新後数量が在庫数を超える場合、例外をスロー")
+    void updateItemQuantity_WhenQuantityExceedsStock_ShouldThrowException() {
+        CartRespons cart = new CartRespons();
+        CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 2, null);
+        cart.getItems().put("1", item);
+        session.setAttribute("cart", cart);
+
+        product1.setStock(3); // 在庫3しかない
+        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
+
+        assertThatThrownBy(() -> cartService.updateItemQuantity("1", 5, session))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("在庫が足りません");
+    }
+
+    @Test
+    @DisplayName("数量更新：数量が0以下の場合、対象itemIdをカートから削除")
+    void updateItemQuantity_WithZeroOrLessQuantity_ShouldRemoveItem() {
+        CartRespons cart = new CartRespons();
+        CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 2, null);
+        cart.getItems().put("1", item);
+        session.setAttribute("cart", cart);
+
+        when(productRepository.findById(1)).thenReturn(Optional.of(product1));
+
+        CartRespons updated = cartService.updateItemQuantity("1", 0, session);
+
+        assertThat(updated.getItems()).doesNotContainKey("1");
+        assertThat(updated.getTotalQuantity()).isZero();
+        assertThat(updated.getTotalPrice()).isZero();
+    }
+
+    @Test
+    @DisplayName("数量更新：数量がnullの場合、NullPointerExceptionをスロー")
+    void updateItemQuantity_WithNullQuantity_ShouldThrowException() {
+        assertThatThrownBy(() -> cartService.updateItemQuantity("1", null, session))
+            .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("数量更新：itemIdがnullの場合、IllegalArgumentExceptionをスローまたは状態変化なし")
+    void updateItemQuantity_WithNullItemId_ShouldThrowExceptionOrNoChange() {
+        assertThatThrownBy(() -> cartService.updateItemQuantity(null, 1, session))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("削除：itemIdが存在する場合、商品を削除してセッション更新")
+    void removeItemFromCart_WhenItemExists_ShouldRemoveItemAndRecalculateTotals() {
+        CartRespons cart = new CartRespons();
+        CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 2, null);
+        cart.getItems().put("1", item);
+        session.setAttribute("cart", cart);
+
+        CartRespons updated = cartService.removeItemFromCart("1", session);
+
+        assertThat(updated.getItems()).doesNotContainKey("1");
+        assertThat(session.getAttribute("cart")).isSameAs(updated);
+    }
+
+    @Test
+    @DisplayName("削除：itemIdが存在しない場合、変化なしでCartRespons返却")
+    void removeItemFromCart_WhenItemNotExists_ShouldReturnCartUnchanged() {
+        CartRespons cart = new CartRespons();
+        session.setAttribute("cart", cart);
+
+        CartRespons result = cartService.removeItemFromCart("999", session);
+
+        assertThat(result).isSameAs(cart);
+    }
+
+    @Test
+    @DisplayName("削除：itemIdがnullの場合、例外を出さず状態も変化しない")
+    void removeItemFromCart_WithNullItemId_ShouldNotThrowAndCartUnchanged() {
+        CartRespons cart = new CartRespons();
+        session.setAttribute("cart", cart);
+
+        CartRespons result = cartService.removeItemFromCart(null, session);
+
+        assertThat(result).isSameAs(cart);
+    }
+
+    @Test
+    @DisplayName("セッション管理：clearCart呼び出しでセッションからcartを削除")
+    void clearCart_ShouldRemoveCartAttributeFromSession() {
+        CartRespons cart = new CartRespons();
+        session.setAttribute("cart", cart);
+
+        cartService.clearCart(session);
+
+        assertThat(session.getAttribute("cart")).isNull();
+    }
+
 }
