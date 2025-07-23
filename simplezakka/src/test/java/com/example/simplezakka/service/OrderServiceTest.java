@@ -400,11 +400,7 @@ class OrderServiceTest {
 
         @Test
         @DisplayName("セッションが渡され、clearCartが適切に呼び出されるべき")
-        void placeOrder_SessionPassedAndCartCleared() {
-            
-            
-            
-            
+        void placeOrder_SessionPassedAndCartCleared() {           
             orderService.placeOrder(mockCartSingleItem, validOrderRequestMember);
             verifyNoInteractions(cartService); 
         }
@@ -442,6 +438,17 @@ class OrderServiceTest {
             assertThat(thrown.getMessage()).isEqualTo("顧客情報が不足しています。");
             verifyNoInteractions(productRepository, orderRepository, customerRepository, cartService);
         }
+
+        @Test
+@DisplayName("入力値検証, 異常系: OrderRequestがnullの場合、NullPointerExceptionをスローすべき")
+void placeOrder_Fail_WhenOrderRequestIsNull_ShouldThrowNullPointerException() {
+    NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+        orderService.placeOrder(mockCartSingleItem, null); // OrderRequest を null で渡す
+    });
+
+    assertNotNull(thrown);
+    verifyNoInteractions(productRepository, orderRepository, customerRepository, cartService);
+}
 
         @Test
         @DisplayName("在庫チェック, 異常系: カート内の商品が見つからない場合、IllegalArgumentExceptionをスローすべき")
