@@ -165,7 +165,7 @@ class CustomerRepositoryTest {
     @Test
     void findByCustomerIdAndEmail_Invalid_ShouldReturnEmpty() {
         customerRepository.save(customer);
-        assertThat(customerRepository.findByCustomerIdAndEmail(999, "wrong@none.com")).isEmpty();
+        assertThat(customerRepository.findByCustomerIdAndEmail(999L, "wrong@none.com")).isEmpty();
     }
 }
 

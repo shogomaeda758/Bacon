@@ -39,7 +39,7 @@ public class OrderController {
             @Valid @RequestBody OrderRequest orderRequest,
             HttpSession session) {
 
-        Integer customerId = (Integer) session.getAttribute("customerId");
+        Long customerId = (Long) session.getAttribute("customerId");
         if (orderRequest.getCustomerInfo() == null) {
             return ResponseEntity.badRequest().body(new OrderResponse("顧客情報は必須です。"));
         }

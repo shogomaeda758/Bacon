@@ -27,7 +27,8 @@ import java.util.Collections;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat; 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -59,7 +60,7 @@ class OrderControllerTest {
     void setUp() {
         mockSession = new MockHttpSession();
         
-        mockSession.setAttribute("customerId", 1);
+        mockSession.setAttribute("customerId", 1L);
 
         cartWithItems = new CartRespons();
         CartItemResponse item = new CartItemResponse(
@@ -98,7 +99,7 @@ class OrderControllerTest {
         
         
         CustomerInfo responseCustomerInfo = new CustomerInfo(
-            1, 
+            1L, 
             "山田 太郎",
             "yamada@example.com",
             "東京都渋谷区1-1-1",
@@ -154,8 +155,7 @@ class OrderControllerTest {
                     .andExpect(jsonPath("$.paymentMethod", is(sampleOrderResponse.getPaymentMethod())))
                     .andExpect(jsonPath("$.status", is(sampleOrderResponse.getStatus())))
                     .andExpect(jsonPath("$.customerInfo.name", is(validCustomerInfo.getName())))
-                    
-                    .andExpect(jsonPath("$.customerInfo.customerId", is(sampleOrderResponse.getCustomerInfo().getCustomerId())))
+                    .andExpect(jsonPath("$.customerInfo.customerId", is(sampleOrderResponse.getCustomerInfo().getCustomerId().intValue())))
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].productId", is(sampleOrderItemDetailResponse.getProductId())));
 

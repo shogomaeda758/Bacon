@@ -133,7 +133,7 @@ class OrderServiceTest {
         validOrderRequestMember = new OrderRequest();
         validOrderRequestMember.setCustomerInfo(validCustomerInfo);
         
-        validOrderRequestMember.getCustomerInfo().setCustomerId(10); 
+        validOrderRequestMember.getCustomerInfo().setCustomerId(10L); 
         validOrderRequestMember.setPaymentMethod("クレジットカード");
 
         
@@ -151,7 +151,7 @@ class OrderServiceTest {
 
         
         mockCustomer = new Customer();
-        mockCustomer.setCustomerId(10);
+        mockCustomer.setCustomerId(10L);
         mockCustomer.setLastName("テスト");
         mockCustomer.setFirstName("顧客");
         mockCustomer.setEmail("test@example.com");
@@ -177,7 +177,7 @@ class OrderServiceTest {
             }
             return order;
         });
-        when(customerRepository.findById(eq(10))).thenReturn(Optional.of(mockCustomer));
+        when(customerRepository.findById(eq(10L))).thenReturn(Optional.of(mockCustomer));
     }
 
 

@@ -72,7 +72,7 @@ public class OrderService {
 
         
         
-        Integer customerId = customerInfoFromRequest.getCustomerId(); 
+        Long customerId = customerInfoFromRequest.getCustomerId(); 
         if (customerId != null) { 
             Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("会員情報が見つかりません。ID: " + customerId));

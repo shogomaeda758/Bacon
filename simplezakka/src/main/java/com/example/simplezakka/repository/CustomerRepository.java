@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.List;
 
 @Repository
-public interface CustomerRepository extends JpaRepository<Customer, Integer> {
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
     
     
     Optional<Customer> findByEmail(String email);
@@ -26,6 +26,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     
     
     @Query("SELECT c FROM Customer c WHERE c.customerId = :customerId AND c.email = :email")
-    Optional<Customer> findByCustomerIdAndEmail(@Param("customerId") Integer customerId, @Param("email") String email);
+    Optional<Customer> findByCustomerIdAndEmail(@Param("customerId") Long customerId, @Param("email") String email);
 
 }

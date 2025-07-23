@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class CustomerInfo {
 
-    private Integer customerId;
+    private Long customerId;
     @NotBlank(message = "お名前は必須です")
     private String name;
 
