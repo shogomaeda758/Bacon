@@ -109,7 +109,8 @@ public class ProductService {
                 product.getName(),
                 product.getPrice().intValue(),
                 product.getImageUrl(),
-                product.getCategory().getCategoryName() // ★ 追加：カテゴリ名を含める
+                product.getCategory().getCategoryName(),
+                product.getCategory().getCategoryId()
         );
     }
 
