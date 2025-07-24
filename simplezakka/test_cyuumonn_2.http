@@ -5,8 +5,8 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card"
@@ -30,23 +30,23 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
 {
 "productId": 1,
-"name": "コットンブランケット",
-"price": 5800,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
 "quantity": 3,
-"subtotal": 17400
+"subtotal": 10500
 }
 ],
-"totalPrice": 17400,
+"totalPrice": 10500,
 "shippingFee": 0,
-"grandTotal": 17400
+"grandTotal": 10500
 }
 
 ### No. 3-16_注文（異常系 - カート内の商品がDBに存在しない）
@@ -56,8 +56,8 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
@@ -82,9 +82,9 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "",
-"email": "ichiro@test.com",
-"address": "東京都千代田区テスト1-1",
-"phoneNumber": "03-1234-5678"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -107,10 +107,10 @@ Content-Type: application/json
 
 {
 "customerInfo": {
-"name": "顧客 一郎",
+"name": "顧客 太郎",
 "email": "invalid-email",
-"address": "東京都千代田区テスト1-1",
-"phoneNumber": "03-1234-5678"
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -155,8 +155,8 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
@@ -182,8 +182,8 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
@@ -209,8 +209,8 @@ Content-Type: application/json
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
@@ -235,10 +235,10 @@ Content-Type: application/json
 
 {
 "customerInfo": {
-"name": "顧客 花子",
-"email": "hanako@test.com",
-"address": "大阪府大阪市テスト3-4",
-"phoneNumber": "06-1111-2222"
+"name": "顧客 太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "01234567889"
 },
 "items": [
 {
