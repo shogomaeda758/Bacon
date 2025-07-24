@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
                             currentOrderData.customerId = null;
+                            alert("ログアウトしました");
                             window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
@@ -220,11 +221,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const filteredProducts = allProducts.filter(product => {
-            const matchesCategory = currentSelectedCategory === 'all' || product.categoryName === currentSelectedCategory;
+            const matchesCategory = currentSelectedCategory === 'all' || product.categoryId.toString() === currentSelectedCategory;
             const matchesSearchTerm = product.name.toLowerCase().includes(currentSearchTerm) ||
-                                      (product.description && product.description.toLowerCase().includes(currentSearchTerm));
+                                    (product.description && product.description.toLowerCase().includes(currentSearchTerm));
             return matchesCategory && matchesSearchTerm;
         });
+
 
         if (filteredProducts.length === 0) {
             container.innerHTML = '<p class="text-center">該当する商品が見つかりませんでした。</p>';

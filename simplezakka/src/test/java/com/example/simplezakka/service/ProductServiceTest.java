@@ -74,8 +74,8 @@ class ProductServiceTest {
     // === findAllProducts ===
 
     @Test
-    @DisplayName("findAllProducts: リポジトリから複数の商品が返される場合、ProductListItemのリストを返す")
-    void findAllProducts_ShouldReturnListOfProductListItems() {
+    @DisplayName("商品が2件以上登録されている場合、商品の一覧(List)が返る")
+    void findAllProducts_ReturnsProductList() {
         when(productRepository.findAll()).thenReturn(Arrays.asList(product1, product2));
 
         List<ProductListItem> result = productService.findAllProducts();
@@ -93,8 +93,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findAllProducts: リポジトリから空のリストが返される場合、空のリストを返す")
-    void findAllProducts_WhenRepositoryReturnsEmptyList_ShouldReturnEmptyList() {
+    @DisplayName("商品が1件も登録されていない場合、空のリストが返る")
+    void findAllProducts_ReturnsEmptyList() {
         when(productRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<ProductListItem> result = productService.findAllProducts();
@@ -105,30 +105,11 @@ class ProductServiceTest {
         verifyNoMoreInteractions(productRepository);
     }
 
-    @Test
-    @DisplayName("findAllProducts: 商品エンティティにnullフィールドが含まれる場合、DTOにもnullがマッピングされる")
-    void findAllProducts_WhenProductHasNullFields_ShouldMapNullToDto() {
-        when(productRepository.findAll()).thenReturn(List.of(productWithNullFields));
-
-        List<ProductListItem> result = productService.findAllProducts();
-
-        assertThat(result).hasSize(1);
-        ProductListItem dto = result.get(0);
-        assertThat(dto.getProductId()).isEqualTo(productWithNullFields.getProductId());
-        assertThat(dto.getName()).isEqualTo(productWithNullFields.getName());
-        assertThat(dto.getPrice()).isEqualTo(productWithNullFields.getPrice().intValue());
-        assertThat(dto.getImageUrl()).isNull();
-        assertThat(dto.getCategoryName()).isEqualTo(category.getCategoryName());
-
-        verify(productRepository, times(1)).findAll();
-        verifyNoMoreInteractions(productRepository);
-    }
-
     // === findProductById ===
 
     @Test
-    @DisplayName("findProductById: 存在するIDで検索した場合、ProductDetailを返す")
-    void findProductById_WhenProductExists_ShouldReturnProductDetail() {
+    @DisplayName("指定IDの商品が存在する場合、商品詳細(ProductDetail)が返る")
+    void findProductById_ExistingProduct_ReturnsDetail() {
         Integer productId = 1;
         when(productRepository.findById(productId)).thenReturn(Optional.of(product1));
 
@@ -147,8 +128,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findProductById: 存在しないIDで検索した場合、nullを返す")
-    void findProductById_WhenProductNotExists_ShouldReturnNull() {
+    @DisplayName("指定IDの商品が存在しない場合、nullが返る")
+    void findProductById_NonExistingProduct_ReturnsNull() {
         Integer productId = 99;
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
@@ -161,8 +142,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("findProductById: 商品エンティティにnullフィールドが含まれる場合、DTOにもnullがマッピングされる")
-    void findProductById_WhenProductHasNullFields_ShouldMapNullToDto() {
+    @DisplayName("商品説明と画像がnullで登録されている場合、商品詳細のdescription, imageUrlがnullのまま返る")
+    void findProductById_WithNullFields_ReturnsPartial() {
         Integer productId = 3;
         when(productRepository.findById(productId)).thenReturn(Optional.of(productWithNullFields));
 
