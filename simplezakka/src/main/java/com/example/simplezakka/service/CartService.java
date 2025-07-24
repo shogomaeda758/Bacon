@@ -74,9 +74,9 @@ public class CartService {
     public CartRespons updateItemQuantity(String itemId, Integer quantity, HttpSession session) {
         CartRespons cart = getCartFromSession(session);
 
-          if (cart.getItems() == null || !cart.getItems().containsKey(itemId)) {
-        return cart;
-    }
+        if (cart.getItems() == null || !cart.getItems().containsKey(itemId)) {
+            throw new IllegalArgumentException("カートに商品が見つかりません: " + itemId);
+        }
 
         if (quantity <= 0) {
             cart.removeItem(itemId);
