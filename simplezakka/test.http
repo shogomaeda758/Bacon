@@ -1,28 +1,41 @@
-### 商品一覧取得
+### 存在しない商品IDで詳細表示
+GET http://localhost:8080/api/products/99999
+Accept: application/json
+# 期待される結果: 404 Not Found（存在しない商品ID）
+
+### 不正な形式の商品IDで詳細表示
+GET http://localhost:8080/api/products/abc
+Accept: application/json
+# 期待される結果: 400 Bad Request または 500 Internal Server Error（型変換エラー）
+
+### DBに商品データが1件もない場合の商品一覧表示
 GET http://localhost:8080/api/products
+Accept: application/json
+# 期待される結果: 空のJSON配列 [] が返却（200 OK）
 
-### 商品詳細取得
+### 商品データにnullフィールドが含まれる場合の詳細表示
 GET http://localhost:8080/api/products/1
+Accept: application/json
+# 期待される結果: 200 OK、nullフィールド（例：description）がnullまたは存在しない
+# 前提: ID=1の商品にdescription=nullが設定済み
 
-### カートに追加
-POST http://localhost:8080/api/cart
-content-type: application/json
+### 画像URLが無効な場合
+GET http://localhost:8080/api/products/1
+Accept: application/json
+# 期待される結果: 200 OK、無効なimageUrlが返却
+# UI確認: http://localhost:8080/index.html で画像が表示されない、またはデフォルト画像/alt属性を確認
+# 前提: ID=1の商品に無効なimageUrl（例："broken_url"）が設定済み
 
-{
-    "productId": 1, 
-    "quantity": 2
-}
+### 商品名が長すぎる場合のUI崩れ確認
+GET http://localhost:8080/api/products/1
+Accept: application/json
+# 期待される結果: 200 OK、255文字の商品名が正しく返却
+# UI確認: http://localhost:8080/index.html でレイアウト崩れがない、文字が省略/改行されている
+# 前提: ID=1の商品に255文字の商品名（例："あ" x 255）が設定済み
 
-### カート取得
-GET http://localhost:8080/api/cart
-
-### 注文
-POST http://localhost:8080/api/orders
-content-type: application/json
-
-{"customerInfo":
-    {"name": "テスト",
-        "email": "t@e.com",
-        "address": "住所",
-        "phoneNumber": "123"}
-}
+### 価格が異常値（0円、負数）の場合
+GET http://localhost:8080/api/products/1
+Accept: application/json
+# 期待される結果: 200 OK、価格が0または負数（例：-100）として返却
+# UI確認: http://localhost:8080/index.html で「価格未設定」やエラー表示を確認
+# 前提: ID=1の商品に価格=0または負数（例：-100）が設定済み
