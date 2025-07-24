@@ -1,5 +1,5 @@
 ### No. 3-14_注文（異常系 - カートが空の状態で注文）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -7,14 +7,24 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card"
 }
 
 ### No. 3-15_注文（異常系 - 注文処理中に在庫不足が発生）
+### 前提条件
+POST http://localhost:8080/api/cart
+Content-Type: application/json
 
-POST http://localhost:8080/api/orders/confirm
+{
+    "productId": 1,
+    "quantity": 3
+}
+- データベースでproductId:1 の商品を2個にする
+
+### 入力
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -22,7 +32,7 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -40,7 +50,7 @@ Content-Type: application/json
 }
 
 ### No. 3-16_注文（異常系 - カート内の商品がDBに存在しない）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -48,7 +58,7 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -66,7 +76,7 @@ Content-Type: application/json
 }
 
 ### No. 3-17_注文（異常系 - 顧客情報不足、例：名前が空）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -92,7 +102,7 @@ Content-Type: application/json
 }
 
 ### No. 3-18_注文（異常系 - 顧客情報の形式が不正、例：メール形式不正）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -118,28 +128,28 @@ Content-Type: application/json
 }
 
 ### No. 3-19_1 注文（異常系 - リクエストボディが空）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 ### No. 3-19_2 注文（異常系 - JSON形式として文法的に不正：値が欠落）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 { "customerInfo": }
 
 ### No. 3-19_3 注文（異常系 - JSON形式として文法的に不正：構文エラー）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {"invalid_json"
 
 ### No. 3-19_4 注文（異常系 - Content-Typeがapplication/jsonだが、実際はJSONではないデータ）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 ### No. 3-20_注文（異常系 - (模擬) 注文DB保存時にエラー発生）
 
 
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -147,7 +157,7 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -166,7 +176,7 @@ Content-Type: application/json
 
 ### No. 3-21_注文（異常系 - (模擬) 在庫更新時にエラー発生）
 
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -174,7 +184,7 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -193,7 +203,7 @@ Content-Type: application/json
 
 ### No. 3-22_注文（異常系 - (模擬) カートクリア時にエラー発生）
 
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
@@ -201,7 +211,7 @@ Content-Type: application/json
 "name": "顧客 太郎",
 "email": "taro@test.com",
 "address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -220,7 +230,7 @@ Content-Type: application/json
 
 ### 3-23_注文（異常系 - 決済方法が未選択）
 
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
