@@ -1,0 +1,16 @@
+2025-07-24 15:03:13.314219+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "[*]ORDERS CUSTOMERS"
+Syntax error in SQL statement "[*]ORDERS CUSTOMERS"; SQL statement:
+ORDERS CUSTOMERS [42000-232]
+2025-07-24 15:03:17.844560+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "[*]ORDERS CUSTOMERS"
+Syntax error in SQL statement "[*]ORDERS CUSTOMERS"; SQL statement:
+ORDERS CUSTOMERS [42000-232]
+2025-07-24 15:03:24.428526+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "[*]CATEGORIES"; 期待されるステートメント "COMMIT, CREATE, CALL, CHECKPOINT, COMMENT"
+Syntax error in SQL statement "[*]CATEGORIES"; expected "COMMIT, CREATE, CALL, CHECKPOINT, COMMENT"; SQL statement:
+CATEGORIES [42001-232]
+2025-07-24 15:03:27.918082+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "[*]ORDER_DETAILS PRODUCTS"
+Syntax error in SQL statement "[*]ORDER_DETAILS PRODUCTS"; SQL statement:
+ORDER_DETAILS PRODUCTS [42000-232]
