@@ -9,7 +9,13 @@ Content-Type: application/json
 "address": "東京都品川区",
 "phoneNumber": "0123456789"
 },
-"paymentMethod": "credit_card"
+"paymentMethod": "credit_card",
+"items": [
+
+],
+"totalPrice": 0,
+"shippingFee": 0,
+"grandTotal": 0
 }
 
 ### No. 3-15_注文（異常系 - 注文処理中に在庫不足が発生）
