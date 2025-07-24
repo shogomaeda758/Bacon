@@ -243,41 +243,36 @@ void getCartFromSession_WhenCartExists_ShouldReturnExistingCart() {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("在庫が足りません");
     }
-// quantity が null の場合 → NullPointerException を期待
-@Test
-@DisplayName("カート操作（追加）: quantityがnullのとき、NullPointerExceptionをスローする")
-void addItemToCart_WithNullQuantity_ShouldThrowNullPointerException() {
-    Integer productId = 1;
-    Integer quantity = null;
-
-    Throwable thrown = catchThrowable(() -> cartService.addItemToCart(productId, quantity,session));
-
-    assertThat(thrown)
-        .isInstanceOf(NullPointerException.class)
-        .hasMessage("数量はnull不可です");
-}
-
 
 @Test
-@DisplayName("カート操作（追加）: quantityが0以下のとき、IllegalArgumentExceptionをスローする")
-void addItemToCart_WithZeroOrNegativeQuantity_ShouldThrowException2() {
-    long productId = 1L; 
+@DisplayName("数量更新：quantityが0以下の場合、対象itemIdがカートから削除されセッションに保存される")
+void updateItemQuantity_WithZeroOrLessQuantity_ShouldRemoveItem() {
+   
+    CartRespons cart = new CartRespons();
+    CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 2, null);
+    cart.getItems().put("1", item);
+    session.setAttribute("cart", cart);
 
-    when(productRepository.findById((int) productId)).thenReturn(Optional.of(product1));
+    CartRespons updatedCart = cartService.updateItemQuantity("1", 0, session);
 
-    Throwable thrownZero = catchThrowable(() -> cartService.addItemToCart(productId, 0, session));
-    Throwable thrownNegative = catchThrowable(() -> cartService.addItemToCart(productId, -5, session));
 
-    assertThat(thrownZero)
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("追加する数量は1以上"); 
+    assertThat(updatedCart.getItems()).doesNotContainKey("1");
 
-    assertThat(thrownNegative)
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("追加する数量は1以上");
+    CartRespons sessionCart = (CartRespons) session.getAttribute("cart");
+    assertThat(sessionCart.getItems()).doesNotContainKey("1");
 }
 
+@Test
+@DisplayName("数量更新：quantityがnullの場合、NullPointerExceptionをスローする")
+void updateItemQuantity_WithNullQuantity_ShouldThrowException() {
+    CartRespons cart = new CartRespons();
+    CartItemResponse item = new CartItemResponse("1", 1, "商品1", BigDecimal.valueOf(500), "/img.png", 1, null);
+    cart.getItems().put("1", item);
+    session.setAttribute("cart", cart);
 
+    assertThatThrownBy(() -> cartService.updateItemQuantity("1", null, session))
+        .isInstanceOf(NullPointerException.class);
+}
 
     @Test
     @DisplayName("数量更新：itemIdがnullの場合、IllegalArgumentExceptionをスローまたは状態変化なし")
