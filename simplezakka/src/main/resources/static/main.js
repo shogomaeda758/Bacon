@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (logoutResponse.ok) {
                             sessionStorage.removeItem("userName");
                             currentOrderData.customerId = null;
+                            alert("ログアウトしました");
                             window.location.reload();
                         } else {
                             const errorData = await logoutResponse.json();
