@@ -123,12 +123,7 @@ public class OrderService {
             order.addOrderDetail(orderDetail);
 
             int updatedRows = productRepository.decreaseStock(product.getProductId(), cartItem.getQuantity());
-            // //if (simulateStockUpdateFailure) {
-            //     if (cartItem.getProductId() == 1 && cartItem.getQuantity() == 3) { 
-            //         System.out.println("--- 模擬: 在庫更新失敗を強制発生 (decreaseStock結果を0に上書き) ---");
-            //         updatedRows = 0; 
-            //     }
-            // }
+
             if (updatedRows != 1) {
                 throw new IllegalStateException(
                     "商品 " + product.getName() + " の在庫更新に失敗しました。時間をおいて再度お試しください。");
