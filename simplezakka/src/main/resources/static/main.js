@@ -952,17 +952,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!cartClearResponse.ok) {
-                // カートのクリアは注文本体とは独立してエラーハンドリング
                 const errorData = await cartClearResponse.json().catch(() => ({ message: '不明なエラー' }));
                 console.error(`Failed to clear cart: ${cartClearResponse.status} - ${errorData.message}`);
-                // ユーザーには注文が完了したことを伝えつつ、カートクリアの問題を軽く伝える
                 alert('注文は正常に完了しましたが、カートのクリア中に問題が発生しました。');
             } else {
                 console.log('カートをクリアしました。');
-                updateCartBadge(0); // カートバッジを0に更新
+                updateCartBadge(0); 
             }
         } catch (cartClearError) {
-            // カートクリア処理でのネットワークエラーなど
             console.error('カートクリア中のネットワークエラー:', cartClearError);
             alert('注文は正常に完了しましたが、カートのクリア中にネットワークエラーが発生しました。');
         }

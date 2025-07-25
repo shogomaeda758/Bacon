@@ -18,6 +18,7 @@ Content-Type: application/json
 "grandTotal": 0
 }
 
+
 ### No. 3-15_注文（異常系 - 注文処理中に在庫不足が発生）
 ### 前提条件
 POST http://localhost:8080/api/cart
