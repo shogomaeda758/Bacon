@@ -555,24 +555,24 @@ document.addEventListener('DOMContentLoaded', function() {
             modalBody.innerHTML = `
                 <form id="order-form" class="needs-validation" novalidate>
                     <div class="mb-3">
-                        <label for="name" class="form-label">お名前</label>
+                        <label for="name" class="form-label">お名前(全角)</label>
                         <input type="text" class="form-control" id="name" required pattern=".{2,}">
-                        <div class="invalid-feedback">お名前は2文字以上で入力してください</div>
+                        <div class="invalid-feedback">お名前は2文字以上の全角で入力してください</div>
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">メールアドレス</label>
+                        <label for="email" class="form-label">メールアドレス(半角)</label>
                         <input type="email" class="form-control" id="email" required>
-                        <div class="invalid-feedback">有効なメールアドレスを入力してください (例: user@example.com)</div>
+                        <div class="invalid-feedback">有効なメールアドレスを半角で入力してください (例: user@example.com)</div>
                     </div>
                     <div class="mb-3">
-                        <label for="address" class="form-label">住所</label>
+                        <label for="address" class="form-label">住所(全角)</label>
                         <input type="text" class="form-control" id="address" required pattern=".{5,}">
-                        <div class="invalid-feedback">住所は5文字以上で入力してください</div>
+                        <div class="invalid-feedback">住所は5文字以上の全角で入力してください</div>
                     </div>
                     <div class="mb-3">
-                        <label for="phone" class="form-label">電話番号</label>
+                        <label for="phone" class="form-label">電話番号(半角)</label>
                         <input type="tel" class="form-control" id="phone" required pattern="^0\\d{9,10}$">
-                        <div class="invalid-feedback">有効な電話番号を入力してください (ハイフンなし、0から始まる10桁または11桁)</div>
+                        <div class="invalid-feedback">有効な電話番号を半角で入力してください (ハイフンなし、0から始まる10桁または11桁)</div>
                     </div>
 
                     <hr class="my-4">
