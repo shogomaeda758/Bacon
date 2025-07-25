@@ -3,6 +3,7 @@ package com.example.simplezakka.annotation;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.*;
+import com.example.simplezakka.validator.FullWidthValidator;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
