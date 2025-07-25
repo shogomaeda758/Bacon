@@ -50,7 +50,7 @@ public class DataLoader implements CommandLineRunner {
         // --- 2. 商品データを作成し、カテゴリを紐付けて保存する ---
         List<Product> products = Arrays.asList(
             createProduct(
-                "シンプルデスクオーガナイザー",
+                "シンプルデスクオーガナイザー",//productId:1
                 "机の上をすっきり整理できる木製オーガナイザー。ペン、メモ、スマートフォンなどを収納できます。",
                 3500,
                 20,
@@ -59,7 +59,7 @@ public class DataLoader implements CommandLineRunner {
                 interior 
             ),
             createProduct(
-                "アロマディフューザー（ウッド）",
+                "アロマディフューザー（ウッド）",//productId:2
                 "天然木を使用したシンプルなデザインのアロマディフューザー。LEDライト付き。",
                 4200,
                 15,
@@ -68,7 +68,7 @@ public class DataLoader implements CommandLineRunner {
                 interior 
             ),
             createProduct(
-                "コットンブランケット",
+                "コットンブランケット",//productId:3
                 "オーガニックコットン100%のやわらかブランケット。シンプルなデザインで様々なインテリアに合います。",
                 5800,
                 10,
@@ -77,7 +77,7 @@ public class DataLoader implements CommandLineRunner {
                 homeGoods 
             ),
             createProduct(
-                "ステンレスタンブラー",
+                "ステンレスタンブラー",//productId:4
                 "保温・保冷機能に優れたシンプルなデザインのステンレスタンブラー。容量350ml。",
                 2800,
                 30,
@@ -86,7 +86,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "ミニマルウォールクロック",
+                "ミニマルウォールクロック",//productId:5
                 "余計な装飾のないシンプルな壁掛け時計。静音設計。",
                 3200,
                 25,
@@ -95,7 +95,7 @@ public class DataLoader implements CommandLineRunner {
                 interior 
             ),
             createProduct(
-                "リネンクッションカバー",
+                "リネンクッションカバー",//productId:6
                 "天然リネン100%のクッションカバー。取り外して洗濯可能。45×45cm対応。",
                 2500,
                 40,
@@ -104,7 +104,7 @@ public class DataLoader implements CommandLineRunner {
                 homeGoods 
             ),
             createProduct(
-                "陶器フラワーベース",
+                "陶器フラワーベース",//productId:7
                 "手作りの風合いが魅力の陶器製フラワーベース。シンプルな形状で花を引き立てます。",
                 4000,
                 15,
@@ -113,7 +113,7 @@ public class DataLoader implements CommandLineRunner {
                 interior 
             ),
             createProduct(
-                "木製コースター（4枚セット）",
+                "木製コースター（4枚セット）",//productId:8
                 "天然木を使用したシンプルなデザインのコースター。4枚セット。",
                 1800,
                 50,
@@ -122,7 +122,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen 
             ),
             createProduct(
-                "キャンバストートバッグ",
+                "キャンバストートバッグ",//productId:9
                 "丈夫なキャンバス地で作られたシンプルなトートバッグ。内ポケット付き。",
                 3600,
                 35,
@@ -131,7 +131,7 @@ public class DataLoader implements CommandLineRunner {
                 fashion 
             ),
             createProduct(
-                "ガラス保存容器セット",
+                "ガラス保存容器セット",//productId:10
                 "電子レンジ・食洗機対応のガラス製保存容器。3サイズセット。",
                 4500,
                 20,
@@ -140,7 +140,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen 
             ),
             createProduct(
-                "テスト商品A",
+                "テスト商品A",//productId:11
                 "テスト用の商品Aです。",
                 4999,
                 10,
@@ -149,16 +149,16 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "テスト商品B",
+                "テスト商品B",//productId:12
                 "テスト用の商品Bです。",
-                3000,
+                1999,
                 10,
                 "/images/glass-container.png",
                 false,
                 kitchen
             ),
             createProduct(
-                "テスト商品C",
+                "テスト商品C",//productId:13
                 "テスト用の商品Cです。",
                 5000,
                 10,
@@ -167,7 +167,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "テスト商品D",
+                "テスト商品D",//productId:14
                 "テスト用の商品Dです。",
                 2000,
                 10,
@@ -176,7 +176,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "テスト商品E",
+                "テスト商品E",//productId:15
                 "テスト用の商品Eです。",
                 3000,
                 10,
@@ -185,7 +185,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "テスト商品F",
+                "テスト商品F",//productId:16
                 "テスト用の商品Fです。",
                 5001,
                 10,
@@ -194,7 +194,7 @@ public class DataLoader implements CommandLineRunner {
                 kitchen
             ),
             createProduct(
-                "テスト商品G",
+                "テスト商品G",//productId:17
                 "テスト用の商品Gです。",
                 3001,
                 10,
