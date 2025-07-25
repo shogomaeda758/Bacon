@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Category {
 
     @Id
@@ -36,8 +35,7 @@ public class Category {
         updatedAt = LocalDateTime.now();
     }
 
-    public void setName(String string) {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'setName'");
+    public void setName(String name) {
+        this.categoryName = name;
     }
 }

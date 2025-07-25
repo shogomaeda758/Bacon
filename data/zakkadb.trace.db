@@ -985,3 +985,14 @@ delete from PRODUCT
 delete from CATEGORY
 insert into CATEGORY (category_id, name, created_at, updated_at) values ...
 insert into PRODUCT (product_id, name, price, stock, category_id, description, image_url, is_recommended, created_at, updated_at) values ... [42000-232]
+2025-07-24 19:38:41.239591+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "[*]mvn test"; 期待されるステートメント "MERGE"
+Syntax error in SQL statement "[*]mvn test"; expected "MERGE"; SQL statement:
+mvn test [42001-232]
+2025-07-24 19:38:54.793506+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "delete from PRODUCT\000d\000adelete [*]from CATEGORY\000d\000ainsert into CATEGORY (category_id, name, created_at, updated_at) values ...\000d\000ainsert into PRODUCT (product_id, name, price, stock, category_id, description, image_url, is_recommended, created_at, updated_at) values ..."
+Syntax error in SQL statement "delete from PRODUCT\000d\000adelete [*]from CATEGORY\000d\000ainsert into CATEGORY (category_id, name, created_at, updated_at) values ...\000d\000ainsert into PRODUCT (product_id, name, price, stock, category_id, description, image_url, is_recommended, created_at, updated_at) values ..."; SQL statement:
+delete from PRODUCT
+delete from CATEGORY
+insert into CATEGORY (category_id, name, created_at, updated_at) values ...
+insert into PRODUCT (product_id, name, price, stock, category_id, description, image_url, is_recommended, created_at, updated_at) values ... [42000-232]
