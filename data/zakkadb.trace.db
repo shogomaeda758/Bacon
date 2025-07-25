@@ -1020,3 +1020,11 @@ The connection was not closed by the application and is garbage collected [90018
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	... 16 more
+2025-07-25 19:05:07.655054+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "SELECT * FROM ORDER_DETAILS CATEGORY [*]CATEGORIES PRODUCT"
+Syntax error in SQL statement "SELECT * FROM ORDER_DETAILS CATEGORY [*]CATEGORIES PRODUCT"; SQL statement:
+SELECT * FROM ORDER_DETAILS CATEGORY CATEGORIES PRODUCT [42000-232]
+2025-07-25 19:06:08.687276+09:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: SQLステートメントに文法エラーがあります "SELECT * FROM CATEGORY PRODUCT [*]PRODUCTS"
+Syntax error in SQL statement "SELECT * FROM CATEGORY PRODUCT [*]PRODUCTS"; SQL statement:
+SELECT * FROM CATEGORY PRODUCT PRODUCTS [42000-232]
