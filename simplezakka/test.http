@@ -9,7 +9,7 @@ POST http://localhost:8080/api/cart
 content-type: application/json
 
 {
-    "productId": 1, 
+    "productId": null, 
     "quantity": 2
 }
 
