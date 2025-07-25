@@ -1,41 +1,65 @@
-### 存在しない商品IDで詳細表示
+### シナリオ6: 商品検索（正常系）
+GET http://localhost:8080/api/products/search?keyword=ああああ
+Accept: application/json
+# 期待される結果: 200 OK, キーワード"ああああ"を含む商品リスト（ProductListItem）が返却される
+# 前提: ID=1の商品にname="ああああ...（255文字）"が設定済み
+
+### シナリオ7: カテゴリー別商品取得（正常系）
+GET http://localhost:8080/api/products/category/1
+Accept: application/json
+# 期待される結果: 200 OK, category_id=1の商品リスト（ProductListItem）が返却される
+# 前提: category_id=1に商品（ID=1, 2）が登録済み
+
+### シナリオ8: 存在しない商品ID
 GET http://localhost:8080/api/products/99999
 Accept: application/json
-# 期待される結果: 404 Not Found（存在しない商品ID）
+# 期待される結果: 404 Not Found
 
-### 不正な形式の商品IDで詳細表示
+### シナリオ9: 不正な形式の商品ID
 GET http://localhost:8080/api/products/abc
 Accept: application/json
-# 期待される結果: 400 Bad Request または 500 Internal Server Error（型変換エラー）
+# 期待される結果: 400 Bad Request または 500
 
-### DBに商品データが1件もない場合の商品一覧表示
+### シナリオ10: DBに商品データが1件もない場合の商品一覧表示
 GET http://localhost:8080/api/products
 Accept: application/json
-# 期待される結果: 空のJSON配列 [] が返却（200 OK）
+# 前提: DELETE FROM PRODUCTS;
+# 期待される結果: 200 OK, []
 
-### 商品データにnullフィールドが含まれる場合の詳細表示
+### シナリオ11: 商品データにnullフィールドが含まれる場合の詳細表示
 GET http://localhost:8080/api/products/1
 Accept: application/json
-# 期待される結果: 200 OK、nullフィールド（例：description）がnullまたは存在しない
+# 期待される結果: 200 OK, nullフィールド（例：description）がnullまたは存在しない
 # 前提: ID=1の商品にdescription=nullが設定済み
 
-### 画像URLが無効な場合
+### シナリオ12: 画像URLが無効な場合
 GET http://localhost:8080/api/products/1
 Accept: application/json
-# 期待される結果: 200 OK、無効なimageUrlが返却
-# UI確認: http://localhost:8080/index.html で画像が表示されない、またはデフォルト画像/alt属性を確認
-# 前提: ID=1の商品に無効なimageUrl（例："broken_url"）が設定済み
+# 期待される結果: 200 OK, imageUrl="broken_url"
 
-### 商品名が長すぎる場合のUI崩れ確認
+### シナリオ13: 商品名が長すぎる場合
 GET http://localhost:8080/api/products/1
 Accept: application/json
-# 期待される結果: 200 OK、255文字の商品名が正しく返却
-# UI確認: http://localhost:8080/index.html でレイアウト崩れがない、文字が省略/改行されている
-# 前提: ID=1の商品に255文字の商品名（例："あ" x 255）が設定済み
+# 期待される結果: 200 OK, name=255文字
 
-### 価格が異常値（0円、負数）の場合
+### シナリオ14: 価格が異常値（負数）
 GET http://localhost:8080/api/products/1
 Accept: application/json
-# 期待される結果: 200 OK、価格が0または負数（例：-100）として返却
-# UI確認: http://localhost:8080/index.html で「価格未設定」やエラー表示を確認
-# 前提: ID=1の商品に価格=0または負数（例：-100）が設定済み
+# 期待される結果: 200 OK, price=-100
+
+### シナリオ14: 価格が異常値（0円）
+GET http://localhost:8080/api/products/2
+Accept: application/json
+# 期待される結果: 200 OK, price=0
+
+### シナリオ15: 商品検索（空のキーワード）
+GET http://localhost:8080/api/products/search?keyword=
+Accept: application/json
+# 期待される結果: 400 Bad Request
+# 前提: キーワードが空または空白の場合
+
+### シナリオ16: カテゴリー別商品取得（存在しないカテゴリー）
+GET http://localhost:8080/api/products/category/999
+Accept: application/json
+# 期待される結果: 200 OK, 空のJSON配列 []
+# 前提: category_id=999に商品が存在しない
