@@ -1,0 +1,62 @@
+3-19-1
+
+HTTP/1.1 400 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Thu, 24 Jul 2025 09:52:57 GMT
+Connection: close
+
+{
+  "orderId": null,
+  "orderDate": null,
+  "totalPrice": null,
+  "shippingFee": null,
+  "grandTotal": null,
+  "paymentMethod": null,
+  "status": null,
+  "items": null,
+  "customerInfo": null,
+  "message": "リクエストボディのJSON形式が不正です。"
+}
+
+3-19-2
+HTTP/1.1 400 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Thu, 24 Jul 2025 09:56:00 GMT
+Connection: close
+
+{
+  "orderId": null,
+  "orderDate": null,
+  "totalPrice": null,
+  "shippingFee": null,
+  "grandTotal": null,
+  "paymentMethod": null,
+  "status": null,
+  "items": null,
+  "customerInfo": null,
+  "message": "リクエストボディのJSON形式が不正です。"
+}
+
+3-19-3
+HTTP/1.1 400 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Thu, 24 Jul 2025 09:52:15 GMT
+Connection: close
+
+{
+  "orderId": null,
+  "orderDate": null,
+  "totalPrice": null,
+  "shippingFee": null,
+  "grandTotal": null,
+  "paymentMethod": null,
+  "status": null,
+  "items": null,
+  "customerInfo": null,
+  "message": "リクエストボディのJSON形式が不正です。"
+}
+
+3-19-4

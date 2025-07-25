@@ -18,6 +18,7 @@ import com.example.simplezakka.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -43,6 +44,9 @@ public class OrderService {
         this.customerRepository = customerRepository;
         this.cartService = cartService;
     }
+
+
+    // private boolean simulateStockUpdateFailure = true ;(結合テスト3-21用のフラグ)
 
     @Transactional
     public OrderResponse placeOrder(CartRespons cart, OrderRequest orderRequest) {
@@ -119,12 +123,14 @@ public class OrderService {
             order.addOrderDetail(orderDetail);
 
             int updatedRows = productRepository.decreaseStock(product.getProductId(), cartItem.getQuantity());
+
             if (updatedRows != 1) {
                 throw new IllegalStateException(
                     "商品 " + product.getName() + " の在庫更新に失敗しました。時間をおいて再度お試しください。");
             }
         }
 
+        // throw new RuntimeException("模擬：注文情報のDB保存に失敗しました。");
         Order savedOrder = orderRepository.save(order);
 
         
