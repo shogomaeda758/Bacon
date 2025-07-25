@@ -1,80 +1,106 @@
 ### No. 3-14_注文（異常系 - カートが空の状態で注文）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
-"paymentMethod": "credit_card"
+"paymentMethod": "credit_card",
+"items": [
+
+],
+"totalPrice": 0,
+"shippingFee": 0,
+"grandTotal": 0
 }
 
 ### No. 3-15_注文（異常系 - 注文処理中に在庫不足が発生）
+### 前提条件
+POST http://localhost:8080/api/cart
+Content-Type: application/json
 
-POST http://localhost:8080/api/orders/confirm
+{
+    "productId": 1,
+    "quantity": 3
+}
+- データベースでproductId:1 の商品を2個にする
+
+### 入力
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
 {
 "productId": 1,
-"name": "コットンブランケット",
-"price": 5800,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
 "quantity": 3,
-"subtotal": 17400
+"subtotal": 10500
 }
 ],
-"totalPrice": 17400,
+"totalPrice": 10500,
 "shippingFee": 0,
-"grandTotal": 17400
+"grandTotal": 10500
+}
+↓データベース変更
+### 3.16 前提条件
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+
+{
+    "productId": 999,
+    "quantity": 1
 }
 
+↓データベース変更
 ### No. 3-16_注文（異常系 - カート内の商品がDBに存在しない）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
 {
 "productId": 999,
-"productName": "不明な商品",
+"name": "不明な商品",
 "price": 1000,
 "quantity": 1,
 "subtotal": 1000
 }
 ],
 "totalPrice": 1000,
-"shippingFee": 0,
+"shippingFee": 500,
 "grandTotal": 1000
 }
 
 ### No. 3-17_注文（異常系 - 顧客情報不足、例：名前が空）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "",
-"email": "ichiro@test.com",
-"address": "東京都千代田区テスト1-1",
-"phoneNumber": "03-1234-5678"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -92,17 +118,17 @@ Content-Type: application/json
 }
 
 ### No. 3-18_注文（異常系 - 顧客情報の形式が不正、例：メール形式不正）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
-"name": "顧客 一郎",
+"name": "顧客 太郎",
 "email": "invalid-email",
-"address": "東京都千代田区テスト1-1",
-"phoneNumber": "03-1234-5678"
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
-"paymentMethod": "credit_card",
+"paymentMethod": "credit_card", 
 "items": [
 {
 "productId": 1,
@@ -118,36 +144,77 @@ Content-Type: application/json
 }
 
 ### No. 3-19_1 注文（異常系 - リクエストボディが空）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 ### No. 3-19_2 注文（異常系 - JSON形式として文法的に不正：値が欠落）
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
-{ "customerInfo": }
+
+{
+"customerInfo": ,
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
 
 ### No. 3-19_3 注文（異常系 - JSON形式として文法的に不正：構文エラー）
-POST http://localhost:8080/api/orders/confirm
-Content-Type: application/json
-
-{"invalid_json"
-
-### No. 3-19_4 注文（異常系 - Content-Typeがapplication/jsonだが、実際はJSONではないデータ）
-POST http://localhost:8080/api/orders/confirm
-Content-Type: application/json
-
-### No. 3-20_注文（異常系 - (模擬) 注文DB保存時にエラー発生）
-
-
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "invalid-email",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+
+
+### No. 3-20 前提条件
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 1
+}
+↓ordersviceを変更（throw new RuntimeExceptionをコメントからコードに、saveorderメソッドをコメントアウト）
+### No. 3-20_注文（異常系 - (模擬) 注文DB保存時にエラー発生）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客 太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -165,43 +232,53 @@ Content-Type: application/json
 }
 
 ### No. 3-21_注文（異常系 - (模擬) 在庫更新時にエラー発生）
+### 前提条件
+POST http://localhost:8080/api/cart
+Content-Type: application/json
 
-POST http://localhost:8080/api/orders/confirm
+{
+    "productId": 1,
+    "quantity": 3
+}
+↓「private boolean simulateStockUpdateFailure 」や「if (simulateStockUpdateFailure)~」を有効化
+
+### 入力
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
 {
 "productId": 1,
-"name": "木製コースター（4枚セット）",
-"price": 1800,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
 "quantity": 3,
-"subtotal": 5400
+"subtotal": 10500
 }
 ],
-"totalPrice": 5400,
+"totalPrice": 10500,
 "shippingFee": 0,
-"grandTotal": 5400
+"grandTotal": 10500
 }
 
 ### No. 3-22_注文（異常系 - (模擬) カートクリア時にエラー発生）
 
-POST http://localhost:8080/api/orders/confirm
+POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
 
 {
 "customerInfo": {
 "name": "顧客 太郎",
-"email": "taro@test.com",
-"address": "東京都新宿区テスト1-2",
-"phoneNumber": "03-9876-5432"
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
 },
 "paymentMethod": "credit_card",
 "items": [
@@ -218,28 +295,3 @@ Content-Type: application/json
 "grandTotal": 4000
 }
 
-### 3-23_注文（異常系 - 決済方法が未選択）
-
-POST http://localhost:8080/api/orders/confirm
-Content-Type: application/json
-
-{
-"customerInfo": {
-"name": "顧客 花子",
-"email": "hanako@test.com",
-"address": "大阪府大阪市テスト3-4",
-"phoneNumber": "06-1111-2222"
-},
-"items": [
-{
-"productId": 1,
-"name": "シンプルデスクオーガナイザー",
-"price": 3500,
-"quantity": 1,
-"subtotal": 3500
-}
-],
-"totalPrice": 3500,
-"shippingFee": 500,
-"grandTotal": 4000
-}
