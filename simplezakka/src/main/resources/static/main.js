@@ -76,11 +76,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {string} [userName=''] - ユーザー名 (ログイン時のみ)
      */
     async function updateHeaderButtons(loggedIn, userName = '') {
-        const headerRightButtons = document.getElementById("header-right-buttons");
-        if (!headerRightButtons) {
-            console.warn("Header right buttons container not found!"); 
-            return;
-        }
+    const headerRightButtons = document.getElementById("header-right-buttons");
+    if (!headerRightButtons) {
+        console.warn("Header right buttons container not found!"); // この警告が表示される
+        return; // 処理を中断する
+    }
 
         let buttonsHtml = '';
         if (loggedIn) {
