@@ -1,0 +1,243 @@
+### 前提条件変更
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 1
+}
+
+### No. 3-18-1_注文（異常系 - 顧客情報の形式が不正、名前が101字以上）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあ",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-2_注文（異常系 - 顧客情報の形式が不正、名前が半角文字）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客 太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-3_注文（異常系 - 顧客情報の形式が不正、メールアドレスが@を使用してない）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "invalid-email",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-4_注文（異常系 - 顧客情報の形式が不正、メールアドレスが256文字以上(263文字)）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "testmember123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-5_注文（異常系 - 顧客情報の形式が不正、メールアドレス全角で入力）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "test-member-１@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-6_注文（異常系 - 顧客情報の形式が不正、住所が501字以上（501字））
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "test-member-a@example.com",
+"address": "あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあ",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-7_注文（異常系 - 顧客情報の形式が不正、住所が半角）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区1-0-1",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-8_注文（異常系 - 顧客情報の形式が不正、電話番号が9桁）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "012345678"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
+### No. 3-18-9_注文（異常系 - 顧客情報の形式が不正、電話番号を全角で入力）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "顧客　太郎",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "123456789０"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
