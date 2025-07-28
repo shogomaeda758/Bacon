@@ -30,7 +30,6 @@ public class CustomerInfo {
 
     @NotBlank(message = "住所は必須です。")
     @Size(max = 500, message = "住所は500文字以内で入力してください。")
-    @FullWidth(message = "住所は全角文字で入力してください。") // 住所: 全角指定
     private String address;
 
     @NotBlank(message = "電話番号は必須です。")
