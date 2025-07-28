@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         console.error('Error:', errorMessage);
         alert(errorMessage);
-        throw new Error(errorMessage);
+        //throw new Error(errorMessage);
     }
 
     
