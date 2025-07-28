@@ -1,7 +1,7 @@
 HTTP/1.1 400 
 Content-Type: application/json
 Transfer-Encoding: chunked
-Date: Thu, 24 Jul 2025 08:03:05 GMT
+Date: Mon, 28 Jul 2025 02:10:04 GMT
 Connection: close
 
 {
@@ -14,5 +14,5 @@ Connection: close
   "status": null,
   "items": null,
   "customerInfo": null,
-  "message": "氏名は必須です。"
+  "message": "電話番号は10桁または11桁の数字で入力してください。; 電話番号は必須です。"
 }
