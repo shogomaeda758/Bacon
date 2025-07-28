@@ -11,8 +11,9 @@ public class HalfWidthValidator implements ConstraintValidator<HalfWidth, String
         if (value == null || value.isEmpty()) {
             return true; // @NotBlank でnullや空文字は別途チェックされるため、ここではtrueを返す
         }
-        // 半角英数字、記号を許可。全角文字が含まれていないかチェック
-        return value.chars().allMatch(c -> Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN ||
-                                         Character.UnicodeBlock.of(c) == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS);
+
+        // ここを修正：BASIC_LATIN（半角英数字記号）のみを許可する
+        // 全角文字や半角カタカナなどはすべて弾く
+        return value.chars().allMatch(c -> Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN);
     }
 }
