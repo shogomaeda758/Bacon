@@ -163,31 +163,6 @@ Content-Type: application/json
 "grandTotal": 4000
 }
 
-### No. 3-18-7_注文（異常系 - 顧客情報の形式が不正、住所が半角）
-POST http://localhost:8080/api/order/confirm
-Content-Type: application/json
-
-{
-"customerInfo": {
-"name": "顧客　太郎",
-"email": "test-member-a@example.com",
-"address": "東京都品川区1-0-1",
-"phoneNumber": "0123456789"
-},
-"paymentMethod": "credit_card", 
-"items": [
-{
-"productId": 1,
-"name": "シンプルデスクオーガナイザー",
-"price": 3500,
-"quantity": 1,
-"subtotal": 3500
-}
-],
-"totalPrice": 3500,
-"shippingFee": 500,
-"grandTotal": 4000
-}
 
 ### No. 3-18-8_注文（異常系 - 顧客情報の形式が不正、電話番号が9桁）
 POST http://localhost:8080/api/order/confirm
