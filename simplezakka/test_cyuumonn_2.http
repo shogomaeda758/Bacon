@@ -92,6 +92,14 @@ Content-Type: application/json
 "grandTotal": 1000
 }
 
+### 前提条件変更
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 1
+}
 ### No. 3-17-1 注文（異常系 - 顧客情報不足、名前が空）
 POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
@@ -243,6 +251,32 @@ Content-Type: application/json
 "shippingFee": 500,
 "grandTotal": 4000
 }
+### No. 3-18_注文（異常系 - 顧客情報の形式が不正、名前が半角）
+POST http://localhost:8080/api/order/confirm
+Content-Type: application/json
+
+{
+"customerInfo": {
+"name": "harada sohei",
+"email": "test-member-a@example.com",
+"address": "東京都品川区",
+"phoneNumber": "0123456789"
+},
+"paymentMethod": "credit_card", 
+"items": [
+{
+"productId": 1,
+"name": "シンプルデスクオーガナイザー",
+"price": 3500,
+"quantity": 1,
+"subtotal": 3500
+}
+],
+"totalPrice": 3500,
+"shippingFee": 500,
+"grandTotal": 4000
+}
+
 ### No. 3-18_注文（異常系 - 顧客情報の形式が不正、例：メール形式不正）
 POST http://localhost:8080/api/order/confirm
 Content-Type: application/json
