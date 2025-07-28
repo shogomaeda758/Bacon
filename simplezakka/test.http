@@ -63,3 +63,26 @@ GET http://localhost:8080/api/products/category/999
 Accept: application/json
 # 期待される結果: 200 OK, 空のJSON配列 []
 # 前提: category_id=999に商品が存在しない
+
+### カートに追加
+POST http://localhost:8080/api/cart
+content-type: application/json
+
+{
+    "productId": null, 
+    "quantity": 2
+}
+
+### カート取得
+GET http://localhost:8080/api/cart
+
+### 注文
+POST http://localhost:8080/api/orders
+content-type: application/json
+
+{"customerInfo":
+    {"name": "テスト",
+        "email": "t@e.com",
+        "address": "住所",
+        "phoneNumber": "123"}
+}

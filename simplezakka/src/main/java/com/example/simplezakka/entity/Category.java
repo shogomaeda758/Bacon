@@ -35,7 +35,8 @@ public class Category {
         updatedAt = LocalDateTime.now();
     }
 
-    public void setName(String name) {
-        this.categoryName = name;
+    public void setName(String string) {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'setName'");
     }
 }
