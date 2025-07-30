@@ -36,7 +36,7 @@ Content-Type: application/json
 
 {
 "customerInfo": {
-"name": "顧客 太郎",
+"name": "顧客　太郎",
 "email": "test-member-a@example.com",
 "address": "東京都品川区",
 "phoneNumber": "0123456789"
@@ -207,7 +207,7 @@ Content-Type: application/json
 
 {
 "customerInfo": {
-"name": "顧客 太郎",
+"name": "顧客　太郎",
 "email": "test-member-a@example.com",
 "address": "東京都品川区",
 "phoneNumber": "0123456789"
@@ -226,31 +226,3 @@ Content-Type: application/json
 "shippingFee": 0,
 "grandTotal": 10500
 }
-
-### No. 3-22_注文（異常系 - (模擬) カートクリア時にエラー発生）
-
-POST http://localhost:8080/api/order/confirm
-Content-Type: application/json
-
-{
-"customerInfo": {
-"name": "顧客 太郎",
-"email": "test-member-a@example.com",
-"address": "東京都品川区",
-"phoneNumber": "0123456789"
-},
-"paymentMethod": "credit_card",
-"items": [
-{
-"productId": 1,
-"name": "シンプルデスクオーガナイザー",
-"price": 3500,
-"quantity": 1,
-"subtotal": 3500
-}
-],
-"totalPrice": 3500,
-"shippingFee": 500,
-"grandTotal": 4000
-}
-
