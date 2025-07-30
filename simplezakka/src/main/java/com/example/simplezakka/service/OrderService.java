@@ -45,8 +45,7 @@ public class OrderService {
         this.cartService = cartService;
     }
 
-
-    // private boolean simulateStockUpdateFailure = true ;(結合テスト3-21用のフラグ)
+    // private boolean simulateStockUpdateFailure = true;
 
     @Transactional
     public OrderResponse placeOrder(CartRespons cart, OrderRequest orderRequest) {
@@ -121,6 +120,16 @@ public class OrderService {
             orderDetail.setUnitPrice(product.getPrice());
             orderDetail.setQuantity(cartItem.getQuantity());
             order.addOrderDetail(orderDetail);
+
+            //   if (simulateStockUpdateFailure) {
+            //     // テストプロファイルが有効で、かつ模擬フラグがtrueの場合
+            //     // 特定のプロダクトIDや数量で分岐させることも可能
+            //     if (cartItem.getProductId() == 1 && cartItem.getQuantity() == 3) {
+            //         System.out.println("--- 模擬：在庫更新失敗を強制発生 ---");
+            //         throw new IllegalStateException(
+            //             "商品 " + cartItem.getName() + " の在庫更新に失敗しました。（模擬エラー）");
+            //     }
+            // }
 
             int updatedRows = productRepository.decreaseStock(product.getProductId(), cartItem.getQuantity());
 
