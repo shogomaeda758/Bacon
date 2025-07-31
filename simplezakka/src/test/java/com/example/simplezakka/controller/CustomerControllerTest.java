@@ -1,7 +1,6 @@
 package com.example.simplezakka.controller;
 
 import com.example.simplezakka.dto.customer.*;
-import com.example.simplezakka.dto.customer.CustomerInfo;
 import com.example.simplezakka.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -15,12 +14,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 
 @WebMvcTest(CustomerController.class)
 class CustomerControllerTest {
@@ -45,42 +46,50 @@ class CustomerControllerTest {
 
     @Test
     void register_ValidInput_ShouldCreateCustomer() throws Exception {
-        CustomerRegisterRequest req = new CustomerRegisterRequest();
-        CustomerInfo info = new CustomerInfo();
-        info.setName("山田 太郎");
-        info.setEmail("test@example.com");
-        info.setAddress("東京都");
-        info.setPhoneNumber("09011112222");
-        req.setCustomerInfo(info); req.setPassword("securepw");
+    CustomerRegisterRequest req = new CustomerRegisterRequest();
+    CustomerInfo info = new CustomerInfo();
 
-        when(customerService.createCustomer((CustomerRegisterRequest)any())).thenReturn(sampleResponse);
+    info.setName("ヤマダタロウ"); 
+    info.setEmail("test@example.com");
+    info.setAddress("トウキョウト");
+    info.setPhoneNumber("09012345678");
 
-        mockMvc.perform(post("/api/customers/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.name").value("山田 太郎"));
+    req.setCustomerInfo(info);
+    req.setPassword("securepw");
+
+    when(customerService.createCustomer(any())).thenReturn(sampleResponse);
+
+    mockMvc.perform(post("/api/customers/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andDo(print())
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("山田 太郎")); 
     }
 
     @Test
     void register_DuplicateEmail_ShouldReturnConflict() throws Exception {
-        CustomerRegisterRequest req = new CustomerRegisterRequest();
-        CustomerInfo info = new CustomerInfo();
-        info.setName("重複 ユーザー");
-        info.setEmail("dup@example.com");
-        info.setAddress("東京都");
-        info.setPhoneNumber("09012345678");
-        req.setCustomerInfo(info); req.setPassword("dup1234");
+    CustomerRegisterRequest req = new CustomerRegisterRequest();
+    CustomerInfo info = new CustomerInfo();
 
-        when(customerService.createCustomer((CustomerRegisterRequest)any()))
-            .thenThrow(new IllegalArgumentException("メールアドレスが既に登録されています"));
+    info.setName("ジュウフクユーザー"); 
+    info.setEmail("dup@example.com"); 
+    info.setAddress("トウキョウト");
+    info.setPhoneNumber("09012345678"); 
 
-        mockMvc.perform(post("/api/customers/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.errorCode", is("REGISTER_ERROR")))
-            .andExpect(jsonPath("$.message", containsString("メールアドレスが既に登録されています")));
+    req.setCustomerInfo(info);
+    req.setPassword("dup1234");
+
+    when(customerService.createCustomer(any()))
+        .thenThrow(new IllegalArgumentException("メールアドレスが既に登録されています"));
+
+    mockMvc.perform(post("/api/customers/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andDo(print())
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.errorCode", is("REGISTER_ERROR")))
+        .andExpect(jsonPath("$.message", containsString("メールアドレスが既に登録されています")));
     }
 
     @Test
@@ -183,45 +192,56 @@ class CustomerControllerTest {
 
     @Test
     void updateCustomer_ValidInput_ShouldSucceed() throws Exception {
-        CustomerUpdateRequest req = new CustomerUpdateRequest();
-        CustomerInfo info = new CustomerInfo();
-        info.setName("佐藤 花子");
-        info.setEmail("hanako@sato.com");
-        info.setAddress("神奈川県");
-        info.setPhoneNumber("08023456789");
-        req.setCustomerInfo(info); req.setCurrentPassword("oldpw"); req.setNewPassword("newpw");
+    CustomerUpdateRequest req = new CustomerUpdateRequest();
+    CustomerInfo info = new CustomerInfo();
+    info.setName("サトウハナコ");                      
+    info.setEmail("hanako@sato.com");                
+    info.setAddress("カナガワケン");                  
+    info.setPhoneNumber("08023456789");              
 
-        CustomerResponse updated = new CustomerResponse(
-            2L, "佐藤 花子", "hanako@sato.com", "神奈川県", "08023456789", LocalDateTime.now(), LocalDateTime.now()
-        );
-        when(customerService.updateCustomer(eq(2L), (CustomerUpdateRequest)any())).thenReturn(updated);
+    req.setCustomerInfo(info);
+    req.setCurrentPassword("oldpw");
+    req.setNewPassword("newpw");
 
-        mockMvc.perform(put("/api/customers/2")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("佐藤 花子"));
+    CustomerResponse updated = new CustomerResponse(
+        2L, "サトウハナコ", "hanako@sato.com", "カナガワケン", "08023456789",
+        LocalDateTime.now(), LocalDateTime.now()
+    );
+
+    when(customerService.updateCustomer(eq(2L), any(CustomerUpdateRequest.class))).thenReturn(updated);
+
+    mockMvc.perform(put("/api/customers/2")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("サトウハナコ"));
     }
 
     @Test
     void updateCustomer_WrongPassword_Should400() throws Exception {
-        CustomerUpdateRequest req = new CustomerUpdateRequest();
-        CustomerInfo info = new CustomerInfo();
-        info.setName("佐藤 花子");
-        info.setEmail("hanako@sato.com");
-        info.setAddress("神奈川県");
-        info.setPhoneNumber("08023456789");
-        req.setCustomerInfo(info); req.setCurrentPassword("wrongpw"); req.setNewPassword("newpw");
+    CustomerUpdateRequest req = new CustomerUpdateRequest();
+    CustomerInfo info = new CustomerInfo();
+    info.setName("サトウハナコ");
+    info.setEmail("hanako@sato.com");
+    info.setAddress("カナガワケン");
+    info.setPhoneNumber("08023456789");
 
-        when(customerService.updateCustomer(eq(2L), (CustomerUpdateRequest)any()))
-            .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
+    req.setCustomerInfo(info);
+    req.setCurrentPassword("wrongpw");  
+    req.setNewPassword("newpw");
 
-        mockMvc.perform(put("/api/customers/2")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errorCode", is("UPDATE_ERROR")))
-            .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
+    
+    when(customerService.updateCustomer(eq(2L), any(CustomerUpdateRequest.class)))
+        .thenThrow(new IllegalArgumentException("パスワードが正しくありません"));
+
+    mockMvc.perform(put("/api/customers/2")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode", is("UPDATE_ERROR")))
+        .andExpect(jsonPath("$.message", containsString("パスワードが正しくありません")));
     }
 
     @Test
